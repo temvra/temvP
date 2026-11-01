@@ -1,0 +1,72 @@
+name: Compilar APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Preparar la web de la app
+        run: |
+          npm ci
+          npm run build
+          npx cap sync android
+
+      - name: Clave de firma (para que cada versión se instale encima de la anterior)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/vuelta-release.keystore
+            printf "storeFile=vuelta-release.keystore\nstorePassword=%s\nkeyAlias=vuelta\nkeyPassword=%s\n" "$KEYSTORE_PASSWORD" "$KEYSTORE_PASSWORD" > android/keystore.properties
+          else
+            echo "::warning::Sin la clave de firma: el APK se firma con una clave temporal y no se podrá instalar encima de la versión anterior."
+          fi
+
+      - name: Compilar
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Renombrar APK
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/release/app-release.apk "out/Temvra-1.0.${{ github.run_number }}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Temvra-apk
+          path: out/*.apk
+
+      - name: Publicar versión para descargar desde el móvil
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Temvra 1.0.${{ github.run_number }}
+          body: |
+            Descarga el archivo .apk de abajo desde el móvil e instálalo.
+            Se instala encima de la versión anterior sin perder tus datos.
+          files: out/*.apk
+          make_latest: true
