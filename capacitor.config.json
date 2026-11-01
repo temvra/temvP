@@ -1,0 +1,20 @@
+{
+  "appId": "com.temvra.app",
+  "appName": "Temvra",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#11131a"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_vuelta",
+      "iconColor": "#7b78d8"
+    },
+    "SystemBars": {
+      "insetsHandling": "native"
+    }
+  }
+}
