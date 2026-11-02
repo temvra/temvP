@@ -38,8 +38,8 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
           if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 -d > android/app/vuelta-release.keystore
-            printf "storeFile=vuelta-release.keystore\nstorePassword=%s\nkeyAlias=vuelta\nkeyPassword=%s\n" "$KEYSTORE_PASSWORD" "$KEYSTORE_PASSWORD" > android/keystore.properties
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/temvra-release.keystore
+            printf "storeFile=temvra-release.keystore\nstorePassword=%s\nkeyAlias=vuelta\nkeyPassword=%s\n" "$KEYSTORE_PASSWORD" "$KEYSTORE_PASSWORD" > android/keystore.properties
           else
             echo "::warning::Sin la clave de firma: el APK se firma con una clave temporal y no se podrá instalar encima de la versión anterior."
           fi
@@ -53,20 +53,20 @@ jobs:
       - name: Renombrar APK
         run: |
           mkdir -p out
-          cp android/app/build/outputs/apk/release/app-release.apk "out/Temvra-1.0.${{ github.run_number }}.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "out/Temvra-Personal-1.0.${{ github.run_number }}.apk"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Temvra-apk
-          path: out/*.apk
+          name: Temvra-Personal
+          path: out/*
 
       - name: Publicar versión para descargar desde el móvil
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: Temvra 1.0.${{ github.run_number }}
+          name: Temvra Personal 1.0.${{ github.run_number }}
           body: |
             Descarga el archivo .apk de abajo desde el móvil e instálalo.
             Se instala encima de la versión anterior sin perder tus datos.
-          files: out/*.apk
+          files: out/*
           make_latest: true
