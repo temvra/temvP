@@ -1,4 +1,9 @@
-# Temvra · app de Android
+# Temvra Personal · versión privada de Temvra
+
+Copia personal de Temvra (`com.temvra.app.personal`): se instala junto a la versión pública sin pisarla.
+Aquí se prueban cosas que no van a la versión de Google Play, como la integración con Claude.
+
+## Base
 
 Temporizador en bucle, circuitos, alarmas, agenda con bloques de trabajo y notas.
 La interfaz está en `src/app.html` (el mismo prototipo que en Claude) y la parte de Android la pone
@@ -6,7 +11,7 @@ La interfaz está en `src/app.html` (el mismo prototipo que en Claude) y la part
 
 ## Opción 1 · Compilar con GitHub, todo desde el móvil (recomendada)
 
-1. Crea un repositorio **privado** en GitHub llamado `Temvra` y sube el contenido de esta carpeta
+1. Crea un repositorio **privado** en GitHub llamado `temvP` y sube el contenido de esta carpeta
    (o conecta GitHub en los ajustes de Claude y pídele que lo suba por ti).
 2. Guarda la clave de firma: en el repositorio, **Settings → Secrets and variables → Actions → New repository secret**.
    Crea `KEYSTORE_PASSWORD` y `KEYSTORE_BASE64` con los valores del archivo `clave-firma-vuelta-timer.txt`

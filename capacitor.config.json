@@ -1,6 +1,6 @@
 {
-  "appId": "com.temvra.app",
-  "appName": "Temvra",
+  "appId": "com.temvra.app.personal",
+  "appName": "Temvra Personal",
   "webDir": "www",
   "android": {
     "backgroundColor": "#11131a"
@@ -10,7 +10,7 @@
       "enabled": true
     },
     "LocalNotifications": {
-      "smallIcon": "ic_stat_vuelta",
+      "smallIcon": "ic_stat_temvra",
       "iconColor": "#7b78d8"
     },
     "SystemBars": {
