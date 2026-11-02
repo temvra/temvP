@@ -6,3 +6,6 @@ android/app/src/main/assets/capacitor.plugins.json
 .DS_Store
 android/keystore.properties
 android/app/*.keystore
+CLAUDE.md
+DECISIONS.md
+PROGRESS.md
