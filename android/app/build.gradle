@@ -9,7 +9,7 @@ android {
     namespace = "com.temvra.app"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.temvra.app"
+        applicationId "com.temvra.app.personal"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode buildNum
@@ -22,7 +22,7 @@ android {
         }
     }
     signingConfigs {
-        vuelta {
+        release {
             if(ksProps['storeFile']){
                 storeFile file(ksProps['storeFile'])
                 storePassword ksProps['storePassword']
@@ -33,10 +33,10 @@ android {
     }
     buildTypes {
         debug {
-            signingConfig ksProps['storeFile'] ? signingConfigs.vuelta : signingConfigs.debug
+            signingConfig ksProps['storeFile'] ? signingConfigs.release : signingConfigs.debug
         }
         release {
-            signingConfig ksProps['storeFile'] ? signingConfigs.vuelta : signingConfigs.debug
+            signingConfig ksProps['storeFile'] ? signingConfigs.release : signingConfigs.debug
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

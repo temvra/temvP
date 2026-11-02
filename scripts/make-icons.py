@@ -28,7 +28,7 @@ for k,f in dens.items():
     logo(int(48*f),bg=True).save(f'{p}/ic_launcher.png');logo(int(48*f),bg=True,rounded=True).save(f'{p}/ic_launcher_round.png')
     logo(int(108*f),scale=0.62).save(f'{p}/ic_launcher_foreground.png')
     q=f'{R}/drawable-{k}';os.makedirs(q,exist_ok=True)
-    logo(int(24*f),scale=1.15).save(f'{q}/ic_stat_vuelta.png')
+    logo(int(24*f),scale=1.15).save(f'{q}/ic_stat_temvra.png')
 open(f'{R}/values/ic_launcher_background.xml','w').write('<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#5D57C6</color>\n</resources>\n')
 # pantallas de carga
 def splash(w,h):
