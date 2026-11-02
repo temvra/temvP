@@ -51,8 +51,42 @@ public class TemvraPlugin extends Plugin {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable abandon = this::abandonFocus;
 
+    private int[] bars = {0, 0, 0, 0};
+
+    /**
+     * La app ocupa toda la pantalla, también detrás de las barras: el fondo llega al borde y solo el contenido se aparta.
+     * Se hace aquí porque la WebView anterior a la 140 no da los márgenes seguros y Capacitor rellenaría esas franjas.
+     */
+    private void edgeToEdge() {
+        android.view.View decor = getActivity().getWindow().getDecorView();
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(decor, (v, insets) -> {
+            androidx.core.graphics.Insets sys = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars() | androidx.core.view.WindowInsetsCompat.Type.displayCutout());
+            androidx.core.graphics.Insets ime = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime());
+            boolean kb = insets.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime());
+            v.setPadding(0, 0, 0, kb ? ime.bottom : 0);
+            bars = new int[]{sys.top, kb ? 0 : sys.bottom, sys.left, sys.right};
+            sendBars();
+            return insets;
+        });
+        androidx.core.view.ViewCompat.requestApplyInsets(decor);
+    }
+
+    private void sendBars() {
+        float d = getContext().getResources().getDisplayMetrics().density;
+        String js = String.format(java.util.Locale.ROOT, "(function(s){s.setProperty('--sat','%.1fpx');s.setProperty('--sab','%.1fpx');s.setProperty('--sal','%.1fpx');s.setProperty('--sar','%.1fpx')})(document.documentElement.style)",
+                bars[0] / d, bars[1] / d, bars[2] / d, bars[3] / d);
+        if (getBridge() != null && getBridge().getWebView() != null) getBridge().getWebView().post(() -> getBridge().getWebView().evaluateJavascript(js, null));
+    }
+
+    @PluginMethod
+    public void applyBars(PluginCall call) {
+        sendBars();
+        call.resolve();
+    }
+
     @Override
     public void load() {
+        getActivity().runOnUiThread(this::edgeToEdge);
         Intent it = getActivity() != null ? getActivity().getIntent() : null;
         if (it != null) deliverAction(it);
     }
@@ -292,9 +326,10 @@ public class TemvraPlugin extends Plugin {
                 android.view.Window w = getActivity().getWindow();
                 android.view.View decor = w.getDecorView();
                 decor.setBackgroundColor(color);
-                w.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(color));
-                w.setStatusBarColor(color);
-                w.setNavigationBarColor(color);
+                // La app se pinta debajo de las barras: fondo o foto llegan hasta el borde de la pantalla
+                w.setStatusBarColor(android.graphics.Color.TRANSPARENT);
+                w.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+                if (android.os.Build.VERSION.SDK_INT >= 29) w.setNavigationBarContrastEnforced(false);
                 androidx.core.view.WindowInsetsControllerCompat c = androidx.core.view.WindowCompat.getInsetsController(w, decor);
                 c.setAppearanceLightStatusBars(!dark);
                 c.setAppearanceLightNavigationBars(!dark);

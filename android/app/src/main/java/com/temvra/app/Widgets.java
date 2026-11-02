@@ -53,7 +53,7 @@ public class Widgets {
         JSONObject d = data(c);
         for (int id : m.getAppWidgetIds(new ComponentName(c, TimerWidget.class))) m.updateAppWidget(id, timer(c, d, m, id));
         for (int id : m.getAppWidgetIds(new ComponentName(c, AlarmWidget.class))) updateAlarm(c, m, id);
-        for (int id : m.getAppWidgetIds(new ComponentName(c, DayWidget.class))) updateList(c, m, id, DAY);
+        for (int id : m.getAppWidgetIds(new ComponentName(c, DayWidget.class))) updateMonth(c, m, id);
         for (int id : m.getAppWidgetIds(new ComponentName(c, BlocksWidget.class))) updateList(c, m, id, BLOCKS);
         for (int id : m.getAppWidgetIds(new ComponentName(c, NotesWidget.class))) updateNotes(c, m, id);
         for (int id : m.getAppWidgetIds(new ComponentName(c, RegWidget.class))) updateReg(c, m, id);
@@ -395,6 +395,12 @@ public class Widgets {
 
     static void lineOp(Context c, int id, String op) {
         AppWidgetManager m = AppWidgetManager.getInstance(c);
+        if (op != null && op.startsWith("m")) {
+            int mo = sp(c).getInt("month_" + id, 0);
+            sp(c).edit().putInt("month_" + id, "mprev".equals(op) ? mo - 1 : "mnext".equals(op) ? mo + 1 : 0).apply();
+            updateMonth(c, m, id);
+            return;
+        }
         if ("zoom".equals(op)) {
             sp(c).edit().putInt("zoom_" + id, sp(c).getInt("zoom_" + id, 0) + 1).apply();
             m.notifyAppWidgetViewDataChanged(id, R.id.wn_list);
@@ -545,5 +551,80 @@ public class Widgets {
         v.setPendingIntentTemplate(R.id.wg_list, actionTemplate(c, 8000 + id % 1000));
         m.updateAppWidget(id, v);
         m.notifyAppWidgetViewDataChanged(id, R.id.wg_list);
+    }
+
+    /* ---------- Calendario: el mes ---------- */
+
+    private static final int[][] MONTH_CELLS = {
+        {R.id.wm_c0, R.id.wm_n0, R.id.wm_t0, R.id.wm_m0}, {R.id.wm_c1, R.id.wm_n1, R.id.wm_t1, R.id.wm_m1}, {R.id.wm_c2, R.id.wm_n2, R.id.wm_t2, R.id.wm_m2},
+        {R.id.wm_c3, R.id.wm_n3, R.id.wm_t3, R.id.wm_m3}, {R.id.wm_c4, R.id.wm_n4, R.id.wm_t4, R.id.wm_m4}, {R.id.wm_c5, R.id.wm_n5, R.id.wm_t5, R.id.wm_m5}, {R.id.wm_c6, R.id.wm_n6, R.id.wm_t6, R.id.wm_m6}};
+
+    private static PendingIntent monthOp(Context c, int id, String op, int code) {
+        Intent it = new Intent(c, AlertReceiver.class).setAction(AlertReceiver.ACTION_LINE).putExtra("id", id).putExtra("op", op);
+        it.setData(Uri.parse("temvra://month/" + id + "/" + op));
+        return PendingIntent.getBroadcast(c, 9500 + code + id % 100 * 4, it, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    static void updateMonth(Context c, AppWidgetManager m, int id) {
+        JSONObject d = data(c), days = d.optJSONObject("days");
+        int color = accent(d), start = d.optInt("weekStart", 1);
+        Bundle o = m.getAppWidgetOptions(id);
+        int w = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 320), h = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 340);
+        float scale = clamp(Math.min(w / 320f, h / 340f), .75f, 1.5f);
+        boolean titles = h > 300;
+        Calendar first = Calendar.getInstance(), now = Calendar.getInstance();
+        first.set(Calendar.DAY_OF_MONTH, 1);
+        first.add(Calendar.MONTH, sp(c).getInt("month_" + id, 0));
+        int month = first.get(Calendar.MONTH);
+        String[] names = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
+        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_month);
+        v.setTextViewText(R.id.wm_title, names[month] + (first.get(Calendar.YEAR) != now.get(Calendar.YEAR) ? " " + first.get(Calendar.YEAR) : ""));
+        v.setInt(R.id.wm_prev, "setColorFilter", color);
+        v.setInt(R.id.wm_next, "setColorFilter", color);
+        v.setInt(R.id.wm_add, "setColorFilter", color);
+        v.setOnClickPendingIntent(R.id.wm_prev, monthOp(c, id, "mprev", 0));
+        v.setOnClickPendingIntent(R.id.wm_next, monthOp(c, id, "mnext", 1));
+        v.setOnClickPendingIntent(R.id.wm_title, monthOp(c, id, "mtoday", 2));
+        v.setOnClickPendingIntent(R.id.wm_add, open(c, "newevent", 9490));
+        int[] heads = {R.id.wm_d0, R.id.wm_d1, R.id.wm_d2, R.id.wm_d3, R.id.wm_d4, R.id.wm_d5, R.id.wm_d6};
+        String[] letters = {"D", "L", "M", "X", "J", "V", "S"};
+        for (int i = 0; i < 7; i++) v.setTextViewText(heads[i], letters[(start + i) % 7]);
+        Calendar cur = (Calendar) first.clone();
+        int back = (first.get(Calendar.DAY_OF_WEEK) - 1 - start + 7) % 7;
+        cur.add(Calendar.DAY_OF_MONTH, -back);
+        String todayK = todayKey(now);
+        v.removeAllViews(R.id.wm_rows);
+        for (int r = 0, pos = 0; r < 6; r++) {
+            RemoteViews row = new RemoteViews(c.getPackageName(), R.layout.widget_month_row);
+            for (int i = 0; i < 7; i++, pos++) {
+                int[] ids = MONTH_CELLS[i];
+                String k = todayKey(cur);
+                boolean inMonth = cur.get(Calendar.MONTH) == month, today = k.equals(todayK);
+                int dow = cur.get(Calendar.DAY_OF_WEEK);
+                boolean weekend = dow == Calendar.SATURDAY || dow == Calendar.SUNDAY;
+                JSONObject day = days != null ? days.optJSONObject(k) : null;
+                JSONArray items = day != null ? day.optJSONArray(DAY) : null;
+                int n = items != null ? items.length() : 0;
+                String hol = day != null ? day.optString("hol") : "";
+                row.setTextViewText(ids[1], String.valueOf(cur.get(Calendar.DAY_OF_MONTH)));
+                row.setTextViewTextSize(ids[1], TypedValue.COMPLEX_UNIT_SP, 15f * scale);
+                row.setTextColor(ids[1], today ? color : !inMonth ? 0x55F4F4F6 : !hol.isEmpty() || weekend ? 0xFFF08A8A : 0xFFF4F4F6);
+                String chip = !hol.isEmpty() ? hol : n > 0 && titles && items.optJSONObject(0) != null ? items.optJSONObject(0).optString("t") : "";
+                row.setTextViewText(ids[2], chip);
+                row.setTextViewTextSize(ids[2], TypedValue.COMPLEX_UNIT_SP, 9.5f * scale);
+                row.setTextColor(ids[2], !hol.isEmpty() ? 0xFFF08A8A : inMonth ? 0xFFD4D4DA : 0x55D4D4DA);
+                row.setViewVisibility(ids[2], chip.isEmpty() ? View.GONE : View.VISIBLE);
+                int more = chip.isEmpty() || !hol.isEmpty() ? n : n - 1;
+                row.setTextViewText(ids[3], more > 0 ? "+" + more + " más" : "");
+                row.setTextViewTextSize(ids[3], TypedValue.COMPLEX_UNIT_SP, 9.5f * scale);
+                row.setTextColor(ids[3], inMonth ? 0xFFA0A0A8 : 0x44A0A0A8);
+                row.setViewVisibility(ids[3], more > 0 ? View.VISIBLE : View.GONE);
+                row.setInt(ids[0], "setBackgroundResource", today ? R.drawable.widget_row_cur : inMonth ? R.drawable.widget_row_bg : R.drawable.wm_out);
+                row.setOnClickPendingIntent(ids[0], open(c, "day:" + k, 10000 + (id % 40) * 50 + pos));
+                cur.add(Calendar.DAY_OF_MONTH, 1);
+            }
+            v.addView(R.id.wm_rows, row);
+        }
+        m.updateAppWidget(id, v);
     }
 }
