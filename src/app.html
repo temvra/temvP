@@ -117,6 +117,8 @@ button.digits:hover{background:var(--surface-2)}
 .fabs{position:fixed;right:max(18px,calc(env(safe-area-inset-right,0px) + 18px));bottom:calc(env(safe-area-inset-bottom,0px) + 112px);display:flex;flex-direction:column;align-items:flex-end;gap:16px;z-index:5}
 .fab-s{width:64px;height:64px;border-radius:20px;background:var(--surface-3);color:var(--accent);display:grid;place-items:center;box-shadow:0 4px 10px rgba(0,0,0,.25)}
 .fab{width:88px;height:88px;border-radius:28px;background:var(--container);color:var(--on-container);display:grid;place-items:center;box-shadow:0 6px 14px rgba(0,0,0,.3)}
+/* Móvil estrecho: FABs más pequeños para que no pisen el aro ni el selector de minutos */
+@media (max-width:420px){.fabs{gap:12px}.fabs .fab-s{width:48px;height:48px;border-radius:16px}.fabs .fab-s svg{width:20px;height:20px}.fabs .fab{width:64px;height:64px;border-radius:20px}.fabs .fab svg{width:28px;height:28px}}
 
 /* Navegación inferior */
 .nav{position:fixed;left:0;right:0;bottom:0;background:var(--nav);display:flex;justify-content:center;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);padding-top:12px;padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));z-index:6}
