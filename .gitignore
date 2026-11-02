@@ -8,3 +8,4 @@ android/keystore.properties
 android/app/*.keystore
 DECISIONS.md
 PROGRESS.md
+desktop/dist/

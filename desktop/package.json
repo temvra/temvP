@@ -1,0 +1,45 @@
+{
+  "name": "temvra-desktop",
+  "productName": "Temvra",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Temvra Personal para escritorio",
+  "main": "main.cjs",
+  "desktopName": "temvra.desktop",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --linux dir",
+    "appimage": "electron-builder --linux AppImage",
+    "install-linux": "sh install-linux.sh"
+  },
+  "build": {
+    "appId": "com.temvra.app.personal.desktop",
+    "productName": "Temvra",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.cjs",
+      {
+        "from": "../www",
+        "to": "www"
+      },
+      {
+        "from": "../resources",
+        "to": ".",
+        "filter": [
+          "icon-512.png"
+        ]
+      }
+    ],
+    "linux": {
+      "executableName": "temvra",
+      "icon": "../resources/icon-512.png",
+      "category": "Utility"
+    }
+  },
+  "devDependencies": {
+    "electron": "^45.2.1",
+    "electron-builder": "^26.18.0"
+  }
+}

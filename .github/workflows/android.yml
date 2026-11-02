@@ -57,18 +57,27 @@ jobs:
           mkdir -p out
           cp android/app/build/outputs/apk/release/app-release.apk "out/Temvra-Personal-1.0.${{ github.run_number }}.apk"
 
+      # Si falla, se publica igualmente el APK
+      - name: Compilar la app de PC
+        continue-on-error: true
+        working-directory: desktop
+        run: |
+          npm ci
+          npm run appimage -- -c.extraMetadata.version=1.0.${{ github.run_number }}
+          cp dist/*.AppImage "../out/Temvra-Personal-1.0.${{ github.run_number }}.AppImage"
+
       - uses: actions/upload-artifact@v5
         with:
           name: Temvra-Personal
           path: out/*
 
-      - name: Publicar versión para descargar desde el móvil
+      - name: Publicar versión para descargar
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: Temvra Personal 1.0.${{ github.run_number }}
           body: |
-            Descarga el archivo .apk de abajo desde el móvil e instálalo.
-            Se instala encima de la versión anterior sin perder tus datos.
+            **Móvil:** descarga el archivo .apk de abajo desde el móvil e instálalo. Se instala encima de la versión anterior sin perder tus datos.
+            **PC (Linux):** descarga el archivo .AppImage, dale permiso de ejecución y ábrelo.
           files: out/*
           make_latest: true
