@@ -1238,6 +1238,8 @@ body.desknotes .ne-tabsbar{display:flex;align-items:flex-end;gap:2px;padding:8px
 body.desknotes .ne-status{display:flex;gap:16px;justify-content:flex-end;position:absolute;right:16px;bottom:10px;font-size:12px;color:var(--muted);background:color-mix(in srgb,var(--surface) 80%,transparent);padding:4px 10px;border-radius:10px;z-index:4}
 body.desknotes .ob-bottom{display:none!important}
 body.desknotes .ne-tools{position:sticky;bottom:0;left:auto;right:auto;border-radius:16px;margin:0 auto 46px;max-width:760px;width:calc(100% - 40px)}
+/* Con ratón no se puede deslizar la barra: todos los botones a la vista. Con poca altura (móvil en horizontal) sigue en una fila */
+@media (min-height:521px){body.desknotes .ne-tools{flex-wrap:wrap;justify-content:center;overflow:visible;max-width:1160px}}
 body.desknotes .vn-back{display:none}
 body.desknotes .ne-body{padding-bottom:80px}
 .desk-empty{position:fixed;right:0;top:0;bottom:0;display:none;align-items:center;justify-content:center;z-index:3}
@@ -1722,6 +1724,12 @@ body.desk .vn-compose{left:auto;right:18px;width:420px;bottom:14px}
   body:not(.desk) #cal-grid .mchip{font-size:10px;line-height:14px;height:15px}
   body:not(.desk) #v-cal{padding-bottom:0}
 }
+/* Mes compacto: los tamaños deben coincidir con la cuenta de renderCal (22 de cabecera y 13 por elemento) */
+#cal-grid.m-compact .mcell{gap:1px;padding:2px 2px 1px}
+#cal-grid.m-compact .mcell .mnum{height:18px;min-width:20px;padding:0 4px;border-radius:9px;font-size:12px;margin-bottom:0}
+#cal-grid.m-compact .mcell .mchip{font-size:9.5px;line-height:12px;height:12px;padding:0 2px;border-radius:3px}
+#cal-grid.m-compact .mcell .mmore{font-size:9.5px;line-height:12px;height:12px;flex:none}
+#cal-grid.m-compact .mcell .left{top:3px;bottom:auto;right:3px}
 .thw{display:flex;align-items:center}
 .thw input{flex:1;min-width:0}
 .thw button{width:22px;height:30px;flex:none;color:var(--muted);font-size:14px}
@@ -2943,8 +2951,8 @@ function playSound(kind=S.sound,loop=false){
   else if(kind==='propio'){if(ownAudio){try{const a=new Audio(ownAudio);a.volume=Math.min(1,S.vol/100);a.play().catch(()=>{})}catch(e){}}else playSound('pitido')}
 }
 function buzz(p){if(S.vib&&navigator.vibrate){try{navigator.vibrate(p)}catch(e){}}}
-/* En Android pide el «foco de audio»: Spotify y demás bajan el volumen (duck) o se pausan mientras suena el aviso. Devuelve true si es nativo. */
-function duckMusic(){if(S.aviso==='none')return false;const nat=window.VTNative&&VTNative.hasPlugin;if(nat)VTNative.audioFocus(S.aviso==='pause'?'pause':'duck',Math.max(1500,(S.dur||2)*1000));return !!nat}
+/* En Android pide el «foco de audio» y en PC usa el sistema: Spotify y demás bajan el volumen (duck) o se pausan mientras suena el aviso. Devuelve true si puede controlar la música. */
+function duckMusic(){if(S.aviso==='none')return false;const nat=window.VTNative&&VTNative.hasPlugin,dk=window.VTDesktop,mode=S.aviso==='pause'?'pause':'duck',ms=Math.max(1500,(S.dur||2)*1000);if(nat)VTNative.audioFocus(mode,ms);else if(dk)dk.audioFocus(mode,ms,S.duck);return !!(nat||dk)}
 function alert_(){
   if(inBg())return;
   buzz([300,120,300,120,500]);
@@ -2957,12 +2965,13 @@ function renderAviso(){
   $('aviso-list').innerHTML=rowsHtml(AVISOS,S.aviso,'av');
   $('duck-lvl').value=S.duck;$('duck-o').textContent=S.duck+' %';$('duck-dur').value=S.dur;$('dur-o').textContent=S.dur+' s';
   const off=S.aviso==='none'||S.aviso==='pause';$('duck-lvl').disabled=off;
+  if(window.VTDesktop)$('duck-note').hidden=true;
 }
 $('aviso-list').onclick=e=>{const b=e.target.closest('[data-av]');if(b){S.aviso=b.dataset.av;save();renderAviso()}};
 $('duck-lvl').oninput=e=>{S.duck=+e.target.value;save();renderAviso()};
 $('duck-dur').oninput=e=>{S.dur=+e.target.value;save();renderAviso()};
 $('vol-lvl').oninput=e=>{S.vol=+e.target.value;save();$('vol-o').textContent=S.vol+' %'};
-$('vol-test').onclick=()=>{ac();if(natSound()&&S.soundOn!==false)duckMusic();buzz([300,120,300]);playSound()};
+$('vol-test').onclick=()=>{ac();if((natSound()||window.VTDesktop)&&S.soundOn!==false)duckMusic();buzz([300,120,300]);playSound()};
 const alertMode=()=>S.soundOn===false?'vib':S.vib?'both':'sound';
 function renderAlertMode(){document.querySelectorAll('#alert-mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===alertMode()))}
 $('alert-mode').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;S.soundOn=b.dataset.m!=='vib';S.vib=b.dataset.m!=='sound';save();renderAlertMode()};
@@ -3124,9 +3133,11 @@ function ring(a){
   /* Una alarma siempre suena, aunque el aviso del temporizador esté en «Nada» */
   buzz([300,120,300,120,500]);duckMusic();
   if(natSound()){playSound(S.sound,true);ringLoop=setInterval(()=>buzz([300,120,300,120,500]),2500)}
-  else{playSound();ringLoop=setInterval(()=>{buzz([300,120,300,120,500]);playSound()},S.sound==='voz'?4000:2500)}
+  else{playSound();ringDuck();ringLoop=setInterval(()=>{buzz([300,120,300,120,500]);playSound();ringDuck()},S.sound==='voz'?4000:2500)}
 }
-function stopRing(){clearInterval(ringLoop);if(natSound())VTNative.stopAlert();$('ringing').hidden=true;try{speechSynthesis.cancel()}catch(e){}
+/* En PC, la música sigue baja mientras la alarma suena, no solo los segundos del aviso */
+function ringDuck(){if(window.VTDesktop&&S.aviso!=='none')VTDesktop.audioFocus(S.aviso==='pause'?'pause':'duck',6000,S.duck)}
+function stopRing(){clearInterval(ringLoop);if(natSound())VTNative.stopAlert();if(window.VTDesktop)VTDesktop.audioFocus('release');$('ringing').hidden=true;try{speechSynthesis.cancel()}catch(e){}
   if(ringing&&!ringing.days.length&&!ringing.snooze){ringing.on=false;save()}
   if(ringing&&ringing.snooze){S.alarms=S.alarms.filter(x=>x.id!==ringing.id);save()}
   ringing=null;renderAlarms()}
@@ -4528,7 +4539,9 @@ function renderCal(){
   const avail=desk?sc.clientHeight-gTop-30:sc.clientHeight?document.querySelector('.nav').getBoundingClientRect().top-gTop-4:0;
   const cellH=Math.max(52,Math.floor((avail-wdH-gapY*weeks)/weeks));
   grid.style.gridTemplateRows=`${wdH}px repeat(${weeks},${cellH}px)`;
-  const fit=Math.max(1,Math.floor((cellH-40)/19));
+  /* Si caben menos de 8 con el tamaño normal, se compactan para que se vean más elementos por día */
+  const comp=Math.floor((cellH-40)/19)<8;grid.classList.toggle('m-compact',comp);
+  const fit=Math.max(1,comp?Math.floor((cellH-22)/13):Math.floor((cellH-40)/19));
   const twd=(new Date().getDay()-fd+7)%7;
   let html=dayOrder().map(x=>DAYN[x]).map((d,i)=>`<div class="cal-wd${i===twd&&y===new Date().getFullYear()&&m===new Date().getMonth()?' today':''}"><span>${d}</span></div>`).join('');
   const frac=dayFrac();
