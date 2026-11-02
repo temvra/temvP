@@ -19,7 +19,7 @@ html=html.replace(/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/jspdf\/[^'"]+\/
   .replace(/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/jszip\/[^'"]+\/jszip\.min\.js/g,'libs/jszip.min.js')
   .replace(/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/pdf\.js\/[^'"]+\/pdf\.worker\.min\.js/g,'libs/pdf.worker.min.js')
   .replace(/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/pdf\.js\/[^'"]+\/pdf\.min\.js/g,'libs/pdf.min.js');
-const head='<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#11131a"><title>Temvra</title>';
+const head='<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#11131a"><title>Temvra</title>';
 if(!/^<!doctype/i.test(html.trim()))html=`<!doctype html><html lang="es"><head>${head}</head><body>${html}<script src="native.js"></script></body></html>`;
 else html=html.replace('</body>','<script src="native.js"></script></body>');
 fs.writeFileSync(path.join(www,'index.html'),html);cp(path.join(root,'src','native.js'),'native.js');

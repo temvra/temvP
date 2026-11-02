@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:padding="10dp">
+
+    <ProgressBar
+        android:id="@+id/w_ring"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center"
+        android:max="100"
+        android:progress="0"
+        android:progressDrawable="@drawable/widget_ring"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/w_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="#A9ABB8"
+            android:textSize="11sp"
+            android:text="Temporizador"/>
+
+        <Chronometer
+            android:id="@+id/w_chrono"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:countDown="true"
+            android:textColor="#E3E2EA"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif-light"/>
+
+        <TextView
+            android:id="@+id/w_static"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#E3E2EA"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif-light"
+            android:text="01:30"/>
+
+        <TextView
+            android:id="@+id/w_lap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#B8B5FF"
+            android:textSize="11sp"
+            android:text="Vuelta 1"/>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/w_play"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="bottom|end"
+        android:background="@drawable/widget_btn"
+        android:padding="8dp"
+        android:contentDescription="Iniciar o pausar"
+        android:src="@drawable/ic_w_play"/>
+</FrameLayout>

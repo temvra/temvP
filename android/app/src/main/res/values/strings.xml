@@ -4,4 +4,10 @@
     <string name="title_activity_main">Temvra</string>
     <string name="package_name">com.temvra.app.personal</string>
     <string name="custom_url_scheme">com.temvra.app.personal</string>
+    <string name="widget_timer_label">Temvra · Temporizador</string>
+    <string name="widget_timer_desc">Cuenta atrás del temporizador con botón de pausa</string>
+    <string name="widget_alarm_label">Temvra · Próxima alarma</string>
+    <string name="widget_alarm_desc">Hora y nombre de la próxima alarma</string>
+    <string name="widget_day_label">Temvra · Hoy</string>
+    <string name="widget_day_desc">Cuánto queda del día y tu próximo evento</string>
 </resources>
