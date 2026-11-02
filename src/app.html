@@ -2940,7 +2940,14 @@ const natSound=()=>!!(window.VTNative&&VTNative.hasPlugin);
 const inBg=()=>!!(window.VTNative&&VTNative.bg);
 /* Sin la app delante los avisos los da el motor nativo: aquí no se duplican */
 function tone(f,st,dur,type='sine',vol=.35){if(inBg()||S.soundOn===false)return;const c=ac();if(!c)return;vol=Math.min(.95,vol*2.2*(S.vol/100));const o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=f;o.connect(g);g.connect(c.destination);const t=c.currentTime+st;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.start(t);o.stop(t+dur+.05)}
-function speak(text){try{if(!('speechSynthesis' in window)){toast('Este navegador no tiene voces');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text||S.tts.text);u.lang=S.tts.lang;u.pitch=S.tts.pitch;u.rate=S.tts.rate;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.replace('_','-').startsWith(S.tts.lang.slice(0,2)));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+/* En PC la voz llega como audio. Si no se puede generar, suena el pitido para no dejar el aviso mudo */
+let dkVoice=null,dkVoiceId=0;
+function stopVoice(){dkVoiceId++;try{speechSynthesis.cancel()}catch(e){}if(dkVoice){try{dkVoice.stop()}catch(e){}dkVoice=null}}
+async function speakDesk(text){stopVoice();const id=dkVoiceId;let b=null;try{b=await VTDesktop.tts(text,S.tts.lang,S.tts.pitch,S.tts.rate)}catch(e){}
+  if(id!==dkVoiceId)return;const c=ac();if(!b||!c){playSound('pitido');return}
+  try{const buf=await c.decodeAudioData(b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength));if(id!==dkVoiceId)return;
+    const o=c.createBufferSource(),g=c.createGain();o.buffer=buf;g.gain.value=Math.min(2,S.vol/100);o.connect(g);g.connect(c.destination);o.onended=()=>{if(dkVoice===o)dkVoice=null};dkVoice=o;o.start()}catch(e){playSound('pitido')}}
+function speak(text){if(window.VTDesktop){speakDesk(text||S.tts.text);return}try{if(!('speechSynthesis' in window)){toast('Este navegador no tiene voces');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text||S.tts.text);u.lang=S.tts.lang;u.pitch=S.tts.pitch;u.rate=S.tts.rate;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.replace('_','-').startsWith(S.tts.lang.slice(0,2)));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
 function playSound(kind=S.sound,loop=false){
   if(inBg()||S.soundOn===false)return;
   if(natSound()){VTNative.playAlert({kind,vol:S.vol,tts:S.tts,loop});return}
@@ -3137,7 +3144,7 @@ function ring(a){
 }
 /* En PC, la música sigue baja mientras la alarma suena, no solo los segundos del aviso */
 function ringDuck(){if(window.VTDesktop&&S.aviso!=='none')VTDesktop.audioFocus(S.aviso==='pause'?'pause':'duck',6000,S.duck)}
-function stopRing(){clearInterval(ringLoop);if(natSound())VTNative.stopAlert();if(window.VTDesktop)VTDesktop.audioFocus('release');$('ringing').hidden=true;try{speechSynthesis.cancel()}catch(e){}
+function stopRing(){clearInterval(ringLoop);if(natSound())VTNative.stopAlert();if(window.VTDesktop)VTDesktop.audioFocus('release');$('ringing').hidden=true;stopVoice();
   if(ringing&&!ringing.days.length&&!ringing.snooze){ringing.on=false;save()}
   if(ringing&&ringing.snooze){S.alarms=S.alarms.filter(x=>x.id!==ringing.id);save()}
   ringing=null;renderAlarms()}

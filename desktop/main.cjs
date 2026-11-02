@@ -47,6 +47,19 @@ ipcMain.on('audio-focus',(e,mode,ms,level)=>{
   clearTimeout(audioT);audioT=setTimeout(()=>{audioQ=audioQ.then(restoreAudio).catch(()=>{})},t);
 });
 app.on('will-quit',()=>{clearTimeout(audioT);restoreAudioNow()});
+// Electron no trae voces en Linux: la voz la genera espeak-ng y la reproduce la web, con el volumen de la app
+const VOICES={'es-MX':'es-419','en-US':'en-us','en-GB':'en-gb','pt-BR':'pt-br','zh-CN':'cmn'};
+ipcMain.handle('tts',(e,text,lang,pitch,rate)=>new Promise(r=>{
+  if(!e.senderFrame||!e.senderFrame.url.startsWith(ORIGIN+'/'))return r(null);
+  const l=String(lang||'es-ES'),p=Math.round(Math.min(99,Math.max(0,(+pitch||1)*50))),s=Math.round(Math.min(450,Math.max(80,(+rate||1)*175)));
+  const c=execFile('espeak-ng',['-v',VOICES[l]||l.slice(0,2),'-p',String(p),'-s',String(s),'-b','1','--stdin','--stdout'],{encoding:'buffer',maxBuffer:32e6,timeout:10000},(err,out)=>{
+    if(err||!out||out.length<44)return r(null);
+    // Por la salida estándar la cabecera WAV no lleva el tamaño real
+    const d=out.indexOf('data');if(d<0)return r(null);
+    out.writeUInt32LE(out.length-8,4);out.writeUInt32LE(out.length-d-8,d+4);r(out);
+  });
+  c.on('error',()=>r(null));c.stdin.on('error',()=>{});c.stdin.end(String(text||'').slice(0,500));
+}));
 function open(){
   win=new BrowserWindow({width:1280,height:820,minWidth:360,minHeight:500,backgroundColor:'#000000',icon:path.join(__dirname,'icon-512.png'),webPreferences:{backgroundThrottling:false,preload:path.join(__dirname,'preload.cjs')}});
   win.on('closed',()=>{win=null});
