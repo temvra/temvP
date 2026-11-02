@@ -1658,7 +1658,7 @@ body:not(.desk) .nav button:not([aria-current="page"]):active{background:color-m
 .cp-b{width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;color:var(--fg);background:transparent}
 .cp-b.on{background:var(--accent);color:var(--on-accent)}
 .cp-s{width:38px;height:38px;flex:none;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}
-.vn-compose:not([hidden]){display:flex;align-items:flex-end;gap:2px;position:fixed;left:12px;right:12px;bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 70px);z-index:5;background:var(--surface-2);border-radius:24px;padding:5px;box-shadow:0 4px 16px rgba(0,0,0,.3);max-width:536px;margin:0 auto}
+.vn-compose:not([hidden]){display:flex;align-items:flex-end;gap:2px;position:fixed;left:12px;right:12px;bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 64px);z-index:5;background:var(--surface-2);border-radius:24px;padding:5px;box-shadow:0 4px 16px rgba(0,0,0,.3);max-width:536px;margin:0 auto}
 .vn-compose textarea{flex:1;min-width:0;background:none;border:0;outline:none;resize:none;color:var(--fg);font:15px/1.35 var(--font);padding:9px 4px;max-height:120px}
 .has-bg .vn-compose{background:color-mix(in srgb,var(--surface-2) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 body.desk .vn-compose{left:auto;right:18px;width:420px;bottom:14px}
@@ -1712,10 +1712,12 @@ body.desk .vn-compose{left:auto;right:18px;width:420px;bottom:14px}
 #dayview.compact #dv-sub,#dayview.compact #dv-today{display:none}
 /* Calendario: el mes entero cabe entre la cabecera y la barra inferior */
 @media (max-width:600px){
-  body:not(.desk) #cal-grid{height:calc(100dvh - var(--sat,0px) - var(--sab,0px) - 130px);grid-template-rows:20px repeat(6,minmax(0,1fr));gap:3px}
+  body:not(.desk) #cal-grid{gap:3px}
+  body:not(.desk) #v-cal.cal-fit{gap:2px}
+  body:not(.desk) #v-cal.cal-fit>.cal-top{padding-bottom:2px;margin-bottom:0}
   body:not(.desk) #cal-grid>*{min-height:0!important;height:auto;overflow:hidden}
-  body:not(.desk) #cal-grid>.cal-wd{height:20px;padding:0}
-  body:not(.desk) #cal-grid .cal-wd span{width:20px;height:20px;font-size:11.5px}
+  body:not(.desk) #cal-grid>.cal-wd{height:18px;padding:0}
+  body:not(.desk) #cal-grid .cal-wd span{width:18px;height:18px;font-size:11.5px}
   body:not(.desk) #cal-grid .mchip{font-size:10px;line-height:14px;height:15px}
   body:not(.desk) #v-cal{padding-bottom:0}
 }
@@ -1751,6 +1753,8 @@ body.desk .vn-compose{left:auto;right:18px;width:420px;bottom:14px}
 .reg-day h3{margin:0 0 4px;font-size:13px;color:var(--muted);font-weight:600;text-transform:capitalize}
 .reg-day.today h3{color:var(--accent)}
 .reg-day textarea{width:100%;min-height:70px;background:none;border:0;outline:none;resize:vertical;color:var(--fg);font:15px/1.45 var(--font)}
+.reg-head,.reg-day,.reg-t,#rd-body{-webkit-touch-callout:none}
+.reg-head input:not(:focus),.reg-day textarea:not(:focus),.reg-t input:not(:focus),.reg-day h3,.reg-t .dc,#rd-body .nd-row{-webkit-user-select:none;user-select:none}
 .reg-chips{display:flex;gap:5px;flex-wrap:wrap;margin:4px 0}
 .reg-chips button{padding:4px 10px;border-radius:10px;background:var(--surface-2);font-size:12.5px;color:var(--fg)}
 .rw-q{font-size:17px;font-weight:600;margin:6px 0 10px}
@@ -1858,11 +1862,11 @@ body.desk:not(.desknotes) #noteview{display:none!important}
   #ob-sheet.grp .obg{border-radius:16px;margin-top:8px}
   .vn-head{padding-block:8px 4px}
   .vn-head .ob-round{width:42px;height:42px}
-  body:not(.desk) .nav{bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 8px);padding:5px}
+  body:not(.desk) .nav{bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 2px);padding:5px}
   body:not(.desk) .nav button{height:46px;min-width:56px}
   body:not(.desk) .nav .ic{padding:0 15px}
   body:not(.desk) .nav-in{gap:3px}
-  .fabs{bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 92px)}
+  .fabs{bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 86px)}
   /* Notas: carpetas y filas más juntas */
   .ob-list{padding-top:2px!important}
   .ob-row{min-height:42px;padding:3px 10px 3px 26px;gap:8px;font-size:15.5px;border-radius:12px}
@@ -4134,11 +4138,11 @@ $('presets').onclick=e=>{if(Date.now()-tmNoClick<400)return;
   const f=e.target.closest('[data-tf]');if(f){const x=tmFolder(f.dataset.tf);x.open=x.open===false;save();renderPresets();return}
   const b=e.target.closest('[data-tm]');if(b)useTimer(S.timers.find(x=>x.id===b.dataset.tm))};
 /* Alarmas y circuitos: mantener pulsado para opciones */
-function holdMenu(container,sel,fn){let lp=null,nc=0;container.addEventListener('pointerdown',e=>{const r=e.target.closest(sel);if(!r||e.button>0||e.target.closest('.switch'))return;lp={x:e.clientX,y:e.clientY,id:e.pointerId,t:setTimeout(()=>{lp=null;nc=Date.now();swallow();if(navigator.vibrate)navigator.vibrate(15);fn(r)},480)}},true);
+function holdMenu(container,sel,fn,skip){let lp=null,nc=0;container.addEventListener('pointerdown',e=>{const r=e.target.closest(sel);if(!r||e.button>0||e.target.closest('.switch')||(skip&&skip(e.target)))return;lp={x:e.clientX,y:e.clientY,id:e.pointerId,t:setTimeout(()=>{lp=null;nc=Date.now();swallow();if(navigator.vibrate)navigator.vibrate(15);fn(r)},480)}},true);
   container.addEventListener('pointermove',e=>{if(lp&&Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>9){clearTimeout(lp.t);lp=null}});
   ['pointerup','pointercancel'].forEach(t=>container.addEventListener(t,()=>{if(lp){clearTimeout(lp.t);lp=null}}));
   container.addEventListener('click',e=>{if(Date.now()-nc<500&&e.target.closest(sel)){e.stopImmediatePropagation();e.preventDefault()}},true);
-  container.addEventListener('contextmenu',e=>{const r=e.target.closest(sel);if(!r)return;e.preventDefault();if(lastPT==='mouse'){if(lp){clearTimeout(lp.t);lp=null}fn(r)}})}
+  container.addEventListener('contextmenu',e=>{const r=e.target.closest(sel);if(!r||(skip&&skip(e.target)))return;e.preventDefault();if(lastPT==='mouse'){if(lp){clearTimeout(lp.t);lp=null}fn(r)}})}
 holdMenu($('presets'),'[data-rec]',r=>{const i=+r.dataset.rec,x=S.recent[i];if(!x)return;obSheet(x.t+' · '+fmt(x.s*1000),[{t:'Usar'},{t:'Guardar en Mis temporizadores'},{t:'Quitar de recientes',danger:true,sep:true}],j=>{if(j===0)r.querySelector('[data-recuse]').click();else if(j===1)saveRecent(i);else{S.recent.splice(i,1);save();renderPresets()}})});
 holdMenu($('alarm-list'),'[data-id]',r=>{const a=S.alarms.find(x=>x.id==r.dataset.id);if(!a)return;obSheet((a.label||'Alarma')+' · '+a.t,[{t:'Duplicar'},{t:'Editar'},{t:'Compartir'},{t:'Eliminar',danger:true,sep:true}],i=>{
   if(i===0){S.alarms.push({...a,id:Date.now(),days:[...a.days]});save();renderAlarms();toast('Duplicada')}else if(i===1)openAlarm(a.id);
@@ -4517,10 +4521,12 @@ function renderCal(){
   const CE=calEvents(),fd=firstDay(),first=new Date(y,m,1),startOff=(first.getDay()-fd+7)%7,start=new Date(y,m,1-startOff);
   const weeks=Math.ceil((startOff+new Date(y,m+1,0).getDate())/7);
   // Altura de celda para que el mes llene la pantalla
-  const sc=$('v-cal'),grid=$('cal-grid'),navH=document.body.classList.contains('desk')?16:(document.querySelector('.nav').offsetHeight||84);
+  const sc=$('v-cal'),grid=$('cal-grid');sc.classList.add('cal-fit');const desk=document.body.classList.contains('desk'),gapY=parseFloat(getComputedStyle(grid).rowGap)||4,wdH=!desk&&matchMedia('(max-width:600px)').matches?18:28;
   const gTop=grid.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop;
-  const cellH=Math.max(52,Math.floor((sc.clientHeight-gTop-navH-14-28-4*weeks)/weeks));
-  grid.style.gridTemplateRows=`28px repeat(${weeks},${cellH}px)`;
+  // En móvil se mide contra la ventana: al cambiar de vista la cabecera anterior aún encoge el contenedor
+  const avail=desk?sc.clientHeight-gTop-30:sc.clientHeight?document.querySelector('.nav').getBoundingClientRect().top-gTop-4:0;
+  const cellH=Math.max(52,Math.floor((avail-wdH-gapY*weeks)/weeks));
+  grid.style.gridTemplateRows=`${wdH}px repeat(${weeks},${cellH}px)`;
   const fit=Math.max(1,Math.floor((cellH-40)/19));
   const twd=(new Date().getDay()-fd+7)%7;
   let html=dayOrder().map(x=>DAYN[x]).map((d,i)=>`<div class="cal-wd${i===twd&&y===new Date().getFullYear()&&m===new Date().getMonth()?' today':''}"><span>${d}</span></div>`).join('');
@@ -6668,7 +6674,7 @@ function renderRegs(){ensureDiary();ensureRegs();if(!regCur||!S.regs.some(x=>x.i
   $('rg-in').placeholder=r?(r.kind==='diary'?'Escribe en el diario de hoy…':'Apunta en '+r.name+'…'):'Crea un registro con +';
   if(r){S.regLast=r.id;renderReg(r);return}$('v-reg').innerHTML='<div class="reg-empty"><p>Aún no tienes registros.</p><button class="btn" id="reg-add">+ Nuevo registro</button></div>'}
 function openRegDrawer(){const dayTxt=r=>r.kind==='diary'?((r.days[today()]||{}).text||'Hoy sin escribir'):regSummary(r,today()).split('\n')[0]||'Hoy sin apuntar';
-  $('rd-body').innerHTML=S.regs.map(r=>`<div class="nd-item"><button class="nd-row reg-r${r.id===regCur?' on':''}" data-pick="${r.id}" style="--rc:${r.color||'var(--accent)'}"><span class="ic2">${r.icon||'🗂️'}</span><span><b>${esc(r.name)}</b><small>${r.tag?'#'+esc(r.tag)+' · ':''}${esc(dayTxt(r))}</small></span></button><button class="nd-x" data-rshare="${r.id}" aria-label="Compartir ${esc(r.name)}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg></button><button class="nd-x" data-rdel="${r.id}" aria-label="Eliminar ${esc(r.name)}">×</button></div>`).join('');$('reg-drawer').hidden=false}
+  $('rd-body').innerHTML=S.regs.map(r=>`<div class="nd-item"><button class="nd-row reg-r${r.id===regCur?' on':''}" data-pick="${r.id}" style="--rc:${r.color||'var(--accent)'}"><span class="ic2">${r.icon||'🗂️'}</span><span><b>${esc(r.name)}</b><small>${r.tag?'#'+esc(r.tag)+' · ':''}${esc(dayTxt(r))}</small></span></button></div>`).join('');$('reg-drawer').hidden=false}
 const csvCell=v=>{const t=String(v==null?'':v);return /[",;\n]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t};
 const tableCsv=T=>{const day=T.rows.some(x=>x.d);return [(day?['Día']:[]).concat(T.cols).map(csvCell).join(';'),...T.rows.filter(x=>!rowEmpty(x)).map(x=>(day?[x.d+(x.t?' '+x.t:'')]:[]).concat(x.c).map(csvCell).join(';'))].join('\n')};
 const tableTxt=T=>T.rows.filter(x=>!rowEmpty(x)).map(x=>(x.d?regDayTxt(x.d)+': ':'')+x.c.filter(Boolean).join(' · ')).join('\n');
@@ -6677,9 +6683,25 @@ function shareTable(T,title){regSend(title+'.csv',tableCsv(T),'text/csv',title,t
 function dayText(r,d){const e=r.days[d]||{},L=[(e.text||'').trim(),...(e.tables||[]).map(tableTxt)].filter(Boolean);return regDayTxt(d)+' '+d+'\n'+L.join('\n\n')}
 function shareDay(r,d){const t=dayText(r,d);regSend(r.name+' '+d+'.txt',t,'text/plain',r.name,r.name+'\n'+t)}
 function shareReg(r){if(r.kind==='diary'){const t=Object.keys(r.days).sort().map(d=>dayText(r,d)).join('\n\n');regSend(r.name+'.txt',t,'text/plain',r.name,r.name+'\n'+t)}else shareTable(r,r.name)}
-function deleteReg(r){obConfirm('¿Eliminar «'+r.name+'»? La nota acumulada se conserva.','Eliminar',()=>{if(r.kind==='diary')S.noDiary=true;S.regs=S.regs.filter(x=>x!==r);if(regCur===r.id)regCur=null;save();renderRegs();if(!$('reg-drawer').hidden)openRegDrawer();if(typeof pushWidgets==='function')pushWidgets()})}
+function deleteReg(r){obConfirm('¿Eliminar «'+r.name+'»? La nota acumulada se conserva.','Eliminar',()=>{if(r.kind==='diary'&&S.regs.filter(x=>x.kind==='diary').length===1)S.noDiary=true;S.regs=S.regs.filter(x=>x!==r);if(regCur===r.id)regCur=null;save();renderRegs();if(!$('reg-drawer').hidden)openRegDrawer();if(typeof pushWidgets==='function')pushWidgets()})}
+function duplicateReg(r){const c=JSON.parse(JSON.stringify(r));c.id='r'+Date.now().toString(36);c.name=r.name+' (copia)';c.tag='';c.sess={};S.regs.splice(S.regs.indexOf(r)+1,0,c);regCur=c.id;save();renderRegs();if(!$('reg-drawer').hidden)openRegDrawer();if(typeof pushWidgets==='function')pushWidgets();toast('Duplicado')}
+function regMenu(r){obSheet(r.name,[{t:'Duplicar'},{t:'Compartir'},{t:'Eliminar',danger:true,sep:true}],i=>{if(i===0)duplicateReg(r);else if(i===1)shareReg(r);else deleteReg(r)})}
+function delRegRow(r,T,i){const x=T.rows[i],same=x.d?T.rows.filter(y=>y.d===x.d).length:T.rows.length;if(same<=1){x.c=x.c.map(()=>'');toast(x.d?'Cada día conserva al menos una fila':'La tabla conserva al menos una fila')}else T.rows.splice(i,1);saveReg(r);renderRegs()}
+function delRegCol(r,T,j){if(T.cols.length<=2){toast('Una tabla necesita al menos 2 columnas');return}obConfirm('¿Eliminar la columna «'+T.cols[j]+'» y sus datos?','Eliminar',()=>{T.cols.splice(j,1);T.rows.forEach(x=>x.c.splice(j,1));saveReg(r);renderRegs()})}
+/* Las tablas del diario no tienen menú propio: sus opciones acompañan a las de fila y columna */
+function dayTableItems(r,key){if(key==='reg')return [];const [,d,k]=key.split('|'),T=r.days[d].tables[+k];return [{t:'Duplicar tabla',sep:true,run:()=>{r.days[d].tables.splice(+k+1,0,JSON.parse(JSON.stringify(T)));saveReg(r);renderRegs();toast('Duplicada')}},{t:'Compartir tabla',run:()=>shareTable(T,r.name+' '+d)},{t:'Eliminar tabla',danger:true,run:()=>obConfirm('¿Eliminar esta tabla?','Eliminar',()=>{r.days[d].tables.splice(+k,1);saveReg(r);renderRegs()})}]}
+function rowMenu(r,T,key,i){const x=T.rows[i],name=r.name+(x.d?' '+x.d:'');obSheet(x.c.find(v=>String(v).trim())||'Fila',[{t:'Duplicar fila',run:()=>{T.rows.splice(i+1,0,JSON.parse(JSON.stringify(x)));saveReg(r);renderRegs();toast('Duplicada')}},{t:'Compartir fila',run:()=>{const t=(x.d?regDayTxt(x.d)+'\n':'')+T.cols.map((c,j)=>c+': '+(x.c[j]||'')).join('\n');regSend(name+'.txt',t,'text/plain',r.name,t)}},{t:'Eliminar fila',danger:true,run:()=>delRegRow(r,T,i)},...dayTableItems(r,key)],(_,__,it)=>it.run())}
+function colMenu(r,T,key,j){obSheet(T.cols[j],[{t:'Duplicar columna',run:()=>{T.cols.splice(j+1,0,T.cols[j]+' (copia)');T.rows.forEach(x=>x.c.splice(j+1,0,x.c[j]==null?'':x.c[j]));saveReg(r);renderRegs();toast('Duplicada')}},{t:'Compartir columna',run:()=>{const t=T.cols[j]+'\n'+T.rows.filter(x=>String(x.c[j]==null?'':x.c[j]).trim()).map(x=>(x.d?regDayTxt(x.d)+': ':'')+x.c[j]).join('\n');regSend(r.name+' '+T.cols[j]+'.txt',t,'text/plain',r.name,t)}},{t:'Eliminar columna',danger:true,run:()=>delRegCol(r,T,j)},...dayTableItems(r,key)],(_,__,it)=>it.run())}
+function dayMenu(r,d){const isT=d===today(),to=isT?addDays(d,1):today();obSheet(fromKey(d).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long'}),[{t:isT?'Duplicar en mañana':'Duplicar en hoy'},{t:'Compartir el día'},{t:'Borrar el día',danger:true,sep:true}],i=>{
+    if(i===0){const e=JSON.parse(JSON.stringify(r.days[d])),z=r.days[to]||(r.days[to]={text:'',tables:[]});if(e.text)z.text=(z.text?z.text.replace(/\s*$/,'')+'\n':'')+e.text;z.tables=(z.tables||[]).concat(e.tables||[]);saveReg(r);renderRegs();toast('Duplicado')}
+    else if(i===1)shareDay(r,d);else obConfirm('¿Borrar el texto y las tablas de este día?','Borrar',()=>{if(d===today())r.days[d]={text:'',tables:[]};else delete r.days[d];saveReg(r);renderRegs()})})}
+/* Mantener pulsado abre las opciones de cada elemento. El campo que ya se está editando conserva la selección de texto del sistema */
+holdMenu($('v-reg'),'tbody tr[data-i],thead th:not(.ctl):not(.dc),.reg-day,.reg-head',el=>{const r=S.regs.find(x=>x.id===regCur);if(!r)return;const ae=document.activeElement;if(ae&&ae.blur)ae.blur();getSelection().removeAllRanges();
+  if(el.matches('.reg-head')){regMenu(r);return}if(el.matches('.reg-day')){dayMenu(r,el.dataset.d);return}
+  const key=el.closest('table[data-ctx]').dataset.ctx,T=regTable(r,key);if(el.matches('tr'))rowMenu(r,T,key,+el.dataset.i);else colMenu(r,T,key,+el.querySelector('[data-col]').dataset.col)},t=>t===document.activeElement||t.closest('button,a'));
+holdMenu($('rd-body'),'[data-pick]',el=>{const r=S.regs.find(x=>x.id===el.dataset.pick);if(r)regMenu(r)});
 $('rg-menu').onclick=openRegDrawer;
-$('reg-drawer').addEventListener('click',e=>{if(e.target===$('reg-drawer')){$('reg-drawer').hidden=true;return}const sh=e.target.closest('[data-rshare]');if(sh){shareReg(S.regs.find(x=>x.id===sh.dataset.rshare));return}const d=e.target.closest('[data-rdel]');if(d){deleteReg(S.regs.find(x=>x.id===d.dataset.rdel));return}const p=e.target.closest('[data-pick]');if(p){regCur=p.dataset.pick;$('reg-drawer').hidden=true;renderRegs();$('v-reg').scrollTop=0}});
+$('reg-drawer').addEventListener('click',e=>{if(e.target===$('reg-drawer')){$('reg-drawer').hidden=true;return}const p=e.target.closest('[data-pick]');if(p){regCur=p.dataset.pick;$('reg-drawer').hidden=true;renderRegs();$('v-reg').scrollTop=0}});
 $('rd-new').onclick=()=>{$('reg-drawer').hidden=true;openRegWizard({})};
 $('rd-set').onclick=()=>{$('reg-drawer').hidden=true;$('open-settings').click()};
 $('rg-plus').onclick=()=>{const r=S.regs.find(x=>x.id===regCur),o=[{t:'Nuevo registro',s:'Te guía según el tipo',ic:MI2.plus,k:'new'}];if(r&&r.kind==='diary')o.push({t:'Añadir tabla al día de hoy',ic:MI.base,k:'tbl'});if(r&&r.kind!=='diary'){o.push({t:'Añadir fila de hoy',ic:MI.base,k:'row'});if(!(REG_TYPES[r.type]||{}).noBlock)o.push({t:'Pasar a la línea de tiempo',ic:MI.cal,k:'sess'});if(r.tag)o.push({t:'Ver la nota acumulada',ic:MI.newnote,k:'note'})}
@@ -6688,7 +6710,7 @@ $('rg-send').onclick=()=>{const ta=$('rg-in'),v=ta.value.trim();if(!v)return;con
   if(r.kind==='diary'){const e=r.days[t];e.text=(e.text?e.text.replace(/\s*$/,'')+'\n':'')+v;regFolders(v)}else{let x=r.rows.find(y=>y.d===t&&rowEmpty(y));if(!x){x=blankRow(r,t);r.rows.push(x);r.rows.sort((a,b)=>a.d.localeCompare(b.d))}const parts=v.split(/\s*[,;]\s*/);parts.slice(0,r.cols.length).forEach((p,j)=>x.c[j]=p);regFolders(v)}
   ta.value='';ta.style.height='';saveReg(r);renderRegs()};
 function renderReg(r){const B=$('v-reg'),head=`<div class="reg-head"><input class="rn" data-rname value="${esc(r.name)}" aria-label="Nombre"><button class="icon-btn" data-rmenu aria-label="Opciones"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></div>`;
-  if(r.kind==='diary'){const days=Object.keys(r.days).sort().reverse();B.innerHTML=head+days.map(d=>{const e=r.days[d],fs=[...new Set(regFoldersPeek(e.text))];return `<div class="reg-day${d===today()?' today':''}" data-d="${d}"><h3>${esc(fromKey(d).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long'}))}</h3><textarea data-dtext placeholder="Escribe aquí. Usa /[carpeta] o /a/b/[carpeta] para enlazar carpetas.">${esc(e.text||'')}</textarea>${fs.length?`<div class="reg-chips">${fs.map(f=>`<button data-folder-go="${esc(f)}">📁 ${esc(f)}</button>`).join('')}</div>`:''}${(e.tables||[]).map((t,k)=>tableHTML(t,{key:'dt|'+d+'|'+k})+`<div class="reg-acts"><button class="btn tonal" data-trow="${d}|${k}">+ Fila</button><button class="btn tonal" data-tcolor="${d}|${k}">Color</button><button class="btn tonal" data-tshare="${d}|${k}">Compartir</button><button class="btn tonal" data-tdel="${d}|${k}">Eliminar</button></div>`).join('')}<div class="reg-acts"><button class="btn tonal" data-tnew="${d}">+ Tabla</button><button class="btn tonal" data-dshare="${d}">Compartir el día</button><button class="btn tonal" data-ddel="${d}">Borrar el día</button></div></div>`}).join('');return}
+  if(r.kind==='diary'){const days=Object.keys(r.days).sort().reverse();B.innerHTML=head+days.map(d=>{const e=r.days[d],fs=[...new Set(regFoldersPeek(e.text))];return `<div class="reg-day${d===today()?' today':''}" data-d="${d}"><h3>${esc(fromKey(d).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long'}))}</h3><textarea data-dtext placeholder="Escribe aquí. Usa /[carpeta] o /a/b/[carpeta] para enlazar carpetas.">${esc(e.text||'')}</textarea>${fs.length?`<div class="reg-chips">${fs.map(f=>`<button data-folder-go="${esc(f)}">📁 ${esc(f)}</button>`).join('')}</div>`:''}${(e.tables||[]).map((t,k)=>tableHTML(t,{key:'dt|'+d+'|'+k})+`<div class="reg-acts"><button class="btn tonal" data-trow="${d}|${k}">+ Fila</button><button class="btn tonal" data-tcolor="${d}|${k}">Color</button></div>`).join('')}<div class="reg-acts"><button class="btn tonal" data-tnew="${d}">+ Tabla</button></div></div>`}).join('');return}
   const fs=[...new Set(r.rows.flatMap(x=>x.c.flatMap(regFoldersPeek)))];
   B.innerHTML=head+`<div class="t2" style="margin:0 2px 6px">${r.goal?esc(r.goal)+' · ':''}${r.tag?'#'+esc(r.tag):'Sin etiqueta'}</div>`+tableHTML(r,{key:'reg',byDay:true})+(fs.length?`<div class="reg-chips">${fs.map(f=>`<button data-folder-go="${esc(f)}">📁 ${esc(f)}</button>`).join('')}</div>`:'')+`<div class="reg-acts"><button class="btn" data-addrow>+ Fila hoy</button>${(REG_TYPES[r.type]||{}).noBlock?'':'<button class="btn tonal" data-sess>Pasar a la línea de tiempo</button>'}${r.tag?'<button class="btn tonal" data-tagnote>Nota acumulada</button>':''}</div>`;
   const w=B.querySelector('.reg-wrap');if(w)requestAnimationFrame(()=>{w.scrollTop=w.scrollHeight})}
@@ -6697,22 +6719,17 @@ function regTable(r,key){if(key==='reg')return r;const [,d,k]=key.split('|');ret
 $('v-reg').addEventListener('click',e=>{const t=e.target,g=s=>t.closest(s);const op=g('[data-open]');if(op){regCur=op.dataset.open;renderRegs();$('v-reg').scrollTop=0;return}
   if(g('#reg-add')){openRegWizard({});return}
   const r=S.regs.find(x=>x.id===regCur);if(!r)return;const fo=g('[data-folder-go]');if(fo){S.obOpen[fo.dataset.folderGo]=true;show('notes');renderNotes();return}
-  if(g('[data-rmenu]')){const del=true;obSheet(r.name,[{t:'Etiqueta',s:r.tag?'#'+r.tag:'Sin etiqueta'},{t:'Color',ic:`<span class="tx-sw" style="background:${r.color||'var(--accent)'}"></span>`},{t:'Compartir'},...(del?[{t:'Eliminar registro',danger:true,sep:true}]:[])],i=>{
-      if(i===0)askName('Etiqueta',r.tag||'',v=>{r.tag=v.trim().replace(/^#/,'');saveReg(r);renderRegs()});else if(i===1)pickColor('Color',r.color,c=>{r.color=c;saveReg(r);renderRegs()});else if(i===2)shareReg(r);else deleteReg(r)});return}
+  if(g('[data-rmenu]')){const del=true;obSheet(r.name,[{t:'Etiqueta',s:r.tag?'#'+r.tag:'Sin etiqueta'},{t:'Color',ic:`<span class="tx-sw" style="background:${r.color||'var(--accent)'}"></span>`},{t:'Duplicar'},{t:'Compartir'},...(del?[{t:'Eliminar registro',danger:true,sep:true}]:[])],i=>{
+      if(i===0)askName('Etiqueta',r.tag||'',v=>{r.tag=v.trim().replace(/^#/,'');saveReg(r);renderRegs()});else if(i===1)pickColor('Color',r.color,c=>{r.color=c;saveReg(r);renderRegs()});else if(i===2)duplicateReg(r);else if(i===3)shareReg(r);else deleteReg(r)});return}
   if(g('[data-addrow]')){r.rows.push(blankRow(r,today()));saveReg(r);renderRegs();return}if(g('[data-sess]')){regSessionAsk(r);return}
   if(g('[data-tagnote]')){syncTagNote(r.tag);const n=S.notes.find(x=>x.regTag===r.tag);if(n){show('notes');openNote(n.id)}else toast('Aún no hay nada apuntado');return}
   const tn=g('[data-tnew]');if(tn){const d=tn.dataset.tnew;(r.days[d].tables=r.days[d].tables||[]).push({cols:['Columna 1','Columna 2'],rows:[{c:['','']}],color:''});saveReg(r);renderRegs();return}
   const tc=g('[data-tcolor]');if(tc){const [d,k]=tc.dataset.tcolor.split('|'),T=r.days[d].tables[+k];pickColor('Color de la tabla',T.color,c=>{T.color=c;saveReg(r);renderRegs()});return}
-  const ts=g('[data-tshare]');if(ts){const [d,k]=ts.dataset.tshare.split('|');shareTable(r.days[d].tables[+k],r.name+' '+d);return}
-  const td=g('[data-tdel]');if(td){const [d,k]=td.dataset.tdel.split('|');obConfirm('¿Eliminar esta tabla?','Eliminar',()=>{r.days[d].tables.splice(+k,1);saveReg(r);renderRegs()});return}
-  const ds=g('[data-dshare]');if(ds){shareDay(r,ds.dataset.dshare);return}
-  const dd=g('[data-ddel]');if(dd){const d=dd.dataset.ddel;obConfirm('¿Borrar el texto y las tablas de este día?','Borrar',()=>{if(d===today())r.days[d]={text:'',tables:[]};else delete r.days[d];saveReg(r);renderRegs()});return}
-  const dc=g('[data-delcol]');if(dc){const j=+dc.dataset.delcol,T=regTable(r,dc.closest('table').dataset.ctx);obConfirm('¿Eliminar la columna «'+T.cols[j]+'» y sus datos?','Eliminar',()=>{T.cols.splice(j,1);T.rows.forEach(x=>x.c.splice(j,1));saveReg(r);renderRegs()});return}
+  const dc=g('[data-delcol]');if(dc){delRegCol(r,regTable(r,dc.closest('table').dataset.ctx),+dc.dataset.delcol);return}
   const tr=g('[data-trow]');if(tr){const [d,k]=tr.dataset.trow.split('|'),T=r.days[d].tables[+k];T.rows.push({c:T.cols.map(()=>'')});saveReg(r);renderRegs();return}
   const tb=g('table[data-ctx]');if(!tb)return;const T=regTable(r,tb.dataset.ctx);
   if(g('[data-addcol]')){askName('Nombre de la columna','',v=>{T.cols.push(v||'Columna');T.rows.forEach(x=>x.c.push(''));saveReg(r);renderRegs()});return}
-  const dr=g('[data-delrow]');if(dr){const i=+dr.closest('tr').dataset.i,x=T.rows[i];const same=x.d?T.rows.filter(y=>y.d===x.d).length:T.rows.length;
-    if(same<=1){x.c=x.c.map(()=>'');toast(x.d?'Cada día conserva al menos una fila':'La tabla conserva al menos una fila')}else T.rows.splice(i,1);saveReg(r);renderRegs()}});
+  const dr=g('[data-delrow]');if(dr)delRegRow(r,T,+dr.closest('tr').dataset.i)});
 $('v-reg').addEventListener('change',e=>{const t=e.target,r=S.regs.find(x=>x.id===regCur);if(!r)return;if(t.dataset.rname!=null){r.name=t.value.trim()||r.name;saveReg(r);return}
   if(t.dataset.dtext!=null){const d=t.closest('[data-d]').dataset.d;r.days[d].text=t.value;const nf=regFolders(t.value);saveReg(r);if(nf.length)renderRegs();return}
   const tb=t.closest('table[data-ctx]');if(!tb)return;const T=regTable(r,tb.dataset.ctx);
