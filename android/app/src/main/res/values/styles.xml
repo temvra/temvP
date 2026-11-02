@@ -13,6 +13,11 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- Mismo color que el fondo de la app: si el WebView no llega hasta el borde, no se ve ninguna franja gris -->
+        <item name="android:windowBackground">@color/temvraBg</item>
+        <item name="android:statusBarColor">@color/temvraBg</item>
+        <item name="android:navigationBarColor">@color/temvraBg</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
 
