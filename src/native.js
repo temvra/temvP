@@ -64,6 +64,8 @@
     /* La zona de las barras toma el color del tema: si no, los iconos oscuros se pierden sobre negro */
     if(TV)TV.setBars({color:th.hex,dark:th.dark});
     if(!TV&&P.SystemBars){await P.SystemBars.setStyle({style:st})}}catch(e){lastStyle=''}}
+  /* Márgenes de las barras del sistema: los pone el lado nativo y se piden al cargar la página */
+  if(TV)TV.applyBars().catch(()=>{});
   const boot=()=>{if(!api()){setTimeout(boot,200);return}setup().then(()=>{syncTimer().then(clearAll);syncFired()});theme();setInterval(theme,4000);setTimeout(pushWidgets,1500)};
   boot();
 })();
