@@ -1,5 +1,5 @@
 /* Temvra · puente con Android (Capacitor).
-   Programa las notificaciones (alarmas, eventos, bloques y temporizador) cuando la app pasa a segundo plano,
+   Programa los avisos (alarmas, eventos, bloques y temporizador) cuando la app pasa a segundo plano,
    gestiona el botón atrás, compartir/guardar archivos y el color de la barra de estado. */
 (function(){
   const C=window.Capacitor;if(!C||!C.isNativePlatform||!C.isNativePlatform())return;
@@ -17,35 +17,41 @@
     hasPlugin:!!TV,
     audioFocus(mode,ms){if(TV)TV.audioFocus({mode:mode||'duck',ms:ms||3000}).catch(()=>{})},
     timerNotify(st){if(!TV)return;(st&&st.show?TV.timerNotify(st):TV.timerClear()).catch(()=>{})},
-    widgets(data){if(TV&&data)TV.widgets({data}).catch(()=>{})}
+    widgets(data){if(TV&&data)TV.widgets({data}).catch(()=>{})},
+    /* Sonido nativo por el canal de alarma, con el volumen elegido en la app */
+    bg:false,
+    playAlert(o){if(TV)TV.playAlert(o).catch(()=>{})},
+    stopAlert(){if(TV)TV.stopAlert().catch(()=>{})},
+    saveOwnAudio(data){if(TV&&data)TV.saveOwnAudio({data}).catch(()=>{})},
+    permStatus(){return TV?TV.permStatus():Promise.resolve(null)},
+    openPerm(which){if(TV)TV.openPerm({which}).catch(()=>{})},
+    askNotifications(){return LN?LN.requestPermissions():Promise.resolve(null)}
   };
-  if(TV){TV.addListener('action',e=>{const go=()=>api()?api().timerAction(e.action):setTimeout(go,300);go()})}
+  if(TV){TV.addListener('action',e=>{const go=()=>api()?api().timerAction(e.action):setTimeout(go,300);go()});
+    /* Un .ics o una bóveda abiertos desde WhatsApp u otra app */
+    TV.addListener('file',e=>{const go=()=>api()?api().importFile(e):setTimeout(go,300);go()})}
   const pushWidgets=()=>{const a=api();if(a&&a.widgetData)window.VTNative.widgets(a.widgetData())};
-  setInterval(pushWidgets,60000);
+  setInterval(()=>{if(!window.VTNative.bg)pushWidgets()},60000);
 
   /* ---------- Notificaciones ---------- */
+  /* Los avisos los programa el plugin propio (Alerts.java): salen y suenan con el móvil bloqueado */
   let ready=false;
-  async function setup(){if(!LN)return;
-    try{let p=await LN.checkPermissions();if(p.display!=='granted')p=await LN.requestPermissions();
-      await LN.createChannel({id:'alarms',name:'Alarmas',description:'Alarmas de Temvra',importance:5,visibility:1,vibration:true,sound:undefined});
-      await LN.createChannel({id:'reminders',name:'Eventos, tareas y bloques',description:'Avisos del calendario',importance:4,visibility:1,vibration:true});
-      await LN.createChannel({id:'timer',name:'Temporizador',description:'Fin de cada vuelta',importance:5,visibility:1,vibration:true});
-      await LN.registerActionTypes({types:[{id:'REM',actions:[{id:'snooze',title:'Posponer 5 min'},{id:'dismiss',title:'Ignorar',destructive:true}]},{id:'ALARM',actions:[{id:'snooze',title:'Posponer 5 min'},{id:'dismiss',title:'Parar',destructive:true}]}]});
-      try{const ex=await LN.checkExactNotificationSetting();if(ex&&ex.exact_alarm!=='granted'&&!localStorage.getItem('vt_exact_asked')){localStorage.setItem('vt_exact_asked','1');await LN.changeExactNotificationSetting()}}catch(e){}
-      ready=p.display==='granted'}catch(e){console.warn(e)}}
-  async function clearAll(){try{const p=await LN.getPending();if(p.notifications.length)await LN.cancel({notifications:p.notifications.map(n=>({id:n.id}))})}catch(e){}}
-  async function schedule(){if(!ready||!api())return;await clearAll();const list=api().upcoming(4);if(!list.length)return;
-    try{await LN.schedule({notifications:list.map(n=>({id:hash(n.key),title:n.title,body:n.body,channelId:n.channel,schedule:{at:new Date(n.at),allowWhileIdle:true},actionTypeId:n.channel==='alarms'?'ALARM':n.channel==='reminders'?'REM':undefined,extra:n.extra,ongoing:false,autoCancel:true}))})}catch(e){console.warn('schedule',e)}}
-  async function snooze(n){const at=new Date(Date.now()+5*6e4);try{await LN.schedule({notifications:[{id:hash('sz|'+Date.now()),title:n.title,body:'Pospuesto · '+at.toTimeString().slice(0,5),channelId:n.channelId||'reminders',schedule:{at,allowWhileIdle:true},actionTypeId:n.actionTypeId,extra:n.extra}]})}catch(e){}}
-  if(LN){LN.addListener('localNotificationActionPerformed',a=>{const n=a.notification||{};
-    if(a.actionId==='snooze'){snooze(n);if(api()&&n.extra&&n.extra.type==='event')api().snoozeEvent(n.extra.id,5);return}
-    if(a.actionId==='dismiss')return;
-    const go=()=>api()?api().open(n.extra):setTimeout(go,300);go()})}
+  async function setup(){if(!TV)return;
+    try{if(LN){let p=await LN.checkPermissions();if(p.display!=='granted')p=await LN.requestPermissions();
+        /* Lo que pudiera dejar programado la versión anterior */
+        const old=await LN.getPending();if(old.notifications.length)await LN.cancel({notifications:old.notifications.map(n=>({id:n.id}))})}
+      ready=true}catch(e){console.warn(e);ready=true}}
+  async function clearAll(){if(TV)try{await TV.clearAlerts()}catch(e){}}
+  async function schedule(){if(!ready||!api()||!TV)return;
+    try{const s=api().state();await TV.scheduleAlerts({list:api().upcoming(7),cfg:{sound:s.sound,soundOn:s.soundOn!==false,vol:s.vol,aviso:s.aviso,vib:s.vib,snooze:s.snooze,tts:s.tts,timer:api().timerSnapshot()}})}catch(e){console.warn('schedule',e)}}
+  /* Lo que se haya tocado desde el bloqueo (pausa, reinicio…) y las vueltas que han pasado */
+  async function syncTimer(){if(!TV||!api())return;try{api().timerApply(await TV.timerState())}catch(e){}}
+  async function syncFired(){if(!TV||!api())return;try{const r=await TV.consumeFired();if(r.fired&&r.fired.length)api().firedAlarms(r.fired)}catch(e){}}
 
   /* ---------- Ciclo de vida ---------- */
   let bg=false;
-  if(App){App.addListener('pause',()=>{bg=true;schedule();pushWidgets()});
-    App.addListener('resume',()=>{bg=false;clearAll();theme()});
+  if(App){App.addListener('pause',()=>{bg=true;window.VTNative.bg=true;schedule();pushWidgets()});
+    App.addListener('resume',()=>{bg=false;window.VTNative.bg=false;syncTimer().then(clearAll);syncFired();theme();pushWidgets()});
     App.addListener('backButton',()=>{const a=api();if(a&&a.back())return;App.minimizeApp()})}
   /* Programar también al cambiar cosas, por si Android cierra la app sin avisar */
   let t;const deb=()=>{clearTimeout(t);t=setTimeout(()=>{if(bg)schedule()},800)};
@@ -54,9 +60,10 @@
   /* ---------- Barra de estado ---------- */
   /* La app se dibuja de borde a borde (viewport-fit=cover): solo hay que decirle a Android si los iconos de las barras van claros u oscuros */
   let lastStyle='';
-  async function theme(){if(!api())return;try{const th=api().theme(),st=th.dark?'DARK':'LIGHT';if(st===lastStyle)return;lastStyle=st;
-    if(P.SystemBars){await P.SystemBars.setStyle({style:st})}
-    else if(SB){await SB.setOverlaysWebView({overlay:true});await SB.setStyle({style:st})}}catch(e){lastStyle=''}}
-  const boot=()=>{if(!api()){setTimeout(boot,200);return}setup().then(()=>{clearAll()});theme();setInterval(theme,4000);setTimeout(pushWidgets,1500)};
+  async function theme(){if(!api())return;try{const th=api().theme(),st=th.dark?'DARK':'LIGHT',key=st+th.bg;if(key===lastStyle)return;lastStyle=key;
+    /* La zona de las barras toma el color del tema: si no, los iconos oscuros se pierden sobre negro */
+    if(TV)TV.setBars({color:th.hex,dark:th.dark});
+    if(!TV&&P.SystemBars){await P.SystemBars.setStyle({style:st})}}catch(e){lastStyle=''}}
+  const boot=()=>{if(!api()){setTimeout(boot,200);return}setup().then(()=>{syncTimer().then(clearAll);syncFired()});theme();setInterval(theme,4000);setTimeout(pushWidgets,1500)};
   boot();
 })();

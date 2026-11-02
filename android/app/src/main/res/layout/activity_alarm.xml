@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:fitsSystemWindows="true"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="28dp">
+
+    <TextView
+        android:id="@+id/alarm_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-light"
+        android:textColor="#F4F4F6"
+        android:textSize="84sp" />
+
+    <TextView
+        android:id="@+id/alarm_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:textColor="#C6C4F4"
+        android:textSize="22sp" />
+
+    <TextView
+        android:id="@+id/alarm_stop"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_marginTop="56dp"
+        android:background="@drawable/alarm_btn_primary"
+        android:gravity="center"
+        android:text="Detener"
+        android:textColor="#14143A"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/alarm_snooze"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/alarm_btn_tonal"
+        android:gravity="center"
+        android:textColor="#F4F4F6"
+        android:textSize="16sp" />
+</LinearLayout>

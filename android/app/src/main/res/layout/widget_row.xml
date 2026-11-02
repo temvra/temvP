@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/wr_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/widget_row_bg"
+    android:gravity="center_vertical"
+    android:minHeight="42dp"
+    android:orientation="horizontal"
+    android:paddingStart="8dp"
+    android:paddingTop="5dp"
+    android:paddingEnd="10dp"
+    android:paddingBottom="5dp">
+
+    <TextView
+        android:id="@+id/wr_time"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textColor="#A0A0A8"
+        android:textSize="12sp" />
+
+    <ImageView
+        android:id="@+id/wr_bar"
+        android:layout_width="3dp"
+        android:layout_height="30dp"
+        android:layout_marginEnd="9dp"
+        android:background="#C6C4F4"
+        android:contentDescription="@null" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/wr_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#F4F4F6"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/wr_sub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#A0A0A8"
+            android:textSize="11.5sp" />
+
+        <ProgressBar
+            android:id="@+id/wr_prog"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_marginTop="4dp"
+            android:max="100"
+            android:progressDrawable="@drawable/widget_bar"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

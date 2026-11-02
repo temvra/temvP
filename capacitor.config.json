@@ -3,7 +3,7 @@
   "appName": "Temvra Personal",
   "webDir": "www",
   "android": {
-    "backgroundColor": "#11131a"
+    "backgroundColor": "#000000"
   },
   "plugins": {
     "CapacitorHttp": {

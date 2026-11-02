@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#5E43C3</color>
-    <color name="colorPrimaryDark">#11131A</color>
+    <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#7B78D8</color>
-    <color name="temvraBg">#11131A</color>
+    <color name="temvraBg">#000000</color>
+    <color name="notif_icon">#1C1C1F</color>
+    <color name="notif_text">#1C1C1F</color>
 </resources>

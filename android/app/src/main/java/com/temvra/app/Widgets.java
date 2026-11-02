@@ -6,22 +6,29 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.RemoteViews;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
-/** Pinta los tres widgets a partir del JSON que guarda la app (SharedPreferences). */
+/** Pinta los widgets a partir del JSON que guarda la app (SharedPreferences). */
 public class Widgets {
     static final String PREFS = "temvra_widgets";
     static final String KEY = "json";
     static final String ACTION_TICK = "com.temvra.app.WIDGET_TICK";
+    static final String DAY = "day", BLOCKS = "blocks", NOTES = "notes", LINE = "line", ALARMS = "alarms", REG = "reg";
+    static final int DEF_ACCENT = 0xFFC6C4F4;
 
     static JSONObject data(Context c) {
         try {
@@ -34,25 +41,35 @@ public class Widgets {
         AppWidgetManager m = AppWidgetManager.getInstance(c);
         return m.getAppWidgetIds(new ComponentName(c, TimerWidget.class)).length
              + m.getAppWidgetIds(new ComponentName(c, AlarmWidget.class)).length
-             + m.getAppWidgetIds(new ComponentName(c, DayWidget.class)).length;
+             + m.getAppWidgetIds(new ComponentName(c, DayWidget.class)).length
+             + m.getAppWidgetIds(new ComponentName(c, BlocksWidget.class)).length
+             + m.getAppWidgetIds(new ComponentName(c, NotesWidget.class)).length
+             + m.getAppWidgetIds(new ComponentName(c, LineWidget.class)).length
+             + m.getAppWidgetIds(new ComponentName(c, RegWidget.class)).length;
     }
 
     static void refreshAll(Context c) {
         AppWidgetManager m = AppWidgetManager.getInstance(c);
         JSONObject d = data(c);
-        for (int id : m.getAppWidgetIds(new ComponentName(c, TimerWidget.class))) m.updateAppWidget(id, timer(c, d));
-        for (int id : m.getAppWidgetIds(new ComponentName(c, AlarmWidget.class))) m.updateAppWidget(id, alarm(c, d));
-        for (int id : m.getAppWidgetIds(new ComponentName(c, DayWidget.class))) m.updateAppWidget(id, day(c, d));
+        for (int id : m.getAppWidgetIds(new ComponentName(c, TimerWidget.class))) m.updateAppWidget(id, timer(c, d, m, id));
+        for (int id : m.getAppWidgetIds(new ComponentName(c, AlarmWidget.class))) updateAlarm(c, m, id);
+        for (int id : m.getAppWidgetIds(new ComponentName(c, DayWidget.class))) updateList(c, m, id, DAY);
+        for (int id : m.getAppWidgetIds(new ComponentName(c, BlocksWidget.class))) updateList(c, m, id, BLOCKS);
+        for (int id : m.getAppWidgetIds(new ComponentName(c, NotesWidget.class))) updateNotes(c, m, id);
+        for (int id : m.getAppWidgetIds(new ComponentName(c, RegWidget.class))) updateReg(c, m, id);
+        for (int id : m.getAppWidgetIds(new ComponentName(c, LineWidget.class))) updateLine(c, m, id);
         scheduleTick(c);
     }
 
-    /* Un «tic» cada minuto para que el widget del día avance sin abrir la app */
+    /* Un «tic» al empezar cada minuto: no despierta el móvil, se entrega en cuanto se enciende la pantalla */
     static void scheduleTick(Context c) {
         AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
         if (am == null) return;
         PendingIntent pi = tickIntent(c);
         if (count(c) == 0) { am.cancel(pi); return; }
-        am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 60_000L, 60_000L, pi);
+        long next = (System.currentTimeMillis() / 60_000L + 1) * 60_000L;
+        try { am.setExact(AlarmManager.RTC, next, pi); }
+        catch (SecurityException e) { am.set(AlarmManager.RTC, next, pi); }
     }
 
     static PendingIntent tickIntent(Context c) {
@@ -73,9 +90,13 @@ public class Widgets {
         return String.format(Locale.ROOT, "%02d:%02d", s / 60, s % 60);
     }
 
-    /* ---------- Temporizador ---------- */
-    static RemoteViews timer(Context c, JSONObject d) {
+    private static float clamp(float v, float lo, float hi) { return Math.max(lo, Math.min(hi, v)); }
+
+    /* ---------- Temporizador: toda la información, proporcional al tamaño ---------- */
+    static RemoteViews timer(Context c, JSONObject d, AppWidgetManager m, int id) {
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_timer);
+        Bundle o = m.getAppWidgetOptions(id);
+        int w = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 180), h = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 180);
         JSONObject t = d.optJSONObject("timer");
         long now = System.currentTimeMillis();
         String name = t != null ? t.optString("name", "Temporizador") : "Temporizador";
@@ -86,25 +107,37 @@ public class Widgets {
         int lap = t != null ? t.optInt("lap", 1) : 1;
         boolean loop = t != null && t.optBoolean("loop", true);
         if (running && endAt > 0 && endAt <= now) {
-            // La app no está abierta: avanzamos las vueltas que ya han pasado
             if (loop && period > 0) { while (endAt <= now) { endAt += period; lap++; } }
             else { running = false; remain = period; }
         }
+        int color = accent(d);
+        float digits = clamp(Math.min(h * .30f, w * .24f), 26, 110), small = clamp(digits * .28f, 12, 26);
         v.setTextViewText(R.id.w_name, name);
-        v.setTextViewText(R.id.w_lap, "Vuelta " + lap);
+        v.setTextViewText(R.id.w_lap, (running ? "En marcha" : "Listo") + " · Vuelta " + lap + (loop ? " · Bucle" : ""));
+        v.setTextViewTextSize(R.id.w_name, TypedValue.COMPLEX_UNIT_SP, small);
+        v.setTextViewTextSize(R.id.w_lap, TypedValue.COMPLEX_UNIT_SP, small * .85f);
+        v.setTextColor(R.id.w_lap, color);
+        v.setTextViewTextSize(R.id.w_chrono, TypedValue.COMPLEX_UNIT_SP, digits);
+        v.setTextViewTextSize(R.id.w_static, TypedValue.COMPLEX_UNIT_SP, digits);
         if (running) {
             v.setViewVisibility(R.id.w_chrono, View.VISIBLE);
             v.setViewVisibility(R.id.w_static, View.GONE);
             v.setChronometerCountDown(R.id.w_chrono, true);
             v.setChronometer(R.id.w_chrono, SystemClock.elapsedRealtime() + (endAt - now), null, true);
             v.setImageViewResource(R.id.w_play, R.drawable.ic_w_pause);
-            v.setOnClickPendingIntent(R.id.w_play, open(c, "pause", 21));
+            v.setOnClickPendingIntent(R.id.w_play, Alerts.timerAction(c, "pause", 21));
         } else {
             v.setViewVisibility(R.id.w_chrono, View.GONE);
             v.setViewVisibility(R.id.w_static, View.VISIBLE);
             v.setTextViewText(R.id.w_static, mmss(remain));
             v.setImageViewResource(R.id.w_play, R.drawable.ic_w_play);
-            v.setOnClickPendingIntent(R.id.w_play, open(c, "resume", 22));
+            v.setOnClickPendingIntent(R.id.w_play, Alerts.timerAction(c, "resume", 22));
+        }
+        v.setOnClickPendingIntent(R.id.w_reset, Alerts.timerAction(c, "reset", 23));
+        v.setOnClickPendingIntent(R.id.w_skip, Alerts.timerAction(c, "skip", 24));
+        if (android.os.Build.VERSION.SDK_INT >= 31) {
+            float bh = clamp(h * .26f, 40, 96);
+            v.setViewLayoutHeight(R.id.w_btns, bh, TypedValue.COMPLEX_UNIT_DIP);
         }
         int prog = period > 0 ? (int) Math.max(0, Math.min(100, 100 - (running ? (endAt - now) : remain) * 100 / period)) : 0;
         v.setProgressBar(R.id.w_ring, 100, prog, false);
@@ -112,54 +145,405 @@ public class Widgets {
         return v;
     }
 
-    /* ---------- Próxima alarma ---------- */
-    static RemoteViews alarm(Context c, JSONObject d) {
+    /* ---------- Alarmas: la lista completa, como en la app ---------- */
+    static void updateAlarm(Context c, AppWidgetManager m, int id) {
+        Bundle o = m.getAppWidgetOptions(id);
+        int w = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 180), h = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 110);
+        float scale = clamp(Math.min(w / 180f, h / 110f), .8f, 1.8f);
+        JSONObject d = data(c);
+        JSONObject next = d.optJSONObject("alarm");
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_alarm);
-        JSONObject a = d.optJSONObject("alarm");
-        if (a != null && a.optLong("at", 0) > System.currentTimeMillis()) {
-            v.setTextViewText(R.id.w_alarm_time, a.optString("time", "--:--"));
-            v.setTextViewText(R.id.w_alarm_sub, a.optString("sub", ""));
-        } else {
-            v.setTextViewText(R.id.w_alarm_time, "--:--");
-            v.setTextViewText(R.id.w_alarm_sub, "Sin alarmas activas");
-        }
-        v.setOnClickPendingIntent(R.id.w_alarm_root, open(c, "alarms", 30));
-        return v;
+        v.setTextViewText(R.id.wa_next, next != null && next.optLong("at", 0) > System.currentTimeMillis() ? next.optString("time", "") + " · " + next.optString("sub", "") : "Sin alarmas activas");
+        v.setTextColor(R.id.wa_head, accent(d));
+        v.setInt(R.id.wa_add, "setColorFilter", accent(d));
+        v.setViewVisibility(R.id.wa_headrow, h < 70 ? View.GONE : View.VISIBLE);
+        v.setOnClickPendingIntent(R.id.wa_headrow, open(c, "alarms", 30));
+        v.setOnClickPendingIntent(R.id.wa_add, open(c, "newalarm", 32));
+        v.setOnClickPendingIntent(R.id.wa_empty, open(c, "alarms", 33));
+        Intent svc = new Intent(c, WidgetListService.class).putExtra("type", ALARMS).putExtra("scale", scale);
+        svc.setData(Uri.parse("temvra://widget/alarms/" + id + "/" + scale));
+        v.setRemoteAdapter(R.id.wa_list, svc);
+        v.setEmptyView(R.id.wa_list, R.id.wa_empty);
+        v.setPendingIntentTemplate(R.id.wa_list, actionTemplate(c, 4000 + id % 1000));
+        m.updateAppWidget(id, v);
+        m.notifyAppWidgetViewDataChanged(id, R.id.wa_list);
     }
 
-    /* ---------- Hoy ---------- */
-    static RemoteViews day(Context c, JSONObject d) {
-        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_day);
+    /** Plantilla común de las listas: WidgetAction decide qué hacer con cada toque. */
+    static PendingIntent actionTemplate(Context c, int code) {
+        Intent tpl = new Intent(c, WidgetAction.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        int mut = android.os.Build.VERSION.SDK_INT >= 31 ? PendingIntent.FLAG_MUTABLE : 0;
+        return PendingIntent.getActivity(c, code, tpl, PendingIntent.FLAG_UPDATE_CURRENT | mut);
+    }
+
+    /* ---------- Widgets con lista: calendario, bloques y notas ---------- */
+
+    static int accent(JSONObject d) {
+        try { return Color.parseColor(d.optString("accent", "#C6C4F4")); }
+        catch (Exception e) { return DEF_ACCENT; }
+    }
+
+    private static String todayKey(Calendar cal) {
+        return String.format(Locale.ROOT, "%04d-%02d-%02d", cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH));
+    }
+
+    private static int minutes(String hm) {
+        try { return Integer.parseInt(hm.substring(0, 2)) * 60 + Integer.parseInt(hm.substring(3, 5)); }
+        catch (Exception e) { return -1; }
+    }
+
+    /** Filas que pinta la lista. La posición de «ahora» se calcula aquí, así avanza sin abrir la app. */
+    static List<JSONObject> rows(JSONObject d, String type) {
+        List<JSONObject> out = new ArrayList<>();
         Calendar cal = Calendar.getInstance();
-        int minOfDay = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE);
-        String[] days = {"domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"};
-        String[] months = {"ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"};
-        String dateTxt = "Hoy · " + days[cal.get(Calendar.DAY_OF_WEEK) - 1] + " " + cal.get(Calendar.DAY_OF_MONTH) + " " + months[cal.get(Calendar.MONTH)];
-        JSONObject dd = d.optJSONObject("day");
-        if (dd != null && dd.has("dateTxt")) dateTxt = dd.optString("dateTxt", dateTxt);
-        v.setTextViewText(R.id.w_day_date, dateTxt);
-        v.setProgressBar(R.id.w_day_bar, 1440, minOfDay, false);
-        int left = 1440 - minOfDay;
-        v.setTextViewText(R.id.w_day_left, "Quedan " + (left / 60) + " h " + (left % 60) + " min del día");
-        String next = "Nada más por hoy", sub = "";
-        if (dd != null) {
-            JSONArray items = dd.optJSONArray("items");
-            String todayKey = String.format(Locale.ROOT, "%04d-%02d-%02d", cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH));
-            boolean sameDay = todayKey.equals(dd.optString("date", todayKey));
-            if (items != null && sameDay) {
-                String nowHm = String.format(Locale.ROOT, "%02d:%02d", minOfDay / 60, minOfDay % 60);
-                for (int i = 0; i < items.length(); i++) {
-                    JSONObject it = items.optJSONObject(i);
-                    if (it == null) continue;
-                    String tm = it.optString("time", "");
-                    if (tm.compareTo(nowHm) > 0) { next = it.optString("title", ""); sub = "A las " + tm + (it.has("sub") ? " · " + it.optString("sub") : ""); break; }
-                }
+        int nowMin = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE);
+        JSONObject days = d.optJSONObject("days");
+        JSONObject day = days != null ? days.optJSONObject(todayKey(cal)) : null;
+        JSONArray items = day != null ? day.optJSONArray(type) : null;
+        boolean nowDone = false;
+        String nowTxt = String.format(Locale.ROOT, "%02d:%02d", nowMin / 60, nowMin % 60);
+        for (int i = 0; items != null && i < items.length(); i++) {
+            JSONObject it = items.optJSONObject(i);
+            if (it == null) continue;
+            int s = minutes(it.optString("s")), e = minutes(it.optString("e"));
+            if (e < 0 && s >= 0) e = s + 30;
+            if (!nowDone && s > nowMin) { out.add(nowRow(nowTxt)); nowDone = true; }
+            JSONObject r = new JSONObject();
+            put(r, "s", it.optString("s"));
+            put(r, "t", it.optString("t"));
+            put(r, "sub", it.optString("sub"));
+            put(r, "c", it.optString("c"));
+            put(r, "action", it.optString("action"));
+            if (s >= 0 && (e <= nowMin || it.optBoolean("done"))) put(r, "past", true);
+            if (s >= 0 && s <= nowMin && nowMin < e && !it.optBoolean("done")) {
+                put(r, "cur", true);
+                put(r, "prog", e > s ? (nowMin - s) * 100 / (e - s) : 0);
+                nowDone = true;
             }
+            out.add(r);
         }
-        v.setTextViewText(R.id.w_day_next, next);
-        v.setTextViewText(R.id.w_day_next2, sub);
-        v.setViewVisibility(R.id.w_day_next2, sub.isEmpty() ? View.GONE : View.VISIBLE);
-        v.setOnClickPendingIntent(R.id.w_day_root, open(c, "agenda", 31));
-        return v;
+        if (!nowDone && !out.isEmpty()) out.add(nowRow(nowTxt));
+        return out;
+    }
+
+    private static JSONObject nowRow(String txt) {
+        JSONObject r = new JSONObject();
+        put(r, "now", true);
+        put(r, "t", txt);
+        return r;
+    }
+
+    private static void put(JSONObject o, String k, Object v) {
+        try { o.put(k, v); } catch (Exception ignored) {}
+    }
+
+    private static int nowIndex(List<JSONObject> rows) {
+        for (int i = 0; i < rows.size(); i++) if (rows.get(i).optBoolean("now") || rows.get(i).optBoolean("cur")) return i;
+        return 0;
+    }
+
+    static void updateList(Context c, AppWidgetManager m, int id, String type) {
+        JSONObject d = data(c);
+        Bundle o = m.getAppWidgetOptions(id);
+        int h = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180), w = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 250);
+        boolean small = h < 90, narrow = w < 190;
+        int color = accent(d);
+        Calendar cal = Calendar.getInstance();
+
+        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_list);
+        String title, openAction, addAction, empty;
+        if (DAY.equals(type)) { title = "Calendario"; openAction = "agenda"; addAction = "newevent"; empty = "Nada programado hoy"; }
+                else { title = "Bloques"; openAction = "blocks"; addAction = "newblock"; empty = "Sin bloques hoy"; }
+
+        v.setViewVisibility(R.id.wl_head, small ? View.GONE : View.VISIBLE);
+        v.setTextViewText(R.id.wl_title, title);
+        v.setTextColor(R.id.wl_title, color);
+        String[] days = {"Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"};
+        v.setTextViewText(R.id.wl_date, days[cal.get(Calendar.DAY_OF_WEEK) - 1] + " " + cal.get(Calendar.DAY_OF_MONTH));
+        v.setViewVisibility(R.id.wl_add, narrow ? View.GONE : View.VISIBLE);
+        v.setInt(R.id.wl_add, "setColorFilter", color);
+        v.setTextViewText(R.id.wl_empty, empty);
+        v.setOnClickPendingIntent(R.id.wl_head, open(c, openAction, 80 + (type.hashCode() & 7)));
+        v.setOnClickPendingIntent(R.id.wl_add, open(c, addAction, 90 + (type.hashCode() & 7)));
+        v.setOnClickPendingIntent(R.id.wl_empty, open(c, openAction, 100 + (type.hashCode() & 7)));
+
+        Intent svc = new Intent(c, WidgetListService.class).putExtra("type", type).putExtra("narrow", narrow);
+        svc.setData(Uri.parse("temvra://widget/" + type + "/" + id + "/" + narrow));
+        v.setRemoteAdapter(R.id.wl_list, svc);
+        v.setEmptyView(R.id.wl_list, R.id.wl_empty);
+
+        v.setPendingIntentTemplate(R.id.wl_list, actionTemplate(c, 110 + id % 1000));
+
+        {
+            // Solo se recoloca la lista cuando «ahora» cambia de fila, para no quitarle el scroll a quien la está mirando
+            int idx = nowIndex(rows(d, type));
+            String key = "scroll_" + id;
+            android.content.SharedPreferences sp = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            if (sp.getInt(key, -1) != idx) { sp.edit().putInt(key, idx).apply(); v.setScrollPosition(R.id.wl_list, idx); }
+        }
+        m.updateAppWidget(id, v);
+        m.notifyAppWidgetViewDataChanged(id, R.id.wl_list);
+    }
+
+    /* ---------- Línea de tiempo: una fila por hora, dibujada como en la app ---------- */
+
+    private static android.content.SharedPreferences sp(Context c) { return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE); }
+
+    static int lineOffset(Context c, int id) { return sp(c).getInt("line_off_" + id, 0); }
+
+    /** Días que caben según el ancho del widget. */
+    static int lineMaxDays(int wdp) { return wdp < 200 ? 1 : wdp < 300 ? 2 : 3; }
+
+    static int lineDays(Context c, int id, int wdp) {
+        int max = lineMaxDays(wdp);
+        return Math.max(1, Math.min(max, sp(c).getInt("line_n_" + id, max)));
+    }
+
+    static int lineWidth(AppWidgetManager m, int id) {
+        Bundle o = m.getAppWidgetOptions(id);
+        return Math.max(120, o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 300));
+    }
+
+    /** El ancho que informa el launcher, sin pasar nunca del de la pantalla. */
+    static int lineWidth(Context c, AppWidgetManager m, int id) {
+        android.util.DisplayMetrics dm = c.getResources().getDisplayMetrics();
+        return Math.min(lineWidth(m, id), (int) (dm.widthPixels / dm.density));
+    }
+
+    static Calendar dayAt(int offset) {
+        Calendar d = Calendar.getInstance();
+        d.add(Calendar.DAY_OF_MONTH, offset);
+        return d;
+    }
+
+    static JSONArray lineItems(JSONObject d, Calendar day) {
+        JSONObject days = d.optJSONObject("days");
+        JSONObject o = days != null ? days.optJSONObject(todayKey(day)) : null;
+        JSONArray it = o != null ? o.optJSONArray(DAY) : null;
+        return it != null ? it : new JSONArray();
+    }
+
+    private static PendingIntent lineIntent(Context c, int id, String op, int code) {
+        Intent it = new Intent(c, AlertReceiver.class).setAction(AlertReceiver.ACTION_LINE).putExtra("id", id).putExtra("op", op);
+        it.setData(Uri.parse("temvra://line/" + id + "/" + op));
+        return PendingIntent.getBroadcast(c, 2000 + code + id % 500 * 8, it, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    static void updateLine(Context c, AppWidgetManager m, int id) {
+        int w = lineWidth(c, m, id), off = lineOffset(c, id), n = lineDays(c, id, w), max = lineMaxDays(w);
+        JSONObject d = data(c);
+        int color = accent(d);
+        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_line);
+        String[] names = {"Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"};
+        int[] heads = {R.id.wline_d0, R.id.wline_d1, R.id.wline_d2};
+        for (int i = 0; i < 3; i++) {
+            if (i >= n) { v.setViewVisibility(heads[i], View.GONE); continue; }
+            Calendar day = dayAt(off + i);
+            v.setViewVisibility(heads[i], View.VISIBLE);
+            v.setTextViewText(heads[i], names[day.get(Calendar.DAY_OF_WEEK) - 1] + " " + day.get(Calendar.DAY_OF_MONTH));
+            v.setTextColor(heads[i], off + i == 0 ? color : 0xFFD4D4DA);
+        }
+        v.setOnClickPendingIntent(R.id.wline_days, open(c, "agenda", 120));
+        v.setInt(R.id.wline_prev, "setColorFilter", color);
+        v.setInt(R.id.wline_next, "setColorFilter", color);
+        v.setInt(R.id.wline_add, "setColorFilter", color);
+        v.setTextColor(R.id.wline_center, color);
+        v.setTextViewText(R.id.wline_view, n == 1 ? "1 día" : n + " días");
+        v.setViewVisibility(R.id.wline_view, max > 1 ? View.VISIBLE : View.GONE);
+        v.setOnClickPendingIntent(R.id.wline_prev, lineIntent(c, id, "prev", 0));
+        v.setOnClickPendingIntent(R.id.wline_next, lineIntent(c, id, "next", 1));
+        v.setOnClickPendingIntent(R.id.wline_view, lineIntent(c, id, "view", 2));
+        v.setOnClickPendingIntent(R.id.wline_center, lineIntent(c, id, "now", 3));
+        v.setOnClickPendingIntent(R.id.wline_add, open(c, "newevent", 121));
+
+        Intent svc = new Intent(c, WidgetListService.class).putExtra("type", LINE).putExtra("wdp", w).putExtra("id", id);
+        svc.setData(Uri.parse("temvra://widget/line/" + id + "/" + w));
+        v.setRemoteAdapter(R.id.wline_list, svc);
+        v.setPendingIntentTemplate(R.id.wline_list, actionTemplate(c, 3000 + id % 1000));
+        m.updateAppWidget(id, v);
+        m.notifyAppWidgetViewDataChanged(id, R.id.wline_list);
+
+        // Al colocarlo se centra en la hora actual; después solo con el botón, para respetar el scroll
+        if (!sp(c).getBoolean("line_" + id, false)) {
+            sp(c).edit().putBoolean("line_" + id, true).apply();
+            scrollToNow(c, id, 900);
+        }
+    }
+
+    /**
+     * La lista necesita haberse cargado antes de poder desplazarla, por eso va con retardo. Una lista solo se mueve
+     * hasta que la fila asoma, así que primero baja al final y luego sube: al subir, la fila queda arriba y se puede centrar.
+     */
+    static void scrollToNow(Context c, int id, long delay) {
+        Context app = c.getApplicationContext();
+        AppWidgetManager m = AppWidgetManager.getInstance(app);
+        int rows = Math.max(1, (m.getAppWidgetOptions(id).getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 300) - 80) / 19);
+        Calendar now = Calendar.getInstance();
+        int target = Math.max(0, (now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)) / 15 - rows / 2);
+        android.os.Handler h = new android.os.Handler(android.os.Looper.getMainLooper());
+        h.postDelayed(() -> {
+            RemoteViews v = new RemoteViews(app.getPackageName(), R.layout.widget_line);
+            v.setScrollPosition(R.id.wline_list, 95);
+            m.partiallyUpdateAppWidget(id, v);
+        }, delay);
+        h.postDelayed(() -> {
+            RemoteViews v = new RemoteViews(app.getPackageName(), R.layout.widget_line);
+            v.setScrollPosition(R.id.wline_list, target);
+            m.partiallyUpdateAppWidget(id, v);
+        }, delay + 600);
+    }
+
+    static void lineOp(Context c, int id, String op) {
+        AppWidgetManager m = AppWidgetManager.getInstance(c);
+        if ("zoom".equals(op)) {
+            sp(c).edit().putInt("zoom_" + id, sp(c).getInt("zoom_" + id, 0) + 1).apply();
+            m.notifyAppWidgetViewDataChanged(id, R.id.wn_list);
+            return;
+        }
+        int w = lineWidth(c, m, id), off = lineOffset(c, id);
+        if ("prev".equals(op)) sp(c).edit().putInt("line_off_" + id, Math.max(-7, off - 1)).apply();
+        else if ("next".equals(op)) sp(c).edit().putInt("line_off_" + id, Math.min(28, off + 1)).apply();
+        else if ("view".equals(op)) {
+            int n = lineDays(c, id, w), max = lineMaxDays(w);
+            sp(c).edit().putInt("line_n_" + id, n >= max ? 1 : n + 1).apply();
+        } else if ("now".equals(op)) {
+            if (off != 0) sp(c).edit().putInt("line_off_" + id, 0).apply();
+            updateLine(c, m, id);
+            scrollToNow(c, id, off != 0 ? 500 : 50);
+            return;
+        }
+        updateLine(c, m, id);
+    }
+
+    /* ---------- Notas: árbol, bóveda y lupa ---------- */
+
+    private static final float[] ZOOMS = {1f, 1.2f, 1.45f, .85f};
+
+    static float zoomOf(Context c, int id) { return ZOOMS[sp(c).getInt("zoom_" + id, 0) % ZOOMS.length]; }
+
+    static JSONObject vaultOf(Context c, int id, JSONObject d) {
+        JSONArray l = d.optJSONArray("vaults");
+        if (l == null || l.length() == 0) return null;
+        String want = sp(c).getString("vault_" + id, d.optString("curVault"));
+        for (int i = 0; i < l.length(); i++) { JSONObject o = l.optJSONObject(i); if (o != null && o.optString("id").equals(want)) return o; }
+        return l.optJSONObject(0);
+    }
+
+    static JSONObject regOf(Context c, int id, JSONObject d) {
+        JSONArray l = d.optJSONArray("regs");
+        if (l == null || l.length() == 0) return null;
+        String want = sp(c).getString("reg_" + id, null);
+        for (int i = 0; want != null && i < l.length(); i++) { JSONObject o = l.optJSONObject(i); if (o != null && o.optString("id").equals(want)) return o; }
+        return l.optJSONObject(0);
+    }
+
+    /** Pasa el árbol a filas, respetando las carpetas abiertas de este widget. */
+    static void flattenTree(Context c, int id, JSONObject v, String parent, int depth, List<JSONObject> out) {
+        String vid = v.optString("id");
+        JSONArray folders = v.optJSONArray("folders"), notes = v.optJSONArray("notes");
+        JSONObject colors = v.optJSONObject("fc");
+        String prefix = parent.isEmpty() ? "" : parent + "/";
+        for (int i = 0; folders != null && i < folders.length(); i++) {
+            String f = folders.optString(i);
+            if (!f.startsWith(prefix) || f.substring(prefix.length()).contains("/") || f.equals(parent)) continue;
+            boolean open = sp(c).getBoolean("open_" + id + "_" + vid + "_" + f, false);
+            int n = 0;
+            for (int k = 0; notes != null && k < notes.length(); k++) {
+                String nf = notes.optJSONObject(k).optString("f");
+                if (nf.equals(f) || nf.startsWith(f + "/")) n++;
+            }
+            JSONObject r = new JSONObject();
+            put(r, "folder", true);
+            put(r, "open", open);
+            put(r, "depth", depth);
+            put(r, "t", f.substring(prefix.length()));
+            put(r, "n", String.valueOf(n));
+            put(r, "c", colors != null ? colors.optString(f) : "");
+            put(r, "action", "fold:" + id + "|" + f);
+            out.add(r);
+            if (open) flattenTree(c, id, v, f, depth + 1, out);
+        }
+        for (int k = 0; notes != null && k < notes.length(); k++) {
+            JSONObject n = notes.optJSONObject(k);
+            if (n == null || !n.optString("f").equals(parent)) continue;
+            JSONObject r = new JSONObject();
+            put(r, "depth", depth);
+            put(r, "t", n.optString("t"));
+            put(r, "c", n.optString("c"));
+            put(r, "action", "note:" + vid + "|" + n.optString("id"));
+            out.add(r);
+        }
+    }
+
+    static void toggleFolder(Context c, int id, String path) {
+        AppWidgetManager m = AppWidgetManager.getInstance(c);
+        JSONObject v = vaultOf(c, id, data(c));
+        if (v == null) return;
+        String k = "open_" + id + "_" + v.optString("id") + "_" + path;
+        sp(c).edit().putBoolean(k, !sp(c).getBoolean(k, false)).apply();
+        m.notifyAppWidgetViewDataChanged(id, R.id.wn_list);
+    }
+
+    static void pick(Context c, int id, String kind, String value) {
+        AppWidgetManager m = AppWidgetManager.getInstance(c);
+        if ("vaults".equals(kind)) { sp(c).edit().putString("vault_" + id, value).apply(); updateNotes(c, m, id); }
+        else { sp(c).edit().putString("reg_" + id, value).apply(); updateReg(c, m, id); }
+    }
+
+    private static PendingIntent pickIntent(Context c, int id, String kind, int code) {
+        Intent it = new Intent(c, WidgetPick.class).putExtra("id", id).putExtra("kind", kind);
+        it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        it.setData(Uri.parse("temvra://pick/" + kind + "/" + id));
+        return PendingIntent.getActivity(c, code + id % 500, it, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    static void updateNotes(Context c, AppWidgetManager m, int id) {
+        JSONObject d = data(c);
+        int color = accent(d);
+        JSONObject vault = vaultOf(c, id, d);
+        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_notes);
+        v.setTextViewText(R.id.wn_vault, (vault != null ? vault.optString("name", "Notas") : "Notas") + "  ▾");
+        int tc = color;
+        try { if (vault != null && !vault.optString("tc").isEmpty()) tc = Color.parseColor(vault.optString("tc")); } catch (Exception ignored) {}
+        v.setTextColor(R.id.wn_vault, tc);
+        v.setInt(R.id.wn_zoom, "setColorFilter", color);
+        v.setInt(R.id.wn_add, "setColorFilter", color);
+        v.setOnClickPendingIntent(R.id.wn_vault, pickIntent(c, id, "vaults", 5000));
+        Intent zi = new Intent(c, AlertReceiver.class).setAction(AlertReceiver.ACTION_LINE).putExtra("id", id).putExtra("op", "zoom");
+        zi.setData(Uri.parse("temvra://zoom/" + id));
+        v.setOnClickPendingIntent(R.id.wn_zoom, PendingIntent.getBroadcast(c, 5600 + id % 400, zi, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+        v.setOnClickPendingIntent(R.id.wn_add, open(c, "newnote", 5500));
+        v.setOnClickPendingIntent(R.id.wn_empty, open(c, "notes", 5501));
+        Intent svc = new Intent(c, WidgetListService.class).putExtra("type", NOTES).putExtra("id", id);
+        svc.setData(Uri.parse("temvra://widget/notes/" + id));
+        v.setRemoteAdapter(R.id.wn_list, svc);
+        v.setEmptyView(R.id.wn_list, R.id.wn_empty);
+        v.setPendingIntentTemplate(R.id.wn_list, actionTemplate(c, 6000 + id % 1000));
+        m.updateAppWidget(id, v);
+        m.notifyAppWidgetViewDataChanged(id, R.id.wn_list);
+    }
+
+    /* ---------- Registro ---------- */
+
+    static void updateReg(Context c, AppWidgetManager m, int id) {
+        JSONObject d = data(c);
+        JSONObject r = regOf(c, id, d);
+        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_reg);
+        int color = accent(d);
+        try { if (r != null && !r.optString("color").isEmpty()) color = Color.parseColor(r.optString("color")); } catch (Exception ignored) {}
+        v.setTextViewText(R.id.wg_name, (r != null ? r.optString("name") : "Registros") + "  ▾");
+        v.setTextColor(R.id.wg_name, color);
+        v.setTextViewText(R.id.wg_tag, r != null && !r.optString("tag").isEmpty() ? "#" + r.optString("tag") : "");
+        v.setInt(R.id.wg_add, "setColorFilter", color);
+        v.setOnClickPendingIntent(R.id.wg_name, pickIntent(c, id, "regs", 7000));
+        v.setOnClickPendingIntent(R.id.wg_add, open(c, r != null ? "reg:" + r.optString("id") : "regs", 7500));
+        v.setOnClickPendingIntent(R.id.wg_empty, open(c, "regs", 7501));
+        Intent svc = new Intent(c, WidgetListService.class).putExtra("type", REG).putExtra("id", id);
+        svc.setData(Uri.parse("temvra://widget/reg/" + id));
+        v.setRemoteAdapter(R.id.wg_list, svc);
+        v.setEmptyView(R.id.wg_list, R.id.wg_empty);
+        v.setPendingIntentTemplate(R.id.wg_list, actionTemplate(c, 8000 + id % 1000));
+        m.updateAppWidget(id, v);
+        m.notifyAppWidgetViewDataChanged(id, R.id.wg_list);
     }
 }
