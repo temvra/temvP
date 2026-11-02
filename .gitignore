@@ -9,3 +9,4 @@ android/app/*.keystore
 CLAUDE.md
 DECISIONS.md
 PROGRESS.md
+desktop/dist/
