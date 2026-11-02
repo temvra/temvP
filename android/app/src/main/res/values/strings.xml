@@ -6,8 +6,16 @@
     <string name="custom_url_scheme">com.temvra.app.personal</string>
     <string name="widget_timer_label">Temvra · Temporizador</string>
     <string name="widget_timer_desc">Cuenta atrás del temporizador con botón de pausa</string>
-    <string name="widget_alarm_label">Temvra · Próxima alarma</string>
-    <string name="widget_alarm_desc">Hora y nombre de la próxima alarma</string>
-    <string name="widget_day_label">Temvra · Hoy</string>
-    <string name="widget_day_desc">Cuánto queda del día y tu próximo evento</string>
+    <string name="widget_alarm_label">Temvra · Alarmas</string>
+    <string name="widget_alarm_desc">Todas tus alarmas y la próxima</string>
+    <string name="widget_day_label">Temvra · Calendario</string>
+    <string name="widget_day_desc">Línea de tiempo de hoy, con la hora actual en tiempo real</string>
+    <string name="widget_blocks_label">Temvra · Bloques</string>
+    <string name="widget_blocks_desc">Bloques de trabajo de hoy y el progreso del actual</string>
+    <string name="widget_line_label">Temvra · Línea de tiempo</string>
+    <string name="widget_line_desc">El día por horas con la línea de ahora; se desplaza dentro del widget</string>
+    <string name="widget_reg_label">Temvra · Registro</string>
+    <string name="widget_reg_desc">Lo apuntado en un registro por días; se desplaza dentro del widget</string>
+    <string name="widget_notes_label">Temvra · Notas</string>
+    <string name="widget_notes_desc">Árbol de carpetas y notas de la bóveda que elijas</string>
 </resources>
