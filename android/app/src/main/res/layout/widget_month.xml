@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/widget_bg" android:orientation="vertical" android:padding="8dp">
-    <LinearLayout android:layout_width="match_parent" android:layout_height="46dp" android:gravity="center_vertical" android:orientation="horizontal">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/widget_bg" android:orientation="vertical" android:padding="6dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="40dp" android:gravity="center_vertical" android:orientation="horizontal">
         <TextView android:id="@+id/wm_title" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:ellipsize="end" android:gravity="center_vertical" android:maxLines="1" android:paddingStart="6dp" android:textColor="#F4F4F6" android:textSize="20sp" />
-        <ImageView android:id="@+id/wm_prev" android:layout_width="44dp" android:layout_height="44dp" android:background="@drawable/widget_pill" android:padding="9dp" android:layout_marginEnd="4dp" android:contentDescription="Mes anterior" android:src="@drawable/ic_w_prev" />
-        <ImageView android:id="@+id/wm_next" android:layout_width="44dp" android:layout_height="44dp" android:background="@drawable/widget_pill" android:padding="9dp" android:layout_marginEnd="4dp" android:contentDescription="Mes siguiente" android:src="@drawable/ic_w_next" />
-        <ImageView android:id="@+id/wm_add" android:layout_width="44dp" android:layout_height="44dp" android:background="@drawable/widget_pill" android:padding="9dp" android:contentDescription="Añadir" android:src="@drawable/ic_w_add" />
+        <ImageView android:id="@+id/wm_prev" android:layout_width="38dp" android:layout_height="38dp" android:background="@drawable/widget_pill" android:padding="8dp" android:layout_marginEnd="4dp" android:contentDescription="Mes anterior" android:src="@drawable/ic_w_prev" />
+        <ImageView android:id="@+id/wm_next" android:layout_width="38dp" android:layout_height="38dp" android:background="@drawable/widget_pill" android:padding="8dp" android:layout_marginEnd="4dp" android:contentDescription="Mes siguiente" android:src="@drawable/ic_w_next" />
+        <ImageView android:id="@+id/wm_add" android:layout_width="38dp" android:layout_height="38dp" android:background="@drawable/widget_pill" android:padding="8dp" android:contentDescription="Añadir" android:src="@drawable/ic_w_add" />
     </LinearLayout>
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingBottom="2dp">
         <TextView android:id="@+id/wm_d0" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:textColor="#A0A0A8" android:textSize="12sp" />
