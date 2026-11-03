@@ -556,13 +556,46 @@ public class Widgets {
     /* ---------- Calendario: el mes ---------- */
 
     private static final int[][] MONTH_CELLS = {
-        {R.id.wm_c0, R.id.wm_n0, R.id.wm_t0, R.id.wm_m0}, {R.id.wm_c1, R.id.wm_n1, R.id.wm_t1, R.id.wm_m1}, {R.id.wm_c2, R.id.wm_n2, R.id.wm_t2, R.id.wm_m2},
-        {R.id.wm_c3, R.id.wm_n3, R.id.wm_t3, R.id.wm_m3}, {R.id.wm_c4, R.id.wm_n4, R.id.wm_t4, R.id.wm_m4}, {R.id.wm_c5, R.id.wm_n5, R.id.wm_t5, R.id.wm_m5}, {R.id.wm_c6, R.id.wm_n6, R.id.wm_t6, R.id.wm_m6}};
+        {R.id.wm_c0, R.id.wm_n0, R.id.wm_t0}, {R.id.wm_c1, R.id.wm_n1, R.id.wm_t1}, {R.id.wm_c2, R.id.wm_n2, R.id.wm_t2},
+        {R.id.wm_c3, R.id.wm_n3, R.id.wm_t3}, {R.id.wm_c4, R.id.wm_n4, R.id.wm_t4}, {R.id.wm_c5, R.id.wm_n5, R.id.wm_t5}, {R.id.wm_c6, R.id.wm_n6, R.id.wm_t6}};
 
     private static PendingIntent monthOp(Context c, int id, String op, int code) {
         Intent it = new Intent(c, AlertReceiver.class).setAction(AlertReceiver.ACTION_LINE).putExtra("id", id).putExtra("op", op);
         it.setData(Uri.parse("temvra://month/" + id + "/" + op));
         return PendingIntent.getBroadcast(c, 9500 + code + id % 100 * 4, it, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    /** Festivo y eventos del día, una línea por elemento; lo que no cabe queda en «+N más». */
+    private static CharSequence monthLines(String hol, JSONArray items, int fit, android.graphics.Paint paint, float lineW, boolean inMonth) {
+        List<String> all = new ArrayList<>();
+        if (!hol.isEmpty()) all.add(hol);
+        for (int i = 0; items != null && i < items.length(); i++) {
+            JSONObject it = items.optJSONObject(i);
+            if (it != null) all.add(it.optString("t"));
+        }
+        android.text.SpannableStringBuilder out = new android.text.SpannableStringBuilder();
+        if (fit < 1) {
+            if (!all.isEmpty()) out.append(String.valueOf(all.size()));
+            return out;
+        }
+        int shown = all.size() > fit ? fit - 1 : all.size();
+        for (int i = 0; i < shown; i++) {
+            if (i > 0) out.append('\n');
+            // Cada elemento en su línea: sin recortar, el texto largo saltaría a la siguiente
+            String t = all.get(i);
+            int cut = paint.breakText(t, true, lineW, null);
+            if (cut > 0 && cut < t.length() && Character.isHighSurrogate(t.charAt(cut - 1))) cut--;
+            int a = out.length();
+            out.append(t, 0, cut);
+            if (i == 0 && !hol.isEmpty()) out.setSpan(new android.text.style.ForegroundColorSpan(inMonth ? 0xFFF08A8A : 0x55F08A8A), a, out.length(), 0);
+        }
+        if (shown < all.size()) {
+            if (shown > 0) out.append('\n');
+            int a = out.length();
+            out.append("+").append(String.valueOf(all.size() - shown)).append(" más");
+            out.setSpan(new android.text.style.ForegroundColorSpan(inMonth ? 0xFFA0A0A8 : 0x44A0A0A8), a, out.length(), 0);
+        }
+        return out;
     }
 
     static void updateMonth(Context c, AppWidgetManager m, int id) {
@@ -571,7 +604,6 @@ public class Widgets {
         Bundle o = m.getAppWidgetOptions(id);
         int w = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 320), h = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 340);
         float scale = clamp(Math.min(w / 320f, h / 340f), .75f, 1.5f);
-        boolean titles = h > 300;
         Calendar first = Calendar.getInstance(), now = Calendar.getInstance();
         first.set(Calendar.DAY_OF_MONTH, 1);
         first.add(Calendar.MONTH, sp(c).getInt("month_" + id, 0));
@@ -594,7 +626,19 @@ public class Widgets {
         cur.add(Calendar.DAY_OF_MONTH, -back);
         String todayK = todayKey(now);
         v.removeAllViews(R.id.wm_rows);
-        for (int r = 0, pos = 0; r < 6; r++) {
+        // Solo las semanas del mes, y letra más pequeña hasta que quepan 6 líneas (5 en los meses de 6 filas).
+        // 70 = márgenes + cabecera + letras de la semana; 3 = márgenes de la celda; 1,08 = alto de línea en dp por sp
+        int weeks = (int) Math.ceil((back + first.getActualMaximum(Calendar.DAY_OF_MONTH)) / 7f);
+        android.util.DisplayMetrics dm = c.getResources().getDisplayMetrics();
+        float fs = dm.scaledDensity / dm.density, numSp = Math.max(9f, 10.5f * scale);
+        float room = (h - 70f) / weeks - 3f - 3f - numSp * fs * 1.17f;
+        float lineSp = Math.max(8f, 9.5f * scale);
+        while (lineSp > 8f && room / (lineSp * fs * 1.08f) < 6f) lineSp = Math.max(8f, lineSp - .5f);
+        int fit = Math.max(0, (int) (room / (lineSp * fs * 1.08f)));
+        android.graphics.Paint paint = new android.graphics.Paint();
+        paint.setTextSize(lineSp * dm.scaledDensity);
+        float lineW = (w / 7f - 5f) * dm.density * .97f;
+        for (int r = 0, pos = 0; r < weeks; r++) {
             RemoteViews row = new RemoteViews(c.getPackageName(), R.layout.widget_month_row);
             for (int i = 0; i < 7; i++, pos++) {
                 int[] ids = MONTH_CELLS[i];
@@ -607,18 +651,14 @@ public class Widgets {
                 int n = items != null ? items.length() : 0;
                 String hol = day != null ? day.optString("hol") : "";
                 row.setTextViewText(ids[1], String.valueOf(cur.get(Calendar.DAY_OF_MONTH)));
-                row.setTextViewTextSize(ids[1], TypedValue.COMPLEX_UNIT_SP, 15f * scale);
+                row.setTextViewTextSize(ids[1], TypedValue.COMPLEX_UNIT_SP, numSp);
                 row.setTextColor(ids[1], today ? color : !inMonth ? 0x55F4F4F6 : !hol.isEmpty() || weekend ? 0xFFF08A8A : 0xFFF4F4F6);
-                String chip = !hol.isEmpty() ? hol : n > 0 && titles && items.optJSONObject(0) != null ? items.optJSONObject(0).optString("t") : "";
-                row.setTextViewText(ids[2], chip);
-                row.setTextViewTextSize(ids[2], TypedValue.COMPLEX_UNIT_SP, 9.5f * scale);
-                row.setTextColor(ids[2], !hol.isEmpty() ? 0xFFF08A8A : inMonth ? 0xFFD4D4DA : 0x55D4D4DA);
-                row.setViewVisibility(ids[2], chip.isEmpty() ? View.GONE : View.VISIBLE);
-                int more = chip.isEmpty() || !hol.isEmpty() ? n : n - 1;
-                row.setTextViewText(ids[3], more > 0 ? "+" + more + " más" : "");
-                row.setTextViewTextSize(ids[3], TypedValue.COMPLEX_UNIT_SP, 9.5f * scale);
-                row.setTextColor(ids[3], inMonth ? 0xFFA0A0A8 : 0x44A0A0A8);
-                row.setViewVisibility(ids[3], more > 0 ? View.VISIBLE : View.GONE);
+                CharSequence lines = monthLines(hol, items, fit, paint, lineW, inMonth);
+                row.setTextViewText(ids[2], lines);
+                row.setTextViewTextSize(ids[2], TypedValue.COMPLEX_UNIT_SP, lineSp);
+                row.setInt(ids[2], "setMaxLines", Math.max(1, fit));
+                row.setTextColor(ids[2], inMonth ? 0xFFD4D4DA : 0x55D4D4DA);
+                row.setViewVisibility(ids[2], lines.length() == 0 ? View.GONE : View.VISIBLE);
                 row.setInt(ids[0], "setBackgroundResource", today ? R.drawable.widget_row_cur : inMonth ? R.drawable.widget_row_bg : R.drawable.wm_out);
                 row.setOnClickPendingIntent(ids[0], open(c, "day:" + k, 10000 + (id % 40) * 50 + pos));
                 cur.add(Calendar.DAY_OF_MONTH, 1);
