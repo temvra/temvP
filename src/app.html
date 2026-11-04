@@ -6860,7 +6860,7 @@ $('ev-guide').onclick=()=>{const c={title:$('ev-title').value,date:$('ev-date').
 $('bks-guide').onclick=()=>{const cat=typeof bkSel!=='undefined'?bkSel:'',m={gym:'entreno',work:'trabajo',study:'estudio'};const c={title:$('bks-title').value,date:bkDay,type:m[cat]||null};$('bk-sheet').hidden=true;openRegWizard(c)};
 
 /* Permisos que necesitan los avisos con el móvil bloqueado */
-const PERMS=[['notifications','Notificaciones','Para ver los avisos en la pantalla de bloqueo'],['fullScreen','Alarma a pantalla completa','La alarma se abre encima del bloqueo'],['overlay','Mostrar sobre otras apps','Sin esto, la pantalla de la alarma puede no abrirse con el móvil bloqueado'],['battery','Sin restricciones de batería','Evita que el sistema retrase avisos y widgets']];
+const PERMS=[['notifications','Notificaciones','Para ver los avisos en la pantalla de bloqueo'],['fullScreen','Alarma a pantalla completa','La alarma se abre encima del bloqueo'],['battery','Sin restricciones de batería','Evita que el sistema retrase avisos y widgets']];
 async function renderPerms(){if(!natSound())return;$('duck-note').hidden=true;let st=null;try{st=await VTNative.permStatus()}catch(e){}if(!st)return;
   $('perm-label').hidden=false;$('perm-list').hidden=false;
   $('perm-list').innerHTML=PERMS.map(([k,t,d],i)=>`<button class="row${i===0?' first':''}${i===PERMS.length-1?' last':''}" data-perm="${k}"><span class="txt"><span class="t1" style="display:block">${t}</span><span class="t2" style="display:block">${d}</span></span><span class="perm-st${st[k]?' ok':''}">${st[k]?'Activo':'Activar'}</span></button>`).join('')}

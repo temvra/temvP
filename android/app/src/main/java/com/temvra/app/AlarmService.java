@@ -67,18 +67,7 @@ public class AlarmService extends Service {
         }
         ringing = ring ? alert.toString() : null;
         sound(alert, ring);
-        if (ring) showScreen(alert);
         return START_NOT_STICKY;
-    }
-
-    /**
-     * En el móvil de pruebas la notificación no abre la pantalla completa aunque el permiso esté activo, así que se abre
-     * directamente. Android solo lo deja con «Mostrar sobre otras apps»; sin él no hace nada y queda la notificación.
-     */
-    private void showScreen(JSONObject alert) {
-        try {
-            startActivity(new Intent(this, AlarmActivity.class).putExtra("alert", alert.toString()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        } catch (Exception ignored) {}
     }
 
     private Notification ringNotification(JSONObject a) {
