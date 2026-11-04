@@ -10,6 +10,7 @@
     "start": "electron .",
     "dist": "electron-builder --linux dir",
     "appimage": "electron-builder --linux AppImage",
+    "win": "electron-builder --win nsis --publish never",
     "install-linux": "sh install-linux.sh"
   },
   "build": {
@@ -33,6 +34,8 @@
         ]
       }
     ],
+    "win": { "icon": "../resources/icon-512.png", "artifactName": "Temvra-Personal-${version}-Windows.${ext}" },
+    "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "shortcutName": "Temvra" },
     "linux": {
       "executableName": "temvra",
       "icon": "../resources/icon-512.png",

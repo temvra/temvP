@@ -5,6 +5,8 @@ const www=path.join(__dirname,'www'),ORIGIN='app://temvra';
 // Origen propio y fijo: localStorage (los datos) no depende de dónde esté instalada la app
 protocol.registerSchemesAsPrivileged([{scheme:'app',privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true}}]);
 app.commandLine.appendSwitch('ozone-platform-hint','auto');
+// Windows solo enseña las notificaciones de apps con este identificador
+if(process.platform==='win32')app.setAppUserModelId('com.temvra.app.personal.desktop');
 // El temporizador y las alarmas deben sonar sin haber tocado antes la ventana
 app.commandLine.appendSwitch('autoplay-policy','no-user-gesture-required');
 let win=null;
