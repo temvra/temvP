@@ -6875,12 +6875,14 @@ window.VTAPI={
   state:()=>S,
   /* Acciones que llegan desde la notificación del temporizador o los widgets */
   timerAction(a){a=String(a||'');
+    /* En el móvil la nota ocupa la pantalla: si sigue abierta, tapa lo que pide el widget */
+    const closeN=()=>{if($('noteview')&&!$('noteview').hidden&&!DESK.matches)closeNote()};
     if(a.startsWith('alert:')){try{VTAPI.open(JSON.parse(a.slice(6)))}catch(e){}return}
     if(a.startsWith('note:')){const v=a.slice(5),bar=v.indexOf('|');if(bar>0){const vid=v.slice(0,bar);if(vid!==S.curVault)switchVault(vid);const n=nget(v.slice(bar+1));if(n){show('notes');openNote(n.id)}}else{const n=nget(v);if(n){show('notes');openNote(n.id)}}return}
-    if(a==='regs'){show('reg');return}
-    if(a.startsWith('day:')){goBlocksDay(a.slice(4));return}
-    if(a.startsWith('reg:')){regCur=a.slice(4);show('reg');return}
-    if(a==='newalarm'){show('alarm');const b=$('fab1');if(b)setTimeout(()=>b.click(),200);return}
+    if(a==='regs'){closeN();show('reg');return}
+    if(a.startsWith('day:')){closeN();goBlocksDay(a.slice(4));return}
+    if(a.startsWith('reg:')){closeN();regCur=a.slice(4);show('reg');return}
+    if(a==='newalarm'){closeN();show('alarm');const b=$('fab1');if(b)setTimeout(()=>b.click(),200);return}
     if(a.startsWith('block:')||a.startsWith('event:')){const [,id,date]=a.split('|');if(realEv(id))VTAPI.open({type:'event',id,date});else{show('cal');openEvent(id,date)}return}
     if(['agenda','blocks','alarms','open','newevent','newblock'].includes(a)&&$('noteview')&&!$('noteview').hidden&&!DESK.matches)closeNote();
     if(a==='notes'){show('notes');return}
