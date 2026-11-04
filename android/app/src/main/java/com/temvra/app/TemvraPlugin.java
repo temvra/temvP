@@ -293,6 +293,7 @@ public class TemvraPlugin extends Plugin {
         JSObject out = new JSObject();
         out.put("notifications", nm == null || nm.areNotificationsEnabled());
         out.put("fullScreen", Build.VERSION.SDK_INT < 34 || nm == null || nm.canUseFullScreenIntent());
+        out.put("overlay", Settings.canDrawOverlays(c));
         out.put("exact", Build.VERSION.SDK_INT < 31 || am == null || am.canScheduleExactAlarms());
         out.put("battery", pm == null || pm.isIgnoringBatteryOptimizations(c.getPackageName()));
         call.resolve(out);
@@ -305,6 +306,7 @@ public class TemvraPlugin extends Plugin {
         Uri pkg = Uri.parse("package:" + c.getPackageName());
         Intent it;
         if ("fullScreen".equals(which) && Build.VERSION.SDK_INT >= 34) it = new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT, pkg);
+        else if ("overlay".equals(which)) it = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, pkg);
         else if ("battery".equals(which)) it = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, pkg);
         else if ("channels".equals(which) || "notifications".equals(which)) it = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, c.getPackageName());
         else it = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg);
