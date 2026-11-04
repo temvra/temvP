@@ -2399,8 +2399,11 @@ body:not(.desk) .nav{touch-action:none;overflow:visible}
       </div>
       <div class="card" style="margin-top:6px">
         <div class="seg" id="upd-mode"><button data-um="ask">Preguntarme antes</button><button data-um="auto">Descargarla sola</button></div>
-        <div class="field"><label for="upd-token">Token de GitHub</label><input type="password" id="upd-token" autocomplete="off" placeholder="El de Notas, si ya lo tienes" style="flex:1;min-width:0"></div>
-        <div class="note" style="margin-top:0">El repositorio es privado: hace falta un token con permiso de lectura de <b>temvra/temvP</b> (Contents: Read). Si no escribes ninguno se usa el de la bóveda de GitHub de Notas. No se guarda en las copias de seguridad.</div>
+        <div class="note" style="margin-top:0">Las versiones salen de las Releases de <b>temvra/temvP</b> en GitHub. No hace falta cuenta ni token.</div>
+        <details style="margin-top:8px"><summary class="sub">Si el repositorio vuelve a ser privado</summary>
+          <div class="field"><label for="upd-token">Token de GitHub</label><input type="password" id="upd-token" autocomplete="off" placeholder="Con permiso de lectura" style="flex:1;min-width:0"></div>
+          <div class="note" style="margin-top:0">Hace falta un token con permiso de lectura del repositorio (Contents: Read). No se guarda en las copias de seguridad.</div>
+        </details>
         <div class="field" style="gap:8px;flex-wrap:wrap"><button class="btn tonal" id="upd-now">Buscar ahora</button><button class="btn" id="upd-inst" hidden>Instalar</button></div>
       </div>
     </div>
@@ -7232,15 +7235,17 @@ function renderUpd(){if(!$('upd-box'))return;const ok=updOk();$('upd-label').hid
   $('upd-st').textContent=updBusy?T('Buscando…'):updMsg||((updCur?T('Instalada')+' '+updCur:'')+(S.upd.last?' · '+T('comprobado')+' '+updAgo(S.upd.last):''));
   const b=$('upd-inst');b.hidden=!updFound;if(updFound)b.textContent=(updFile&&updFile.includes(updFound.asset.name)?T('Instalar'):T('Descargar e instalar'))+' '+updFound.v}
 function updAsset(r){const d=updDesk(),as=r.assets||[];return as.find(d?(d.platform==='win32'?a=>/\.exe$/i.test(a.name):a=>/\.AppImage$/i.test(a.name)):a=>/\.apk$/i.test(a.name))}
-async function updLatest(){const h={Accept:'application/vnd.github+json'},t=updToken();if(t)h.Authorization='Bearer '+t;
-  const r=await fetch(`https://api.github.com/repos/${UPD_REPO}/releases/latest`,{headers:h,cache:'no-store'});if(r.status===404||r.status===401||r.status===403)throw new Error('auth');if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+/* El repositorio es público: no hace falta token. Si hay uno guardado que ya no vale, se prueba sin él */
+async function updLatest(){const go=t=>{const h={Accept:'application/vnd.github+json'};if(t)h.Authorization='Bearer '+t;return fetch(`https://api.github.com/repos/${UPD_REPO}/releases/latest`,{headers:h,cache:'no-store'})};
+  const t=updToken();let r=await go(t);if(t&&(r.status===401||r.status===403))r=await go('');
+  if(r.status===404||r.status===401)throw new Error('auth');if(r.status===403)throw new Error('límite de GitHub, prueba más tarde');if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
 async function updCheck(manual){if(!updOk()||updBusy)return;updBusy=true;updMsg='';renderUpd();let then=null;
   try{if(!updCur)await updSync();const r=await updLatest();S.upd.last=Date.now();save();const tag=r.tag_name||'',a=updAsset(r);
     updFound=vcmp(updCur,tag)<0&&a?{tag,v:tag.replace(/^v/,''),asset:a,url:r.html_url}:null;
     if(!updFound){if(manual)toast(T('Tienes la última versión')+(updCur?' ('+updCur+')':''));return}
     if(!manual&&S.upd.skip===tag)return;
     then=S.upd.mode==='auto'&&!manual?()=>updGet(true):updAsk}
-  catch(e){updMsg=e.message==='auth'?T('No se puede ver el repositorio: añade un token de GitHub'):T('No se pudo comprobar')+' ('+e.message+')';if(manual)toast(e.message==='auth'?T('Falta un token de GitHub con acceso al repositorio'):T('No se pudo conectar con GitHub'))}
+  catch(e){updMsg=e.message==='auth'?T('No se encuentra el repositorio o no tiene versiones publicadas'):T('No se pudo comprobar')+' ('+e.message+')';if(manual)toast(e.message==='auth'?T('No se encuentra el repositorio de versiones'):T('No se pudo conectar con GitHub'))}
   finally{updBusy=false;renderUpd()}
   if(then)then()}
 function updAsk(){const f=updFound;if(!f)return;const mb=f.asset.size?' · '+(f.asset.size/1048576).toFixed(f.asset.size>1e8?0:1)+' MB':'';
