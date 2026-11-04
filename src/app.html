@@ -2007,7 +2007,8 @@ body:not(.desk) .nav{touch-action:none;overflow:visible}
 @media (prefers-reduced-motion:no-preference){.lg-room{transition:transform .34s cubic-bezier(.3,1.35,.5,1)!important}}
 .ob-row.lg-float,.vl-row.lg-float{opacity:1!important;position:relative;z-index:6;pointer-events:none;background:color-mix(in srgb,var(--surface-2) 70%,transparent);border-radius:14px;
   box-shadow:inset 0 1px 1px rgba(255,255,255,.5),inset 6px 0 10px -6px rgba(255,110,200,.6),inset -6px 0 10px -6px rgba(80,200,255,.65),0 0 0 1px rgba(255,255,255,.3),0 16px 34px rgba(0,0,0,.45)!important;filter:brightness(1.12)}
-.lifted,.sorting{pointer-events:none}
+.lifted,.sorting,.lg-carry{pointer-events:none}
+.lg-carry{position:relative;z-index:6}
 /* Menús laterales en cristal */
 .cdr,.vcard{background:color-mix(in srgb,var(--surface) 84%,transparent)!important;backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:inset -1px 0 0 color-mix(in srgb,#fff 12%,transparent),8px 0 40px rgba(0,0,0,.4)!important}
 .cdr-body.lg-host>.cdr-views{position:relative;z-index:1}
@@ -4170,16 +4171,16 @@ function gfMove(el,x,y,base){if(!el)return;base=base||'';if(lgRM.matches){el.sty
     el.style.transform=`translate(${s.x.toFixed(1)}px,${s.y.toFixed(1)}px) rotate(${rot.toFixed(2)}deg) scale(${(1+k*(ax-ay*.6)).toFixed(3)},${(1+k*(ay-ax*.6)).toFixed(3)})${s.base}`;
     if(Math.abs(s.tx-s.x)>.3||Math.abs(s.ty-s.y)>.3||sp>.1)s.raf=requestAnimationFrame(st);else{s.raf=0;el.style.transform=`translate(${s.tx}px,${s.ty}px)${s.base}`}})}
 /* Hacer hueco como en iPhone: mientras arrastras, los demás elementos de la lista se apartan con un muelle */
-function roomMake(el,items,sc){items=items.filter(x=>x.offsetParent!==null);const i0=items.indexOf(el);if(i0<0||items.length<2)return null;const s0=sc?sc.scrollTop:0;
-  const R=items.map(x=>{const r=x.getBoundingClientRect();return {top:r.top+s0,h:r.height,l:r.left,w:r.width}});
-  const nx=R[i0+1],pv=R[i0-1],step=nx?nx.top-R[i0].top:pv?R[i0].top-pv.top:R[i0].h;
-  items.forEach(x=>{if(x!==el)x.classList.add('lg-room')});return {el,items,R,i0,step,sc,s0,idx:i0}}
+function roomMake(el,items,sc,unit){items=items.filter(x=>x.offsetParent!==null);const i0=items.indexOf(el);if(i0<0||items.length<2)return null;const s0=sc?sc.scrollTop:0;unit=unit||(x=>[x]);
+  const U=items.map(unit),R=U.map(us=>{const rs=us.map(u=>u.getBoundingClientRect()),t=Math.min(...rs.map(r=>r.top)),b=Math.max(...rs.map(r=>r.bottom));return {top:t+s0,h:b-t,l:rs[0].left,w:rs[0].width}});
+  const nx=R[i0+1],pv=R[i0-1],gap=nx?nx.top-(R[i0].top+R[i0].h):pv?R[i0].top-(pv.top+pv.h):0,step=R[i0].h+Math.max(0,gap);
+  U.forEach((us,i)=>{if(i!==i0)us.forEach(u=>u.classList.add('lg-room'))});return {el,items,U,R,i0,step,sc,s0,idx:i0}}
 const roomScroll=m=>(m.sc?m.sc.scrollTop:0)-m.s0;
 function roomIn(m,x,y){const yy=y+roomScroll(m)+m.s0,a=m.R[0],z=m.R[m.R.length-1];return x>=Math.min(a.l,z.l)-30&&x<=Math.max(a.l+a.w,z.l+z.w)+30&&yy>=a.top-m.step*.6&&yy<=z.top+z.h+m.step*.6}
 function roomAt(m,y){const yy=y+roomScroll(m)+m.s0;let idx=0;m.items.forEach((x,i)=>{if(x!==m.el&&yy>m.R[i].top+m.R[i].h/2)idx++});m.idx=idx;
-  m.items.forEach((x,i)=>{if(x===m.el)return;const j=i<m.i0?i:i-1,off=i<m.i0&&j>=idx?m.step:i>m.i0&&j<idx?-m.step:0;x.style.transform=off?`translateY(${off}px)`:''});
+  m.items.forEach((x,i)=>{if(x===m.el)return;const j=i<m.i0?i:i-1,off=i<m.i0&&j>=idx?m.step:i>m.i0&&j<idx?-m.step:0;m.U[i].forEach(u=>u.style.transform=off?`translateY(${off}px)`:'')});
   const o=m.items.filter(x=>x!==m.el);return idx<o.length?{el:o[idx],after:false,idx}:{el:o[o.length-1],after:true,idx}}
-function roomEnd(m){if(!m)return;m.items.forEach(x=>{if(x!==m.el){x.style.transform='';setTimeout(()=>x.classList.remove('lg-room'),400)}})}
+function roomEnd(m){if(!m)return;m.U.forEach((us,i)=>{if(i!==m.i0)us.forEach(u=>{u.style.transform='';setTimeout(()=>u.classList.remove('lg-room'),400)})})}
 function gfStop(el){const s=el&&GF.get(el);if(s&&s.raf)cancelAnimationFrame(s.raf);if(el)GF.delete(el)}
 /* Al soltar, el elemento se asienta en su sitio con un rebote de gelatina */
 function lgSettle(sel){if(!sel||lgRM.matches)return;setTimeout(()=>{const els=typeof sel==='string'?document.querySelectorAll(sel):[sel];els.forEach(el=>{if(!el||!el.isConnected)return;el.classList.remove('lg-drop');void el.offsetWidth;el.classList.add('lg-drop');el.addEventListener('animationend',()=>el.classList.remove('lg-drop'),{once:true})})},30)}
@@ -5654,20 +5655,25 @@ function moveDrag(){if(!drag)return;
   const L=$('ob-list'),vr=$('vn-list').querySelector('.vl-rows'),inV=vr&&drag.row.closest('#vn-list'),SL=inV?vr:L,R=SL.getBoundingClientRect();if(drag.y<R.top+60)SL.scrollTop-=14;else if(drag.y>R.bottom-60)SL.scrollTop+=14;
   let tg=null;
   /* Orden personalizado dentro de la misma carpeta: la nota arrastrada va con el dedo y las demás se apartan */
-  if(drag.room&&(!drag.row.isConnected||!roomIn(drag.room,drag.x,drag.y))){roomEnd(drag.room);drag.room=null;gfStop(drag.row);drag.row.style.transform='';drag.row.classList.remove('lg-float');drag.g.style.opacity=''}
-  if(drag.room){const m=drag.room,t=roomAt(m,drag.y);gfMove(drag.row,0,drag.y-drag.sy0+roomScroll(m),' scale(1.02)');
-    tg={f:drag.roomF,el:null,re:{kind:'N',id:t.el.dataset.note||t.el.dataset.att,after:t.after,row:t.el},room:true}}
+  if(drag.room&&(!drag.row.isConnected||!roomIn(drag.room,drag.x,drag.y)))obRoomStop(drag);
+  if(drag.room){const m=drag.room,dy=drag.y-drag.sy0+roomScroll(m);gfMove(drag.row,0,dy,' scale(1.02)');if(drag.kids)gfMove(drag.kids,0,dy);
+    /* Carpetas: en el centro de otra carpeta se mete dentro (y no se reordena) */
+    if(drag.roomK==='F'){const el=document.elementFromPoint(drag.x,drag.y),fr=el&&el.closest('#ob-list [data-folder]');if(fr&&fr!==drag.row&&m.items.includes(fr)){const rb=fr.getBoundingClientRect(),rel=(drag.y-rb.top)/rb.height;if(rel>.3&&rel<.7)tg={f:fr.dataset.folder,el:fr}}}
+    if(!tg){const t=roomAt(m,drag.y);tg={f:drag.roomF,el:null,re:{kind:drag.roomK,id:drag.roomK==='F'?t.el.dataset.folder:(t.el.dataset.note||t.el.dataset.att),after:t.after,row:t.el},room:true}}}
   else tg=dropTarget();
-  if(!drag.room&&tg&&tg.re&&tg.re.kind==='N'&&drag.moved&&drag.row.isConnected&&tg.re.row.parentElement===drag.row.parentElement){
-    const m=roomMake(drag.row,[...drag.row.parentElement.children].filter(x=>x.matches('[data-note],[data-att]')),SL);
-    if(m){const rr=drag.row.getBoundingClientRect();drag.room=m;drag.roomF=tg.f;drag.sy0=rr.top+rr.height/2;drag.row.classList.add('lg-float');drag.g.style.opacity='0';moveDrag();return}}
+  if(!drag.room&&tg&&tg.re&&drag.moved&&drag.row.isConnected&&tg.re.row.parentElement===drag.row.parentElement){
+    const F=tg.re.kind==='F',unit=F?x=>{const k=x.nextElementSibling;return k&&k.classList.contains('ob-kids')?[x,k]:[x]}:null;
+    const m=roomMake(drag.row,[...drag.row.parentElement.children].filter(x=>x.matches(F?'[data-folder]':'[data-note],[data-att]')),SL,unit);
+    if(m){const rr=drag.row.getBoundingClientRect();drag.room=m;drag.roomK=tg.re.kind;drag.roomF=tg.f;drag.sy0=rr.top+rr.height/2;drag.kids=F?unit(drag.row)[1]||null:null;
+      drag.row.classList.add('lg-float');if(drag.kids)drag.kids.classList.add('lg-carry');drag.g.style.opacity='0';moveDrag();return}}
   L.querySelectorAll('.drop').forEach(x=>x.classList.remove('drop'));document.querySelectorAll('#ob-list .drop-before,#ob-list .drop-after,#vn-list .drop-before,#vn-list .drop-after').forEach(x=>x.classList.remove('drop-before','drop-after'));
   L.classList.toggle('drop-root',!!tg&&tg.f===''&&!tg.re&&drag.moved);
   drag.tg=tg;if(!tg||!drag.moved)return;if(tg.el)tg.el.classList.add('drop');if(tg.re&&!tg.room)tg.re.row.classList.add(tg.re.after?'drop-after':'drop-before');
-  if(tg.f&&!S.obOpen[tg.f]&&tg.el){if(drag.hov!==tg.f){drag.hov=tg.f;drag.hovT=Date.now()}else if(Date.now()-drag.hovT>550){S.obOpen[tg.f]=true;drag.hov=null;renderNotes();const nr=L.querySelector(`[data-${drag.t==='folder'?'folder':drag.t}="${CSS.escape(drag.id)}"]`);if(nr)nr.classList.add('dragging')}}
+  if(tg.f&&!S.obOpen[tg.f]&&tg.el){if(drag.hov!==tg.f){drag.hov=tg.f;drag.hovT=Date.now()}else if(Date.now()-drag.hovT>550){S.obOpen[tg.f]=true;drag.hov=null;renderNotes();const nr=L.querySelector(`[data-${drag.t==='folder'?'folder':drag.t}="${CSS.escape(drag.id)}"]`);if(nr){nr.classList.add('dragging');drag.row=nr}}}
   else if(!tg.f||S.obOpen[tg.f])drag.hov=null;
 }
-function endDrag(cancel){const d=drag;drag=null;clearInterval(d.iv);gfStop(d.g);d.g.remove();roomEnd(d.room);if(d.room){gfStop(d.row);d.row.style.transform='';d.row.classList.remove('lg-float')}if(!cancel&&d.moved)lgSettle(lgSel(d.id));$('ob-list').classList.remove('drop-root');
+function obRoomStop(d){roomEnd(d.room);d.room=null;gfStop(d.row);d.row.style.transform='';d.row.classList.remove('lg-float');if(d.kids){gfStop(d.kids);d.kids.style.transform='';d.kids.classList.remove('lg-carry');d.kids=null}if(d.g)d.g.style.opacity=''}
+function endDrag(cancel){const d=drag;drag=null;clearInterval(d.iv);gfStop(d.g);d.g.remove();if(d.room)obRoomStop(d);if(!cancel&&d.moved)lgSettle(lgSel(d.id));$('ob-list').classList.remove('drop-root');
   obSuppress=true;setTimeout(()=>obSuppress=false,350);
   if(cancel){renderNotes();return}
   if(!d.moved){renderNotes();ctxMenu(d.row);return}
