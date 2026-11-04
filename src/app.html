@@ -2944,8 +2944,8 @@ document.addEventListener('paste',e=>{const it=[...(e.clipboardData&&e.clipboard
   const f=it.getAsFile();readImage(f,1600,d=>{const at=addAttachment(d,attFolder());edInsert(`\n![[${at.name}]]\n`);renderNotes();toast('Imagen pegada')})});
 
 let pickThenSeed=false;
-function pickImage(seed){pickThenSeed=seed;const i=$('img-any');i.value='';i.click()}
-document.querySelectorAll('#bg-seg button').forEach(x=>x.onclick=()=>{S.bg.type=x.dataset.bg;save();applyBg();if(x.dataset.bg==='img'&&!bgImg)pickImage(false)});
+function pickBgImage(seed){pickThenSeed=seed;const i=$('img-any');i.value='';i.click()}
+document.querySelectorAll('#bg-seg button').forEach(x=>x.onclick=()=>{S.bg.type=x.dataset.bg;save();applyBg();if(x.dataset.bg==='img'&&!bgImg)pickBgImage(false)});
 $('img-any').addEventListener('change',e=>loadBgFile(e.target.files[0]));
 [['bg-c1','c1'],['bg-g1','g1'],['bg-g2','g2']].forEach(([id,k])=>$(id).addEventListener('input',e=>{S.bg[k]=e.target.value;save();applyBg()}));
 $('bg-c1-hex').addEventListener('change',e=>{if(validHex(e.target.value)){S.bg.c1='#'+e.target.value.replace('#','');save();applyBg()}else toast('Escribe un código como #1D2A44')});
@@ -2970,7 +2970,7 @@ function dominant(canvas){
 $('seed-from-img').onclick=()=>{
   if(S.bg.type==='color'){setSeed(S.bg.c1);return}
   if(S.bg.type==='grad'){setSeed(S.bg.g1);return}
-  if(S.bg.type!=='img'||!bgImg){pickImage(true);return}
+  if(S.bg.type!=='img'||!bgImg){pickBgImage(true);return}
   const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);const h=dominant(c);h?(setSeed(h),toast('Tema a juego con tu imagen')):toast('La imagen no tiene un color claro, prueba con la paleta')};img.src=bgImg;
 };
 
@@ -3962,14 +3962,14 @@ document.addEventListener('keydown',e=>{if(!document.body.classList.contains('de
   const drag=(el,calc,apply,done)=>{el.addEventListener('pointerdown',e=>{if(e.button>0)return;e.preventDefault();el.setPointerCapture(e.pointerId);el.classList.add('on');document.body.classList.add('resizing');
     const mv=ev=>apply(calc(ev.clientX)),up=()=>{el.classList.remove('on');document.body.classList.remove('resizing');el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);done()};
     el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up)})};
-  const clampAg=x=>Math.round(Math.max(320,Math.min(innerWidth-84-380,innerWidth-x))),nlw=()=>notes3()?S.nLW||280:0,clampNt=x=>Math.round(Math.max(220,Math.min(Math.min(720,innerWidth-84-420-nlw()),x-84))),clampNl=x=>Math.round(Math.max(200,Math.min(Math.min(520,innerWidth-84-420-(S.nW||300)),x-84-(S.nW||300))));
+  const clampAg=x=>Math.round(Math.max(320,Math.min(innerWidth-84-380,innerWidth-x))),nlw=()=>notes3()?notesLW():0,curNW=()=>parseFloat(root.style.getPropertyValue('--nw'))||300,clampNt=x=>Math.round(Math.max(220,Math.min(Math.min(720,innerWidth-84-420-nlw()),x-84))),clampNl=x=>Math.round(Math.max(200,Math.min(Math.min(520,innerWidth-504-curNW()),x-84-curNW())));
   drag(ag,clampAg,w=>{S.bkW=w;setW('--bkw',w);reflow()},()=>{save();renderBlocks()});
   drag(nt,clampNt,w=>{S.nW=w;setW('--nw',w)},()=>save());
   drag(nl,clampNl,w=>{S.nLW=w;setW('--nlw',w)},()=>save());
   nl.addEventListener('dblclick',()=>{delete S.nLW;root.style.removeProperty('--nlw');save()});
   ag.addEventListener('dblclick',()=>{delete S.bkW;setW('--bkw',defAg());save();reflow();renderBlocks()});
   nt.addEventListener('dblclick',()=>{delete S.nW;root.style.removeProperty('--nw');save()});
-  let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{setW('--bkw',S.bkW?Math.min(S.bkW,Math.max(320,innerWidth-84-380)):defAg());if(S.nW)setW('--nw',Math.min(S.nW,Math.max(220,innerWidth-84-420-nlw())));syncN3();reflow()},120)});
+  let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{setW('--bkw',S.bkW?Math.min(S.bkW,Math.max(320,innerWidth-84-380)):defAg());syncN3();reflow()},120)});
   setTimeout(()=>{lastCols=bkColsN()},0)})();
 
 /* ================= TOUR DE BIENVENIDA ================= */
@@ -5146,7 +5146,10 @@ function obTools(){const P=S.obPanel,U=S.obUI,b=(id,ic,lbl,on)=>`<button data-to
 }
 /* Tres columnas solo con ratón y sitio de sobra; en el móvil no se usa */
 function notes3(){return document.body.classList.contains('desknotes')&&innerWidth>=1100&&innerHeight>=521&&S.obPanel==='files'}
-function syncN3(){const on=notes3(),ch=on!==document.body.classList.contains('notes3');document.body.classList.toggle('notes3',on);if(ch&&view==='notes')renderNotes()}
+/* Ancho que cabe de cada columna. Se guarda lo elegido por el usuario, para recuperarlo al ensanchar */
+function notesLW(){return Math.min(S.nLW||280,Math.max(200,innerWidth-504-Math.min(S.nW||300,260)))}
+function fitNotes(){const r=document.documentElement.style;if(S.nLW)r.setProperty('--nlw',notesLW()+'px');if(S.nW)r.setProperty('--nw',Math.min(S.nW,Math.max(220,innerWidth-504-(notes3()?notesLW():0)))+'px')}
+function syncN3(){fitNotes();const on=notes3(),ch=on!==document.body.classList.contains('notes3');document.body.classList.toggle('notes3',on);if(ch&&view==='notes')renderNotes()}
 const vlFolder=()=>{const f=S.obFolder==null?'*':S.obFolder;return f==='*'||f===''||allFolders().includes(f)?f:'*'};
 function vlFolderRows(){const f=vlFolder(),root=[...S.notes,...S.atts].some(x=>!x.folder),row=(k,t,c)=>`<button class="ob-row vn-frow${f===k?' on':''}" data-fall="${k}"><span class="ob-chev none">${OB_IC.chev}</span><span class="vn-ftile">${OB_IC.note.replace(/width="\d+" height="\d+"/,'width="18" height="18"')}</span><span class="ob-name">${t}</span><span class="vn-cnt">${c}</span></button>`;
   return row('*',T('Todas las notas'),S.notes.length+S.atts.length)+(root?row('',T('Sin carpeta'),[...S.notes,...S.atts].filter(x=>!x.folder).length):'')}
@@ -5162,7 +5165,7 @@ function renderNoteCol(){if(!notes3())return;const f=vlFolder(),L=$('vn-list'),a
   L.querySelector('.vl-rows').scrollTop=top}
 function renderNotes(){
   const P=S.obPanel,folders=allFolders(),n3=notes3();
-  document.body.classList.toggle('notes3',n3);
+  document.body.classList.toggle('notes3',n3);fitNotes();
   $('v-notes').dataset.panel=P;
   if(P==='files'){if(S.obUI.reveal)revealActive(false);
     if(n3)renderNoteCol();
