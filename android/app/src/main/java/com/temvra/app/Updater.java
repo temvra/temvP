@@ -66,10 +66,15 @@ final class Updater {
         return h;
     }
 
-    /** Última versión publicada: {tag, name, body, apkUrl, apkName, size}. */
+    /** Última versión publicada: {tag, name, body, apkUrl, apkName, size}. El repositorio es público: el token es opcional. */
     static JSONObject latest(String token) throws Exception {
         HttpURLConnection h = open("https://api.github.com/repos/" + REPO + "/releases/latest", token, "application/vnd.github+json");
         int code = h.getResponseCode();
+        if ((code == 401 || code == 403) && token != null && !token.isEmpty()) {
+            h.disconnect();
+            h = open("https://api.github.com/repos/" + REPO + "/releases/latest", null, "application/vnd.github+json");
+            code = h.getResponseCode();
+        }
         if (code != 200) throw new Exception(code == 404 || code == 401 ? "auth" : "http " + code);
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         try (InputStream in = h.getInputStream()) { byte[] b = new byte[8192]; int n; while ((n = in.read(b)) > 0) buf.write(b, 0, n); }
@@ -93,6 +98,10 @@ final class Updater {
     /** Descarga un archivo de la release. El enlace firmado al que redirige GitHub no admite el token: se quita. */
     static File download(Context c, String assetUrl, String token, String name) throws Exception {
         HttpURLConnection h = open(assetUrl, token, "application/octet-stream");
+        if ((h.getResponseCode() == 401 || h.getResponseCode() == 403) && token != null && !token.isEmpty()) {
+            h.disconnect();
+            h = open(assetUrl, null, "application/octet-stream");
+        }
         int hops = 0;
         while ((h.getResponseCode() / 100) == 3 && hops++ < 5) {
             String loc = h.getHeaderField("Location");

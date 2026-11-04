@@ -103,7 +103,10 @@ ipcMain.handle('upd-download',async(e,url,token,name)=>{
   if(!fromApp(e)||!/^https:\/\/api\.github\.com\//.test(String(url)))return {error:'url'};
   const dir=path.join(app.getPath('userData'),'updates');fs.mkdirSync(dir,{recursive:true});
   const file=path.join(dir,path.basename(String(name||'Temvra-update')));
-  try{await fetchTo(url,token,file);return {path:file}}catch(err){return {error:String(err.message||err)}}});
+  try{await fetchTo(url,token,file);return {path:file}}catch(err){
+    // Repositorio público: si el token guardado ya no vale, sin él
+    if(token&&/http 40[13]/.test(String(err.message)))try{await fetchTo(url,null,file);return {path:file}}catch(e2){return {error:String(e2.message||e2)}}
+    return {error:String(err.message||err)}}});
 ipcMain.handle('upd-install',async(e,file)=>{
   if(!fromApp(e))return {error:'origin'};file=String(file||'');
   const dir=path.join(app.getPath('userData'),'updates');if(!file.startsWith(dir+path.sep)||!fs.existsSync(file))return {error:'missing'};
