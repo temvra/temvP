@@ -101,8 +101,10 @@ jobs:
           npm ci
           npm run build
 
+      # Con bash: PowerShell parte el argumento -c.extraMetadata.version en dos
       - name: Compilar la app de Windows
         working-directory: desktop
+        shell: bash
         run: |
           npm ci
           npm run win -- -c.extraMetadata.version=1.0.${{ github.run_number }}
