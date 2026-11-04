@@ -87,6 +87,7 @@ public class TemvraPlugin extends Plugin {
     @Override
     public void load() {
         getActivity().runOnUiThread(this::edgeToEdge);
+        Updater.schedule(getContext());
         Intent it = getActivity() != null ? getActivity().getIntent() : null;
         if (it != null) deliverAction(it);
     }
@@ -353,4 +354,80 @@ public class TemvraPlugin extends Plugin {
         out.put("installed", Widgets.count(getContext()));
         call.resolve(out);
     }
+    /* ---------------- Actualizaciones desde GitHub ---------------- */
+
+    @PluginMethod
+    public void updConfig(PluginCall call) {
+        Context c = getContext();
+        Updater.sp(c).edit()
+                .putBoolean("on", Boolean.TRUE.equals(call.getBoolean("on", true)))
+                .putString("mode", call.getString("mode", "ask"))
+                .putString("token", call.getString("token", ""))
+                .putString("skip", call.getString("skip", ""))
+                .apply();
+        Updater.schedule(c);
+        JSObject out = new JSObject();
+        out.put("version", Updater.installed(c));
+        out.put("canInstall", Updater.canInstall(c));
+        out.put("last", Updater.sp(c).getLong("last", 0));
+        out.put("apkPath", Updater.sp(c).getString("apkPath", ""));
+        call.resolve(out);
+    }
+
+    @PluginMethod
+    public void updCheck(PluginCall call) {
+        final Context c = getContext();
+        final String token = call.getString("token", "");
+        new Thread(() -> {
+            try {
+                JSONObject r = Updater.latest(token);
+                Updater.sp(c).edit().putLong("last", System.currentTimeMillis()).apply();
+                JSObject out = new JSObject(r.toString());
+                out.put("current", Updater.installed(c));
+                out.put("newer", Updater.compare(Updater.installed(c), r.optString("tag")) < 0);
+                call.resolve(out);
+            } catch (Exception e) {
+                call.reject(String.valueOf(e.getMessage()));
+            }
+        }).start();
+    }
+
+    @PluginMethod
+    public void updDownload(PluginCall call) {
+        final Context c = getContext();
+        final String url = call.getString("url", ""), token = call.getString("token", ""), name = call.getString("name", "Temvra.apk");
+        new Thread(() -> {
+            try {
+                java.io.File f = Updater.download(c, url, token, name);
+                Updater.sp(c).edit().putString("apkPath", f.getAbsolutePath()).apply();
+                JSObject out = new JSObject();
+                out.put("path", f.getAbsolutePath());
+                call.resolve(out);
+            } catch (Exception e) {
+                call.reject(String.valueOf(e.getMessage()));
+            }
+        }).start();
+    }
+
+    /** Abre el instalador de Android. Sin el permiso «Instalar apps desconocidas» abre ese ajuste. */
+    @PluginMethod
+    public void updInstall(PluginCall call) {
+        Context c = getContext();
+        java.io.File f = new java.io.File(call.getString("path", Updater.sp(c).getString("apkPath", "")));
+        if (!f.exists()) { call.reject("missing"); return; }
+        if (!Updater.canInstall(c)) {
+            if (Build.VERSION.SDK_INT >= 26) {
+                try { getActivity().startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + c.getPackageName()))); } catch (Exception ignored) {}
+            }
+            call.reject("perm");
+            return;
+        }
+        try {
+            getActivity().startActivity(Updater.installIntent(c, f));
+            call.resolve();
+        } catch (Exception e) {
+            call.reject(String.valueOf(e.getMessage()));
+        }
+    }
 }
+
