@@ -2391,6 +2391,20 @@ body:not(.desk) .nav{touch-action:none;overflow:visible}
     </div>
     <p class="sub" style="margin:8px 6px 0">Los widgets se actualizan solos cada minuto, sin abrir la app. Para ponerlos: mantén pulsado un hueco de la pantalla de inicio → Widgets → Temvra.</p>
 
+    <div class="label" id="upd-label" hidden>Actualizaciones</div>
+    <div id="upd-box" hidden>
+      <div class="stack">
+        <div class="row first"><div class="txt"><div class="t1">Buscar versiones nuevas cada día</div><div class="t2" id="upd-st">En las Releases de GitHub</div></div><button class="switch" role="switch" id="upd-on" aria-label="Buscar versiones nuevas cada día"></button></div>
+        <div class="row last"><div class="txt"><div class="t1">Cuando haya una nueva</div><div class="t2" id="upd-mode-t"></div></div></div>
+      </div>
+      <div class="card" style="margin-top:6px">
+        <div class="seg" id="upd-mode"><button data-um="ask">Preguntarme antes</button><button data-um="auto">Descargarla sola</button></div>
+        <div class="field"><label for="upd-token">Token de GitHub</label><input type="password" id="upd-token" autocomplete="off" placeholder="El de Notas, si ya lo tienes" style="flex:1;min-width:0"></div>
+        <div class="note" style="margin-top:0">El repositorio es privado: hace falta un token con permiso de lectura de <b>temvra/temvP</b> (Contents: Read). Si no escribes ninguno se usa el de la bóveda de GitHub de Notas. No se guarda en las copias de seguridad.</div>
+        <div class="field" style="gap:8px;flex-wrap:wrap"><button class="btn tonal" id="upd-now">Buscar ahora</button><button class="btn" id="upd-inst" hidden>Instalar</button></div>
+      </div>
+    </div>
+
     <div class="label">Copia de seguridad</div>
     <div class="card">
       <div class="t1">Tus datos viven en este dispositivo</div>
@@ -7195,6 +7209,66 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     else if(b.hidden&&m.oldValue===null)closed(b)})});
   backs.forEach(b=>mo.observe(b,{attributes:true,attributeFilter:['hidden'],attributeOldValue:true}));
 })();
+/* ===================== Actualizaciones desde GitHub =====================
+   Una vez al día mira la última Release del repositorio. En Android la comprobación también la hace el sistema con la app cerrada
+   (UpdateReceiver.java). Al encontrar una versión nueva pregunta o la descarga sola; instalar siempre lo confirma Android o Windows. */
+if(!S.upd)S.upd={on:true,mode:'ask',last:0,token:'',skip:''};
+const UPD_REPO='temvra/temvP';
+const updTV=()=>window.VTNative&&VTNative.hasPlugin&&window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Temvra||null;
+const updDesk=()=>window.VTDesktop&&VTDesktop.version?VTDesktop:null;
+const updOk=()=>!!(updTV()||updDesk());
+const updToken=()=>S.upd.token||(S.gh&&S.gh.token)||'';
+const updAgo=t=>{const m=Math.round((Date.now()-t)/60000);return m<1?T('ahora mismo'):m<60?T('hace')+' '+m+' min':m<1440?T('hace')+' '+Math.round(m/60)+' h':T('hace')+' '+Math.round(m/1440)+' d'};
+let updCur='',updBusy=false,updFound=null,updMsg='',updFile='';
+const vcmp=(a,b)=>{const x=String(a).replace(/[^0-9.]/g,'').split('.'),y=String(b).replace(/[^0-9.]/g,'').split('.');for(let i=0;i<Math.max(x.length,y.length);i++){const p=+x[i]||0,q=+y[i]||0;if(p!==q)return p<q?-1:1}return 0};
+async function updSync(){const tv=updTV();
+  if(tv){try{const r=await tv.updConfig({on:S.upd.on!==false,mode:S.upd.mode||'ask',token:updToken(),skip:S.upd.skip||''});updCur=r.version||'';if(r.apkPath)updFile=r.apkPath}catch(e){}}
+  else if(updDesk())updCur=updDesk().version;renderUpd()}
+function renderUpd(){if(!$('upd-box'))return;const ok=updOk();$('upd-label').hidden=$('upd-box').hidden=!ok;if(!ok)return;
+  $('upd-on').setAttribute('aria-checked',S.upd.on!==false);
+  $('upd-mode').querySelectorAll('[data-um]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.um===(S.upd.mode||'ask')));
+  $('upd-mode-t').textContent=(S.upd.mode||'ask')==='auto'?T('Se descarga sola y te avisa para instalarla'):T('Te pregunta antes de descargarla');
+  if(document.activeElement!==$('upd-token'))$('upd-token').value=S.upd.token||'';
+  $('upd-st').textContent=updBusy?T('Buscando…'):updMsg||((updCur?T('Instalada')+' '+updCur:'')+(S.upd.last?' · '+T('comprobado')+' '+updAgo(S.upd.last):''));
+  const b=$('upd-inst');b.hidden=!updFound;if(updFound)b.textContent=(updFile&&updFile.includes(updFound.asset.name)?T('Instalar'):T('Descargar e instalar'))+' '+updFound.v}
+function updAsset(r){const d=updDesk(),as=r.assets||[];return as.find(d?(d.platform==='win32'?a=>/\.exe$/i.test(a.name):a=>/\.AppImage$/i.test(a.name)):a=>/\.apk$/i.test(a.name))}
+async function updLatest(){const h={Accept:'application/vnd.github+json'},t=updToken();if(t)h.Authorization='Bearer '+t;
+  const r=await fetch(`https://api.github.com/repos/${UPD_REPO}/releases/latest`,{headers:h,cache:'no-store'});if(r.status===404||r.status===401||r.status===403)throw new Error('auth');if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+async function updCheck(manual){if(!updOk()||updBusy)return;updBusy=true;updMsg='';renderUpd();let then=null;
+  try{if(!updCur)await updSync();const r=await updLatest();S.upd.last=Date.now();save();const tag=r.tag_name||'',a=updAsset(r);
+    updFound=vcmp(updCur,tag)<0&&a?{tag,v:tag.replace(/^v/,''),asset:a,url:r.html_url}:null;
+    if(!updFound){if(manual)toast(T('Tienes la última versión')+(updCur?' ('+updCur+')':''));return}
+    if(!manual&&S.upd.skip===tag)return;
+    then=S.upd.mode==='auto'&&!manual?()=>updGet(true):updAsk}
+  catch(e){updMsg=e.message==='auth'?T('No se puede ver el repositorio: añade un token de GitHub'):T('No se pudo comprobar')+' ('+e.message+')';if(manual)toast(e.message==='auth'?T('Falta un token de GitHub con acceso al repositorio'):T('No se pudo conectar con GitHub'))}
+  finally{updBusy=false;renderUpd()}
+  if(then)then()}
+function updAsk(){const f=updFound;if(!f)return;const mb=f.asset.size?' · '+(f.asset.size/1048576).toFixed(f.asset.size>1e8?0:1)+' MB':'';
+  obSheet('Temvra '+f.v+' '+T('disponible'),[{t:T('Descargar e instalar'),s:f.asset.name+mb},{t:T('Ahora no')},{t:T('Saltar esta versión'),s:T('No volverá a avisarte de la')+' '+f.v,sep:true}],i=>{
+    if(i===0)updGet(false);else if(i===2){S.upd.skip=f.tag;save();updSync()}},T('Tienes la')+' '+updCur)}
+async function updGet(auto){const f=updFound;if(!f)return;updBusy=true;updMsg='';renderUpd();toast(T('Descargando')+' Temvra '+f.v+'…');let path='';
+  try{const tv=updTV();
+    if(tv)path=(await tv.updDownload({url:f.asset.url,token:updToken(),name:f.asset.name})).path;
+    else{const r=await updDesk().downloadUpdate(f.asset.url,updToken(),f.asset.name);if(r.error)throw new Error(r.error);path=r.path}
+    updFile=path}
+  catch(e){updMsg=T('No se pudo descargar')+' ('+e.message+')';toast(updMsg)}
+  finally{updBusy=false;renderUpd()}
+  if(!path)return;
+  if(auto)obSheet('Temvra '+f.v+' '+T('descargada'),[{t:T('Instalar ahora')},{t:T('Más tarde'),s:T('La tienes en Ajustes → Actualizaciones')}],i=>{if(i===0)updInstall()});else updInstall()}
+async function updInstall(){if(!updFile){updGet(false);return}
+  const tv=updTV();
+  if(tv){try{await tv.updInstall({path:updFile})}catch(e){const m=String(e&&e.message||e);
+      if(/perm/.test(m))toast(T('Permite «Instalar apps desconocidas» para Temvra y vuelve a pulsar Instalar'));else if(/missing/.test(m)){updFile='';updGet(false)}else toast(T('No se pudo abrir el instalador'))}return}
+  const r=await updDesk().installUpdate(updFile);if(r.error){if(r.error==='missing'){updFile='';updGet(false)}else toast(T('No se pudo instalar')+': '+r.error)}else if(r.shown)toast(T('Descargada: ábrela para instalarla'))}
+$('upd-on').onclick=()=>{S.upd.on=S.upd.on===false;save();updSync()};
+$('upd-mode').onclick=e=>{const b=e.target.closest('[data-um]');if(!b)return;S.upd.mode=b.dataset.um;save();updSync()};
+$('upd-token').onchange=()=>{S.upd.token=$('upd-token').value.trim();save();updSync();if(S.upd.token)updCheck(true)};
+$('upd-now').onclick=()=>updCheck(true);
+$('upd-inst').onclick=()=>{if(updFile&&updFound&&updFile.includes(updFound.asset.name))updInstall();else updGet(false)};
+/* Una vez al día: al abrir la app y al volver a ella */
+const updDaily=()=>{if(updOk()&&S.upd.on!==false&&Date.now()-(S.upd.last||0)>20*3600e3)updCheck(false)};
+setTimeout(()=>{updSync().then(updDaily)},4000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(updDaily,1500)});
 window.VTAPI={
   state:()=>S,
   /* Acciones que llegan desde la notificación del temporizador o los widgets */
@@ -7203,6 +7277,7 @@ window.VTAPI={
     const closeN=()=>{if($('noteview')&&!$('noteview').hidden&&!DESK.matches)closeNote()};
     if(a.startsWith('alert:')){try{VTAPI.open(JSON.parse(a.slice(6)))}catch(e){}return}
     if(a.startsWith('note:')){const v=a.slice(5),bar=v.indexOf('|');if(bar>0){const vid=v.slice(0,bar);if(vid!==S.curVault)switchVault(vid);const n=nget(v.slice(bar+1));if(n){show('notes');openNote(n.id)}}else{const n=nget(v);if(n){show('notes');openNote(n.id)}}return}
+    if(a==='update'){closeN();updFound=null;updCheck(true);return}
     if(a==='regs'){closeN();show('reg');return}
     if(a.startsWith('day:')){closeN();goBlocksDay(a.slice(4));return}
     if(a.startsWith('reg:')){closeN();regCur=a.slice(4);show('reg');return}

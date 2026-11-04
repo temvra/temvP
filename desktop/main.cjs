@@ -87,6 +87,32 @@ ipcMain.on('attention',(e,kind)=>{
   if(kind==='end'){win.setAlwaysOnTop(false);return}
   if(win.isMinimized())win.restore();else if(!win.isVisible())win.showInactive();else if(!win.isFocused())win.flashFrame(true);
 });
+// Actualizaciones: la web encuentra la versión nueva en GitHub y aquí se descarga e instala
+const fromApp=e=>e.senderFrame&&e.senderFrame.url.startsWith(ORIGIN+'/');
+ipcMain.on('app-version',e=>{e.returnValue=app.getVersion()});
+function fetchTo(url,token,file,hops=0){return new Promise((ok,ko)=>{
+  const https=require('node:https'),h={'User-Agent':'Temvra',Accept:'application/octet-stream'};if(token)h.Authorization='Bearer '+token;
+  https.get(url,{headers:h},res=>{
+    // El enlace firmado al que redirige GitHub no admite el token
+    if(res.statusCode>=300&&res.statusCode<400&&res.headers.location&&hops<5){res.resume();fetchTo(res.headers.location,null,file,hops+1).then(ok,ko);return}
+    if(res.statusCode!==200){res.resume();ko(new Error('http '+res.statusCode));return}
+    const tmp=file+'.part',out=fs.createWriteStream(tmp);res.pipe(out);
+    out.on('finish',()=>out.close(()=>{try{fs.renameSync(tmp,file);ok(file)}catch(err){ko(err)}}));out.on('error',ko);
+  }).on('error',ko)})}
+ipcMain.handle('upd-download',async(e,url,token,name)=>{
+  if(!fromApp(e)||!/^https:\/\/api\.github\.com\//.test(String(url)))return {error:'url'};
+  const dir=path.join(app.getPath('userData'),'updates');fs.mkdirSync(dir,{recursive:true});
+  const file=path.join(dir,path.basename(String(name||'Temvra-update')));
+  try{await fetchTo(url,token,file);return {path:file}}catch(err){return {error:String(err.message||err)}}});
+ipcMain.handle('upd-install',async(e,file)=>{
+  if(!fromApp(e))return {error:'origin'};file=String(file||'');
+  const dir=path.join(app.getPath('userData'),'updates');if(!file.startsWith(dir+path.sep)||!fs.existsSync(file))return {error:'missing'};
+  try{
+    if(process.platform==='win32'){const err=await shell.openPath(file);if(err)return {error:err};setTimeout(quit,1500);return {ok:true}}
+    // Linux con AppImage: se sustituye el archivo y se vuelve a abrir
+    if(process.env.APPIMAGE){const dst=process.env.APPIMAGE,tmp=dst+'.new';fs.copyFileSync(file,tmp);fs.chmodSync(tmp,0o755);fs.renameSync(tmp,dst);app.relaunch({execPath:dst});quitting=true;app.exit(0);return {ok:true}}
+    shell.showItemInFolder(file);return {ok:true,shown:true}
+  }catch(err){return {error:String(err.message||err)}}});
 function open(hidden){
   win=new BrowserWindow({show:!hidden,width:1280,height:820,minWidth:360,minHeight:500,backgroundColor:'#000000',icon:ICON,webPreferences:{backgroundThrottling:false,preload:path.join(__dirname,'preload.cjs')}});
   win.on('close',e=>{if(tray&&!quitting){e.preventDefault();win.hide()}});
