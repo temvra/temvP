@@ -1364,6 +1364,36 @@ body.deskcal .bk-zoom{right:24px;bottom:24px}
 .desk-split:hover::after,.desk-split.on::after{background:var(--accent)}
 body.deskcal .desk-split.ag{display:block;right:calc(var(--bkw,420px) - 5px)}
 body.desknotes .desk-split.nt{display:block;left:calc(84px + var(--nw,340px) - 5px)}
+/* PC: Notas en tres columnas: carpetas, notas de la carpeta y editor */
+.vn-list{display:none}
+body.notes3 #v-notes{width:var(--nw,300px)}
+body.notes3 .vn-list{display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:calc(84px + var(--nw,300px));width:var(--nlw,280px);padding-top:var(--sat,env(safe-area-inset-top,0px));z-index:3;border-right:1px solid color-mix(in srgb,var(--outline) 60%,transparent);background:color-mix(in srgb,var(--surface) 40%,transparent)}
+body.notes3 #noteview,body.notes3 #canvasview,body.notes3 .desk-empty{left:calc(84px + var(--nw,300px) + var(--nlw,280px))}
+body.notes3 .desk-split.nt{left:calc(84px + var(--nw,300px) - 5px)}
+body.notes3 .desk-split.nl{display:block;left:calc(84px + var(--nw,300px) + var(--nlw,280px) - 5px)}
+body.notes3 .ob-tools{flex-wrap:wrap;justify-content:center}
+body.notes3 .ob-tools [data-tool=new]{display:none}
+body.notes3 .ob-chev.none{visibility:hidden}
+body.notes3 .ob-row{padding-inline:22px 8px}
+body.notes3 .ob-kids{margin-left:6px}
+body.notes3 .vn-compose:not([hidden]){left:calc(84px + var(--nw,300px) + var(--nlw,280px) + 18px);right:18px;width:auto;max-width:420px;margin-left:auto}
+.has-bg body.notes3 .vn-list,body.notes3.has-bg .vn-list{background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.vl-head{display:flex;align-items:center;gap:8px;padding:14px 10px 8px 16px;flex:none}
+.vl-head div{flex:1;min-width:0}
+.vl-head b{display:block;font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--fg)}
+.vl-head small{font-size:12px;color:var(--muted)}
+.vl-new{width:36px;height:36px;border-radius:10px;flex:none;display:grid;place-items:center;color:var(--fg);background:var(--surface-2)}
+.vl-new:hover{background:var(--surface-3)}
+.vl-rows{flex:1;min-height:0;overflow-y:auto;padding:0 8px 16px}
+.vl-row{display:block;width:100%;text-align:left;padding:9px 10px;border-radius:12px;color:var(--fg);border-bottom:1px solid color-mix(in srgb,var(--outline) 35%,transparent)}
+.vl-row:hover{background:color-mix(in srgb,var(--surface-2) 60%,transparent)}
+.vl-row.on{background:var(--surface-2)}
+.vl-row.dragging{opacity:.35}
+.vl-row b{display:block;font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vl-row span{display:block;font-size:12.5px;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.vl-row span i{font-style:normal;color:var(--fg);opacity:.75;margin-right:6px}
+.vl-row .ob-edit{width:100%}
+.vl-empty{padding:40px 14px;text-align:center;color:var(--muted);font-size:14px}
 body.resizing,body.resizing *{cursor:col-resize!important;user-select:none!important;-webkit-user-select:none!important}
 body.deskcal .bk-tl{display:flex;gap:8px;align-items:flex-start}
 body.deskcal .bk-tl>.bk-sec{flex:1 1 0;min-width:0;margin-bottom:0}
@@ -1384,7 +1414,7 @@ body.deskcal .bk-headwrap{top:-16px;margin:-16px -16px 0;padding-top:16px}
 .ne-down{position:fixed;right:24px;bottom:96px;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--container);color:var(--on-container);box-shadow:0 6px 18px rgba(0,0,0,.35);z-index:5;animation:ndIn .2s ease-out}
 .ne-down:hover{filter:brightness(1.1)}
 @keyframes ndIn{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
-body.desknotes .ne-down{right:32px;bottom:110px}
+body.desknotes .ne-down{right:32px;top:118px;bottom:auto}
 
 /* Barra inferior: cápsula flotante */
 body:not(.desk) .nav{left:50%;right:auto;bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 14px);transform:translateX(-50%);width:auto;padding:7px;border-radius:999px;background:color-mix(in srgb,var(--surface-2) 88%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 1px color-mix(in srgb,var(--fg) 8%,transparent)}
@@ -2070,6 +2100,8 @@ body.desk:not(.desknotes) #noteview{display:none!important}
       <div class="ob-pwrap" id="ob-pwrap" hidden><div class="ob-pmenu" id="ob-pmenu"></div><button class="ob-panelpill" id="ob-panelpill"><span id="ob-panel-ic"></span><span id="ob-panel-name"></span></button></div>
     </div>
   </div>
+
+  <div class="vn-list" id="vn-list"></div>
 
   <div class="vn-compose" id="vn-compose" hidden><button class="cp-b" id="vn-menu" aria-label="Menú de notas"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h11"/></svg></button><button class="cp-b" id="vn-plus" aria-label="Elegir qué crear"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><textarea id="vn-in" rows="1" placeholder="Escribe una nota…" aria-label="Nota rápida"></textarea><button class="cp-s" id="vn-send" aria-label="Crear"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button></div>
   <div class="vn-compose" id="rg-compose" hidden><button class="cp-b" id="rg-menu" aria-label="Menú de registros"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h11"/></svg></button><button class="cp-b" id="rg-plus" aria-label="Más opciones"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><textarea id="rg-in" rows="1" placeholder="Apunta algo…" aria-label="Apuntar"></textarea><button class="cp-s" id="rg-send" aria-label="Apuntar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button></div>
@@ -2944,10 +2976,11 @@ function tone(f,st,dur,type='sine',vol=.35){if(inBg()||S.soundOn===false)return;
 let dkVoice=null,dkVoiceId=0;
 function stopVoice(){dkVoiceId++;try{speechSynthesis.cancel()}catch(e){}if(dkVoice){try{dkVoice.stop()}catch(e){}dkVoice=null}}
 async function speakDesk(text){stopVoice();const id=dkVoiceId;let b=null;try{b=await VTDesktop.tts(text,S.tts.lang,S.tts.pitch,S.tts.rate)}catch(e){}
-  if(id!==dkVoiceId)return;const c=ac();if(!b||!c){playSound('pitido');return}
+  if(id!==dkVoiceId)return;const c=ac();if(!b||!c){if(speechSynthesis.getVoices().length)speakWeb(text);else playSound('pitido');return}
   try{const buf=await c.decodeAudioData(b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength));if(id!==dkVoiceId)return;
     const o=c.createBufferSource(),g=c.createGain();o.buffer=buf;g.gain.value=Math.min(2,S.vol/100);o.connect(g);g.connect(c.destination);o.onended=()=>{if(dkVoice===o)dkVoice=null};dkVoice=o;o.start()}catch(e){playSound('pitido')}}
-function speak(text){if(window.VTDesktop){speakDesk(text||S.tts.text);return}try{if(!('speechSynthesis' in window)){toast('Este navegador no tiene voces');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text||S.tts.text);u.lang=S.tts.lang;u.pitch=S.tts.pitch;u.rate=S.tts.rate;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.replace('_','-').startsWith(S.tts.lang.slice(0,2)));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+function speak(text){if(window.VTDesktop){speakDesk(text||S.tts.text);return}speakWeb(text)}
+function speakWeb(text){try{if(!('speechSynthesis' in window)){toast('Este navegador no tiene voces');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text||S.tts.text);u.lang=S.tts.lang;u.pitch=S.tts.pitch;u.rate=S.tts.rate;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.replace('_','-').startsWith(S.tts.lang.slice(0,2)));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
 function playSound(kind=S.sound,loop=false){
   if(inBg()||S.soundOn===false)return;
   if(natSound()){VTNative.playAlert({kind,vol:S.vol,tts:S.tts,loop});return}
@@ -2959,7 +2992,7 @@ function playSound(kind=S.sound,loop=false){
 }
 function buzz(p){if(S.vib&&navigator.vibrate){try{navigator.vibrate(p)}catch(e){}}}
 /* En Android pide el «foco de audio» y en PC usa el sistema: Spotify y demás bajan el volumen (duck) o se pausan mientras suena el aviso. Devuelve true si puede controlar la música. */
-function duckMusic(){if(S.aviso==='none')return false;const nat=window.VTNative&&VTNative.hasPlugin,dk=window.VTDesktop,mode=S.aviso==='pause'?'pause':'duck',ms=Math.max(1500,(S.dur||2)*1000);if(nat)VTNative.audioFocus(mode,ms);else if(dk)dk.audioFocus(mode,ms,S.duck);return !!(nat||dk)}
+function duckMusic(){if(S.aviso==='none')return false;const nat=window.VTNative&&VTNative.hasPlugin,dk=window.VTDesktop&&VTDesktop.canDuck,mode=S.aviso==='pause'?'pause':'duck',ms=Math.max(1500,(S.dur||2)*1000);if(nat)VTNative.audioFocus(mode,ms);else if(dk)dk.audioFocus(mode,ms,S.duck);return !!(nat||dk)}
 function alert_(){
   if(inBg())return;
   buzz([300,120,300,120,500]);
@@ -2972,13 +3005,13 @@ function renderAviso(){
   $('aviso-list').innerHTML=rowsHtml(AVISOS,S.aviso,'av');
   $('duck-lvl').value=S.duck;$('duck-o').textContent=S.duck+' %';$('duck-dur').value=S.dur;$('dur-o').textContent=S.dur+' s';
   const off=S.aviso==='none'||S.aviso==='pause';$('duck-lvl').disabled=off;
-  if(window.VTDesktop)$('duck-note').hidden=true;
+  if(window.VTDesktop){$('duck-note').hidden=!!VTDesktop.canDuck;$('duck-note').textContent='En Windows, la app todavía no puede bajar ni pausar la música de otras apps.'}
 }
 $('aviso-list').onclick=e=>{const b=e.target.closest('[data-av]');if(b){S.aviso=b.dataset.av;save();renderAviso()}};
 $('duck-lvl').oninput=e=>{S.duck=+e.target.value;save();renderAviso()};
 $('duck-dur').oninput=e=>{S.dur=+e.target.value;save();renderAviso()};
 $('vol-lvl').oninput=e=>{S.vol=+e.target.value;save();$('vol-o').textContent=S.vol+' %'};
-$('vol-test').onclick=()=>{ac();if((natSound()||window.VTDesktop)&&S.soundOn!==false)duckMusic();buzz([300,120,300]);playSound()};
+$('vol-test').onclick=()=>{ac();if((natSound()||(window.VTDesktop&&VTDesktop.canDuck))&&S.soundOn!==false)duckMusic();buzz([300,120,300]);playSound()};
 const alertMode=()=>S.soundOn===false?'vib':S.vib?'both':'sound';
 function renderAlertMode(){document.querySelectorAll('#alert-mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===alertMode()))}
 $('alert-mode').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;S.soundOn=b.dataset.m!=='vib';S.vib=b.dataset.m!=='sound';save();renderAlertMode()};
@@ -3143,7 +3176,7 @@ function ring(a){
   else{playSound();ringDuck();ringLoop=setInterval(()=>{buzz([300,120,300,120,500]);playSound();ringDuck()},S.sound==='voz'?4000:2500)}
 }
 /* En PC, la música sigue baja mientras la alarma suena, no solo los segundos del aviso */
-function ringDuck(){if(window.VTDesktop&&S.aviso!=='none')VTDesktop.audioFocus(S.aviso==='pause'?'pause':'duck',6000,S.duck)}
+function ringDuck(){if(window.VTDesktop&&VTDesktop.canDuck&&S.aviso!=='none')VTDesktop.audioFocus(S.aviso==='pause'?'pause':'duck',6000,S.duck)}
 function stopRing(){clearInterval(ringLoop);if(natSound())VTNative.stopAlert();if(window.VTDesktop)VTDesktop.audioFocus('release');$('ringing').hidden=true;stopVoice();
   if(ringing&&!ringing.days.length&&!ringing.snooze){ringing.on=false;save()}
   if(ringing&&ringing.snooze){S.alarms=S.alarms.filter(x=>x.id!==ringing.id);save()}
@@ -3892,7 +3925,7 @@ document.addEventListener('keydown',e=>{if($('canvasview').hidden||cvEditing)ret
 /* ===================== Notas en ordenador ===================== */
 /* Móvil en horizontal: mismo diseño a dos paneles que en el ordenador, en vez de una columna estrecha */
 const DESK=matchMedia('(min-width:900px) and (min-height:500px), (min-width:640px) and (orientation:landscape)');
-function applyDesk(){const on=DESK.matches;document.body.classList.toggle('desk',on);document.body.classList.toggle('desknotes',on&&view==='notes');
+function applyDesk(){const on=DESK.matches;document.body.classList.toggle('desk',on);document.body.classList.toggle('desknotes',on&&view==='notes');syncN3();
   if(on&&view==='notes'){renderDeskTabs();if(!curNote&&S.obActive&&nget(S.obActive)&&!isCanvas(nget(S.obActive))&&!window._deskBoot){window._deskBoot=1;openNote(S.obActive,false)}}
   $('desk-empty').hidden=!(on&&view==='notes'&&$('noteview').hidden)}
 DESK.addEventListener?DESK.addEventListener('change',applyDesk):DESK.addListener(applyDesk);
@@ -3913,19 +3946,21 @@ document.addEventListener('keydown',e=>{if(!document.body.classList.contains('de
 /* ---------- PC: divisores arrastrables (agenda y notas) ---------- */
 (()=>{const root=document.documentElement,setW=(v,px)=>root.style.setProperty(v,px+'px');
   const defAg=()=>Math.round(Math.max(420,Math.min(innerWidth-84-380,(innerWidth-84)*.5)));
-  setW('--bkw',S.bkW||defAg());if(S.nW)setW('--nw',S.nW);
+  setW('--bkw',S.bkW||defAg());if(S.nW)setW('--nw',S.nW);if(S.nLW)setW('--nlw',S.nLW);
   const mk=(cls,label)=>{const d=document.createElement('div');d.className='desk-split '+cls;d.setAttribute('role','separator');d.setAttribute('aria-orientation','vertical');d.setAttribute('aria-label',label);d.title=label;document.body.appendChild(d);return d};
-  const ag=mk('ag','Arrastra para cambiar el ancho · doble clic para volver al tamaño normal'),nt=mk('nt','Arrastra para cambiar el ancho · doble clic para volver al tamaño normal');
+  const ag=mk('ag','Arrastra para cambiar el ancho · doble clic para volver al tamaño normal'),nt=mk('nt','Arrastra para cambiar el ancho · doble clic para volver al tamaño normal'),nl=mk('nl','Arrastra para cambiar el ancho · doble clic para volver al tamaño normal');
   let lastCols=0;const reflow=()=>{const n=bkColsN();if(n!==lastCols){lastCols=n;if(n)renderBlocks()}};
   const drag=(el,calc,apply,done)=>{el.addEventListener('pointerdown',e=>{if(e.button>0)return;e.preventDefault();el.setPointerCapture(e.pointerId);el.classList.add('on');document.body.classList.add('resizing');
     const mv=ev=>apply(calc(ev.clientX)),up=()=>{el.classList.remove('on');document.body.classList.remove('resizing');el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);done()};
     el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up)})};
-  const clampAg=x=>Math.round(Math.max(320,Math.min(innerWidth-84-380,innerWidth-x))),clampNt=x=>Math.round(Math.max(220,Math.min(Math.min(720,innerWidth-84-420),x-84)));
+  const clampAg=x=>Math.round(Math.max(320,Math.min(innerWidth-84-380,innerWidth-x))),nlw=()=>notes3()?S.nLW||280:0,clampNt=x=>Math.round(Math.max(220,Math.min(Math.min(720,innerWidth-84-420-nlw()),x-84))),clampNl=x=>Math.round(Math.max(200,Math.min(Math.min(520,innerWidth-84-420-(S.nW||300)),x-84-(S.nW||300))));
   drag(ag,clampAg,w=>{S.bkW=w;setW('--bkw',w);reflow()},()=>{save();renderBlocks()});
   drag(nt,clampNt,w=>{S.nW=w;setW('--nw',w)},()=>save());
+  drag(nl,clampNl,w=>{S.nLW=w;setW('--nlw',w)},()=>save());
+  nl.addEventListener('dblclick',()=>{delete S.nLW;root.style.removeProperty('--nlw');save()});
   ag.addEventListener('dblclick',()=>{delete S.bkW;setW('--bkw',defAg());save();reflow();renderBlocks()});
   nt.addEventListener('dblclick',()=>{delete S.nW;root.style.removeProperty('--nw');save()});
-  let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{setW('--bkw',S.bkW?Math.min(S.bkW,Math.max(320,innerWidth-84-380)):defAg());if(S.nW)setW('--nw',Math.min(S.nW,Math.max(220,innerWidth-84-420)));reflow()},120)});
+  let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{setW('--bkw',S.bkW?Math.min(S.bkW,Math.max(320,innerWidth-84-380)):defAg());if(S.nW)setW('--nw',Math.min(S.nW,Math.max(220,innerWidth-84-420-nlw())));syncN3();reflow()},120)});
   setTimeout(()=>{lastCols=bkColsN()},0)})();
 
 /* ================= TOUR DE BIENVENIDA ================= */
@@ -5078,17 +5113,19 @@ function notePath(n){return (n.folder?n.folder+'/':'')+(n.title||'Sin título')}
 let obSel=null,obRenaming=null,obSuppress=false,obPmenu=false;
 function treeHTML(parent){
   let h='';
-  sortFolders(allFolders().filter(f=>parentOf(f)===parent)).forEach(f=>{const open=!!S.obOpen[f],sel=obSel&&obSel.type==='folder'&&obSel.id===f;
+  const n3=notes3(),subs=f=>allFolders().some(x=>parentOf(x)===f);
+  sortFolders(allFolders().filter(f=>parentOf(f)===parent)).forEach(f=>{const open=!!S.obOpen[f],sel=n3?S.obFolder===f:obSel&&obSel.type==='folder'&&obSel.id===f;
     if(obRenaming==='f:'+f)h+=`<div class="ob-row ob-editrow"><span class="ob-chev">${OB_IC.chev}</span><input class="ob-edit" id="ob-edit" value="${esc(baseName(f))}" data-kind="f" data-ref="${esc(f)}" aria-label="Nombre"></div>`;
-    else{const cnt=[...S.notes,...S.atts].filter(x=>(x.folder||'')===f||(x.folder||'').startsWith(f+'/')).length;h+=`<button class="ob-row vn-frow${sel?' on':''}" data-folder="${esc(f)}" aria-expanded="${open}"><span class="ob-chev${open?' open':''}">${OB_IC.chev}</span><span class="vn-ftile"${folderColor(f)?` style="color:${folderColor(f)}"`:''}>${OB_IC.folder.replace('width="16" height="16"','width="18" height="18"')}</span><span class="ob-name"${folderColor(f)?` style="color:${folderColor(f)}"`:''}>${esc(baseName(f))}</span><span class="vn-cnt">${cnt}</span></button>`}
+    else{const cnt=[...S.notes,...S.atts].filter(x=>(x.folder||'')===f||(x.folder||'').startsWith(f+'/')).length;h+=`<button class="ob-row vn-frow${sel?' on':''}" data-folder="${esc(f)}" aria-expanded="${open}"><span class="ob-chev${open?' open':''}${n3&&!subs(f)?' none':''}">${OB_IC.chev}</span><span class="vn-ftile"${folderColor(f)?` style="color:${folderColor(f)}"`:''}>${OB_IC.folder.replace('width="16" height="16"','width="18" height="18"')}</span><span class="ob-name"${folderColor(f)?` style="color:${folderColor(f)}"`:''}>${esc(baseName(f))}</span><span class="vn-cnt">${cnt}</span></button>`}
     if(open)h+=`<div class="ob-kids">${treeHTML(f)}</div>`});
+  if(n3)return h;
   sortItems([...S.notes.filter(n=>(n.folder||'')===parent),...S.atts.filter(a=>(a.folder||'')===parent)]).forEach(x=>{
     const isN=x.title!=null,on=isN?S.obActive===x.id&&(!obSel||obSel.type!=='folder'):(obSel&&obSel.id===x.id);
     if(obRenaming==='n:'+x.id||obRenaming==='a:'+x.id){h+=`<div class="ob-row ob-editrow"><input class="ob-edit" id="ob-edit" value="${esc(isN?x.title:x.name.replace(/\.\w+$/,''))}" data-kind="${isN?'n':'a'}" data-ref="${x.id}" aria-label="Nombre"></div>`;return}
     h+=`<button class="ob-row${on?' on':''}" ${isN?`data-note="${x.id}"`:`data-att="${x.id}"`}><span class="vn-glyph${isN?(isCanvas(x)?' cvg':''):' img'}"${!isN&&attType(x)!=='img'?` style="color:${FT_IC[attType(x)][0]}"`:''}>${!isN&&attType(x)!=='img'?`<b class="ft-mini">${FT_IC[attType(x)][1]}</b>`:isN?(isCanvas(x)?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/></svg>':''):OB_IC.img}</span><span class="vn-ntext"><span class="ob-name"${isN&&x.color?` style="color:${x.color}"`:''}>${esc(isN?(x.title||'Sin título'):x.name.replace(/\.\w+$/,''))}</span>${isN?`<span class="vn-sub">${nAgo(x.updated||x.created||Date.now())}${isCanvas(x)?' · lienzo · '+cvParse(x).nodes.length+' tarjetas':''}${(isCanvas(x)?[]:tagsOf(x)).slice(0,2).map(t=>' · #'+esc(t)).join('')}</span>`:''}</span>${isN&&x.date?`<span class="ob-badge vn-date">${shortDate(x.date)}</span>`:''}${isN?'':`<span class="ob-badge">${esc((x.name.split('.').pop()||'').toUpperCase())}</span>`}</button>`});
   return h;
 }
-function revealActive(scroll){const n=nget(S.obActive);if(!n)return;let f=n.folder;while(f){S.obOpen[f]=true;f=parentOf(f)}
+function revealActive(scroll){const n=nget(S.obActive);if(!n)return;let f=n.folder;if(notes3())S.obFolder=f||'';while(f){S.obOpen[f]=true;f=parentOf(f)}
   if(scroll){renderNotes();const el=$('ob-list').querySelector(`[data-note="${n.id}"]`);if(el)el.scrollIntoView({block:'center',behavior:'smooth'})}}
 const anyOpen=()=>allFolders().some(f=>S.obOpen[f]);
 function obTools(){const P=S.obPanel,U=S.obUI,b=(id,ic,lbl,on)=>`<button data-tool="${id}" class="${on?'on':''}" aria-label="${lbl}" title="${lbl}">${ic}</button>`;
@@ -5098,11 +5135,29 @@ function obTools(){const P=S.obPanel,U=S.obUI,b=(id,ic,lbl,on)=>`<button data-to
   if(P==='star')return b('bmadd',OB_IC.bmadd,'Añadir marcador')+b('bmgroup',OB_IC.newfolder,'Nuevo grupo')+b('bmfold',Object.values(S.bmOpen).some(Boolean)?OB_IC.collapse:OB_IC.expand,'Expandir o contraer todo')+b('bmfind',OB_IC.find,'Mostrar filtro de búsqueda',U.bmFilter);
   return '';
 }
+/* Tres columnas solo con ratón y sitio de sobra; en el móvil no se usa */
+function notes3(){return document.body.classList.contains('desknotes')&&innerWidth>=1100&&innerHeight>=521&&S.obPanel==='files'}
+function syncN3(){const on=notes3(),ch=on!==document.body.classList.contains('notes3');document.body.classList.toggle('notes3',on);if(ch&&view==='notes')renderNotes()}
+const vlFolder=()=>{const f=S.obFolder==null?'*':S.obFolder;return f==='*'||f===''||allFolders().includes(f)?f:'*'};
+function vlFolderRows(){const f=vlFolder(),root=[...S.notes,...S.atts].some(x=>!x.folder),row=(k,t,c)=>`<button class="ob-row vn-frow${f===k?' on':''}" data-fall="${k}"><span class="ob-chev none">${OB_IC.chev}</span><span class="vn-ftile">${OB_IC.note.replace(/width="\d+" height="\d+"/,'width="18" height="18"')}</span><span class="ob-name">${t}</span><span class="vn-cnt">${c}</span></button>`;
+  return row('*',T('Todas las notas'),S.notes.length+S.atts.length)+(root?row('',T('Sin carpeta'),[...S.notes,...S.atts].filter(x=>!x.folder).length):'')}
+/* Columna central: lo que hay directamente en la carpeta elegida */
+function renderNoteCol(){if(!notes3())return;const f=vlFolder(),L=$('vn-list'),all=[...S.notes,...S.atts],items=sortItems(f==='*'?all:all.filter(x=>(x.folder||'')===f));
+  const prev=L.querySelector('.vl-rows'),top=prev?prev.scrollTop:0;
+  const date=t=>t?new Date(t).toLocaleDateString(LOC,{day:'numeric',month:'short'}):'';
+  const snip=n=>isCanvas(n)?T('Lienzo'):(n.body||'').slice(0,240).replace(/<[^>]+>/g,'').replace(/[#*_`>~\[\]-]+/g,' ').replace(/\s+/g,' ').trim();
+  const rows=items.map(x=>{const isN=x.title!=null,k=isN?'n:':'a:';
+    if(obRenaming===k+x.id)return `<div class="vl-row"><input class="ob-edit" id="ob-edit" value="${esc(isN?x.title:x.name.replace(/\.\w+$/,''))}" data-kind="${isN?'n':'a'}" data-ref="${x.id}" aria-label="Nombre"></div>`;
+    return `<button class="vl-row${isN&&S.obActive===x.id?' on':''}" ${isN?`data-note="${x.id}"`:`data-att="${x.id}"`}><b>${esc(isN?x.title||'Sin título':x.name)}</b><span><i>${date(x.updated||x.created)}</i>${esc([f==='*'&&x.folder?baseName(x.folder):'',isN?snip(x):''].filter(Boolean).join(' · '))}</span></button>`}).join('');
+  L.innerHTML=`<div class="vl-head"><div><b>${esc(f==='*'?T('Todas las notas'):f===''?T('Sin carpeta'):baseName(f))}</b><small>${items.length} ${items.length===1?T('elemento'):T('elementos')}</small></div><button class="vl-new" data-vlnew="1" aria-label="Nueva nota" title="Nueva nota">${OB_IC.newnote.replace('width="30" height="30"','width="22" height="22"')}</button></div><div class="vl-rows">${rows||`<div class="vl-empty">${T('Esta carpeta está vacía')}</div>`}</div>`;
+  L.querySelector('.vl-rows').scrollTop=top}
 function renderNotes(){
-  const P=S.obPanel,folders=allFolders();
+  const P=S.obPanel,folders=allFolders(),n3=notes3();
+  document.body.classList.toggle('notes3',n3);
   $('v-notes').dataset.panel=P;
   if(P==='files'){if(S.obUI.reveal)revealActive(false);
-    $('ob-list').innerHTML=treeHTML('')||`<div class="ob-empty" style="text-align:center;padding:40px 10px">Aún no hay notas<br>Pulsa + para escribir la primera</div>`;
+    if(n3)renderNoteCol();
+    $('ob-list').innerHTML=(n3?vlFolderRows():'')+treeHTML('')||`<div class="ob-empty" style="text-align:center;padding:40px 10px">Aún no hay notas<br>Pulsa + para escribir la primera</div>`;
     const ed=$('ob-edit');if(ed){ed.focus();ed.select();ed.scrollIntoView({block:'nearest'})}}
   else if(P==='search')renderSearchPanel();
   else if(P==='tags')renderTagsPanel();
@@ -5130,6 +5185,8 @@ $('ob-list').addEventListener('focusout',e=>{if(e.target.id==='ob-edit')setTimeo
 /* Clicks del panel de archivos y marcadores */
 $('ob-list').addEventListener('click',e=>{
   if(obSuppress){e.preventDefault();return}
+  const fa=e.target.closest('[data-fall]');if(fa){S.obFolder=fa.dataset.fall;save();renderNotes();return}
+  if(notes3()){const fd=e.target.closest('[data-folder]');if(fd){const p=fd.dataset.folder;if(e.target.closest('.ob-chev'))S.obOpen[p]=!S.obOpen[p];else S.obFolder=p;save();renderNotes();return}}
   const f=e.target.closest('[data-folder]');if(f){const p=f.dataset.folder;obSel={type:'folder',id:p};S.obOpen[p]=!S.obOpen[p];save();renderNotes();return}
   const n=e.target.closest('[data-note]');if(n){obSel={type:'note',id:n.dataset.note};openNote(n.dataset.note);return}
   const a=e.target.closest('[data-att]');if(a){obSel={type:'att',id:a.dataset.att};openAtt(a.dataset.att);return}
@@ -5138,11 +5195,18 @@ $('ob-list').addEventListener('click',e=>{
   const t=e.target.closest('[data-tagrow]');if(t){if(e.target.closest('.ob-chev')){S.tagOpen[t.dataset.tagrow]=!S.tagOpen[t.dataset.tagrow];save();renderNotes();return}runSearchFor('tag:#'+t.dataset.tagrow);return}
   const pr=e.target.closest('[data-prop]');if(pr){runSearchFor('['+pr.dataset.prop+']');return}
 });
-$('ob-list').addEventListener('contextmenu',e=>{const row=e.target.closest('[data-note],[data-folder],[data-att],[data-bm],[data-bmg]');if(!row)return;e.preventDefault();if(lastPT==='mouse'||!('ontouchstart' in window)){if(lp){clearTimeout(lp.t);lp=null}ctxMenu(row)}});
+const obCtx=e=>{const row=e.target.closest('[data-note],[data-folder],[data-att],[data-bm],[data-bmg]');if(!row)return;e.preventDefault();if(lastPT==='mouse'||!('ontouchstart' in window)){if(lp){clearTimeout(lp.t);lp=null}ctxMenu(row)}};
+$('ob-list').addEventListener('contextmenu',obCtx);$('vn-list').addEventListener('contextmenu',obCtx);
+$('vn-list').addEventListener('click',e=>{if(obSuppress){e.preventDefault();return}
+  if(e.target.closest('[data-vlnew]')){$('nb-new').click();return}
+  const n=e.target.closest('[data-note]');if(n){openNote(n.dataset.note);return}
+  const a=e.target.closest('[data-att]');if(a)openAtt(a.dataset.att)});
+$('vn-list').addEventListener('keydown',e=>{if(e.target.id==='ob-edit'){if(e.key==='Enter'){e.preventDefault();commitEdit(e.target)}if(e.key==='Escape')commitEdit(e.target,true)}});
+$('vn-list').addEventListener('focusout',e=>{if(e.target.id==='ob-edit')setTimeout(()=>commitEdit(e.target),0)});
 
 /* Barra de herramientas del panel */
 $('ob-tools').onclick=e=>{const b=e.target.closest('[data-tool]');if(!b)return;const U=S.obUI;
-  const target=obSel&&obSel.type==='folder'?obSel.id:'';
+  const target=notes3()?(vlFolder()==='*'?'':vlFolder()):obSel&&obSel.type==='folder'?obSel.id:'';
   switch(b.dataset.tool){
     case 'new':{const n=newNote(uniqueTitle('Sin título'),target||newNoteFolder());if(target)S.obOpen[target]=true;save();obSel={type:'note',id:n.id};openNote(n.id,true);setTimeout(()=>{const t=$('ne-title');t.focus();t.select()},80);break}
     case 'canvas':{if(target)S.obOpen[target]=true;newCanvas(target||newNoteFolder());break}
@@ -5300,9 +5364,10 @@ function ctxSheet(title,sub,A){const items=[],fns=[];let sep=false;
 
 /* --- Arrastrar y soltar --- */
 let lp=null,drag=null;
-$('ob-list').addEventListener('pointerdown',e=>{
+const obPD=e=>{
   if(e.button>0||e.target.closest('input'))return;const row=e.target.closest('[data-note],[data-folder],[data-att],[data-bm],[data-bmg]');if(!row)return;
-  lp={row,sx:e.clientX,sy:e.clientY,t:setTimeout(()=>{const r=lp&&lp.row;lp=null;if(r)startDrag(r,e.clientX,e.clientY)},420)}});
+  lp={row,sx:e.clientX,sy:e.clientY,t:setTimeout(()=>{const r=lp&&lp.row;lp=null;if(r)startDrag(r,e.clientX,e.clientY)},420)}};
+$('ob-list').addEventListener('pointerdown',obPD);$('vn-list').addEventListener('pointerdown',obPD);
 document.addEventListener('pointermove',e=>{if(lp&&Math.hypot(e.clientX-lp.sx,e.clientY-lp.sy)>8){clearTimeout(lp.t);lp=null}if(drag){drag.x=e.clientX;drag.y=e.clientY;moveDrag()}});
 document.addEventListener('pointerup',()=>{if(lp){clearTimeout(lp.t);lp=null}if(drag)endDrag(false)});
 document.addEventListener('pointercancel',()=>{if(lp){clearTimeout(lp.t);lp=null}if(drag)endDrag(true)});
@@ -5711,7 +5776,7 @@ const I_READ=OBI('<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 
 function leaveNote(){clearTimeout(neSaveT);if(!curNote)return;if(neEdit)saveNote();selLay=null;
   if(!curNote.title.trim())curNote.title=uniqueTitle('Sin título');save()}
 function openNote(id,edit,fromNav){
-  const n=nget(id);if(!n)return;if(isCanvas(n)){openCanvas(id);return}if(curNote&&curNote!==n)leaveNote();curNote=n;S.obActive=id;save();
+  const n=nget(id);if(!n)return;if(isCanvas(n)){openCanvas(id);return}if(curNote&&curNote!==n)leaveNote();curNote=n;S.obActive=id;save();renderNoteCol();
   if(!fromNav){navH=navH.slice(0,navI+1);if(navH[navI]!==id){navH.push(id);navI=navH.length-1}}
   if(!openTabs.includes(id)){openTabs.push(id);if(openTabs.length>9)openTabs.shift()}
   $('noteview').hidden=false;$('ne-crumb').textContent=curNote.folder?baseName(curNote.folder):(S.vaults.find(v=>v.id===S.curVault)||{name:'Notas'}).name;$('ne-title').value=curNote.title;selLay=null;renderLayers();setMode(edit!=null?edit:S.ob.openMode==='read'?false:S.ob.openMode==='edit'?true:!curNote.body.trim());
@@ -6091,7 +6156,7 @@ function templateList(){const own=tplNotes().map(n=>({t:n.title,s:'Plantilla de 
 function insertTemplate(){if(!curNote)return;const L=templateList();obSheet('Insertar plantilla',L.map(x=>({t:x.t,s:x.s})),i=>{if(!neEdit)setMode(true);const ta=$('ne-text');if(document.activeElement!==ta)ta.setSelectionRange(ta.value.length,ta.value.length);insertAt((ta.value&&!ta.value.endsWith('\n')?'\n\n':'')+fillTpl(L[i].body(),curNote.title),'')})}
 
 /* Ubicaciones por defecto */
-function newNoteFolder(){const o=S.ob;if(o.newLoc==='current'){const n=nget(S.obActive);return n?n.folder||'':''}if(o.newLoc==='folder')return o.newFolder||'';return ''}
+function newNoteFolder(){if(notes3()&&vlFolder()!=='*')return vlFolder();const o=S.ob;if(o.newLoc==='current'){const n=nget(S.obActive);return n?n.folder||'':''}if(o.newLoc==='folder')return o.newFolder||'';return ''}
 function attFolder(){const o=S.ob;if(o.attLoc==='note')return curNote?curNote.folder||'':'';if(o.attLoc==='folder')return o.attFolder||'';return ''}
 
 /* --- Tareas de las notas en el calendario (📅 AAAA-MM-DD) --- */

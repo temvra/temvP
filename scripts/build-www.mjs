@@ -1,6 +1,6 @@
 // Genera www/ a partir de src/app.html: fuentes y librerías locales (la app funciona sin conexión) + puente nativo.
-import fs from 'node:fs';import path from 'node:path';
-const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..'),nm=p=>path.join(root,'node_modules',p),www=path.join(root,'www');
+import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),nm=p=>path.join(root,'node_modules',p),www=path.join(root,'www');
 fs.rmSync(www,{recursive:true,force:true});fs.mkdirSync(path.join(www,'libs'),{recursive:true});fs.mkdirSync(path.join(www,'fonts'),{recursive:true});
 const cp=(a,b)=>fs.copyFileSync(a,path.join(www,b));
 cp(nm('jspdf/dist/jspdf.umd.min.js'),'libs/jspdf.umd.min.js');cp(nm('jszip/dist/jszip.min.js'),'libs/jszip.min.js');

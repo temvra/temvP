@@ -78,6 +78,37 @@ jobs:
           name: Temvra Personal 1.0.${{ github.run_number }}
           body: |
             **Móvil:** descarga el archivo .apk de abajo desde el móvil e instálalo. Se instala encima de la versión anterior sin perder tus datos.
+            **PC (Windows):** descarga el archivo .exe y ejecútalo. Windows avisará de que la app no está firmada: pulsa «Más información» y «Ejecutar de todos modos».
             **PC (Linux):** descarga el archivo .AppImage, dale permiso de ejecución y ábrelo.
           files: out/*
           make_latest: true
+
+  # Va aparte porque el instalador de Windows se compila en Windows. Si falla, el APK y el AppImage ya están publicados
+  windows:
+    needs: apk
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Preparar la web de la app
+        run: |
+          npm ci
+          npm run build
+
+      - name: Compilar la app de Windows
+        working-directory: desktop
+        run: |
+          npm ci
+          npm run win -- -c.extraMetadata.version=1.0.${{ github.run_number }}
+
+      - name: Añadirla a la versión
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          files: desktop/dist/*.exe
