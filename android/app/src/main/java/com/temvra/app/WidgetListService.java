@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Parcel;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -21,8 +23,40 @@ import java.util.Locale;
 /** Filas de los widgets con lista. Todo son vistas de texto normales, así nada se estira al cambiar de tamaño. */
 public class WidgetListService extends RemoteViewsService {
     @Override
-    public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        Context c = getApplicationContext();
+    public RemoteViewsFactory onGetViewFactory(Intent intent) { return factory(getApplicationContext(), intent); }
+
+    /** Todo va en una transacción de Binder, limitada a 1 MB: si una lista enorme no cabe se quedan fuera sus últimas filas. */
+    private static final int MAX_ITEMS_BYTES = 700 * 1024;
+
+    /** Las filas de una lista para llevarlas dentro de la propia vista. Ver Widgets.setList. */
+    @android.annotation.TargetApi(31)
+    static RemoteViews.RemoteCollectionItems items(Context c, Intent svc, int layout, int list) {
+        RemoteViewsFactory f = factory(c.getApplicationContext(), svc);
+        f.onCreate();
+        f.onDataSetChanged();
+        int total = f.getCount(), n = total;
+        RemoteViews[] rows = new RemoteViews[total];
+        for (int i = 0; i < total; i++) rows[i] = f.getViewAt(i);
+        while (true) {
+            RemoteViews.RemoteCollectionItems.Builder b = new RemoteViews.RemoteCollectionItems.Builder().setHasStableIds(f.hasStableIds());
+            for (int i = 0; i < n; i++) b.addItem(f.getItemId(i), rows[i]);
+            RemoteViews.RemoteCollectionItems items = b.build();
+            RemoteViews probe = new RemoteViews(c.getPackageName(), layout);
+            probe.setRemoteAdapter(list, items);
+            Parcel p = Parcel.obtain();
+            probe.writeToParcel(p, 0);
+            int size = p.dataSize();
+            p.recycle();
+            if (size <= MAX_ITEMS_BYTES || n <= 1) {
+                if (n < total) Log.w("Temvra", "Lista de widget recortada: " + n + " de " + total + " filas");
+                f.onDestroy();
+                return items;
+            }
+            n = n * 3 / 4;
+        }
+    }
+
+    private static RemoteViewsFactory factory(Context c, Intent intent) {
         String type = intent.getStringExtra("type");
         int id = intent.getIntExtra("id", 0);
         if (Widgets.LINE.equals(type)) return new LineFactory(c, id, intent.getIntExtra("wdp", 300));
@@ -207,6 +241,7 @@ public class WidgetListService extends RemoteViewsService {
     /* ---------- Línea de tiempo: 96 franjas de 15 min, así las cifras y el texto conservan siempre su proporción ---------- */
     private static final class LineFactory extends Base {
         private static final int[] CELLS = {R.id.wl_c0, R.id.wl_c1, R.id.wl_c2, R.id.wl_c3, R.id.wl_c4, R.id.wl_c5};
+        private static final int[] DAYS = {R.id.wl_day0, R.id.wl_day1, R.id.wl_day2};
         private final int id, wdp;
         private final List<List<Ev>> cols = new ArrayList<>();
         private int off = 0, accent = Widgets.DEF_ACCENT;
@@ -268,6 +303,7 @@ public class WidgetListService extends RemoteViewsService {
             v.setTextViewText(R.id.wl_hour, nowHere ? String.format(Locale.ROOT, "%02d:%02d", nowMin / 60, nowMin % 60) : hour ? String.format(Locale.ROOT, "%02d:00", slot / 4) : "");
             v.setTextColor(R.id.wl_hour, nowHere ? 0xFFFF5C60 : 0xFFA0A0A8);
             for (int i = 0; i < CELLS.length; i++) v.setViewVisibility(CELLS[i], View.GONE);
+            for (int i = 0; i < DAYS.length; i++) v.setViewVisibility(DAYS[i], i < cols.size() ? View.VISIBLE : View.GONE);
             for (int k = 0; k < cols.size() && k < 3; k++) {
                 Ev[] lane = new Ev[2];
                 boolean two = false;
@@ -286,6 +322,7 @@ public class WidgetListService extends RemoteViewsService {
             if (e == null) {
                 v.setTextViewText(cell, "");
                 v.setInt(cell, "setBackgroundResource", 0);
+                setFill(v, cell, "agenda");
                 return;
             }
             boolean first = e.s >= top, last = e.e <= top + 15;

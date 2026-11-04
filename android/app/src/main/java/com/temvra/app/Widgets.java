@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.TypedValue;
@@ -162,11 +163,26 @@ public class Widgets {
         v.setOnClickPendingIntent(R.id.wa_empty, open(c, "alarms", 33));
         Intent svc = new Intent(c, WidgetListService.class).putExtra("type", ALARMS).putExtra("scale", scale);
         svc.setData(Uri.parse("temvra://widget/alarms/" + id + "/" + scale));
-        v.setRemoteAdapter(R.id.wa_list, svc);
+        setList(c, v, R.id.wa_list, svc);
         v.setEmptyView(R.id.wa_list, R.id.wa_empty);
         v.setPendingIntentTemplate(R.id.wa_list, actionTemplate(c, 4000 + id % 1000));
         m.updateAppWidget(id, v);
-        m.notifyAppWidgetViewDataChanged(id, R.id.wa_list);
+        reloadList(m, id, R.id.wa_list);
+    }
+
+    /**
+     * Pone las filas de una lista. Desde Android 15 el sistema convierte setRemoteAdapter en filas dentro de la vista, y
+     * notifyAppWidgetViewDataChanged vuelve a publicar la vista que tenía guardada: la lista cambiaba, pero la cabecera
+     * nueva quedaba pisada por la anterior. Con las filas ya dentro, lista y cabecera llegan juntas en una sola actualización.
+     */
+    private static void setList(Context c, RemoteViews v, int list, Intent svc) {
+        if (Build.VERSION.SDK_INT >= 35) v.setRemoteAdapter(list, WidgetListService.items(c, svc, v.getLayoutId(), list));
+        else v.setRemoteAdapter(list, svc);
+    }
+
+    /** Después de setList: las versiones anteriores siguen cargando las filas desde el servicio. */
+    private static void reloadList(AppWidgetManager m, int id, int list) {
+        if (Build.VERSION.SDK_INT < 35) m.notifyAppWidgetViewDataChanged(id, list);
     }
 
     /** Plantilla común de las listas: WidgetAction decide qué hacer con cada toque. */
@@ -269,7 +285,7 @@ public class Widgets {
 
         Intent svc = new Intent(c, WidgetListService.class).putExtra("type", type).putExtra("narrow", narrow);
         svc.setData(Uri.parse("temvra://widget/" + type + "/" + id + "/" + narrow));
-        v.setRemoteAdapter(R.id.wl_list, svc);
+        setList(c, v, R.id.wl_list, svc);
         v.setEmptyView(R.id.wl_list, R.id.wl_empty);
 
         v.setPendingIntentTemplate(R.id.wl_list, actionTemplate(c, 110 + id % 1000));
@@ -282,7 +298,7 @@ public class Widgets {
             if (sp.getInt(key, -1) != idx) { sp.edit().putInt(key, idx).apply(); v.setScrollPosition(R.id.wl_list, idx); }
         }
         m.updateAppWidget(id, v);
-        m.notifyAppWidgetViewDataChanged(id, R.id.wl_list);
+        reloadList(m, id, R.id.wl_list);
     }
 
     /* ---------- Línea de tiempo: una fila por hora, dibujada como en la app ---------- */
@@ -329,11 +345,8 @@ public class Widgets {
         return PendingIntent.getBroadcast(c, 2000 + code + id % 500 * 8, it, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
-    static void updateLine(Context c, AppWidgetManager m, int id) {
-        int w = lineWidth(c, m, id), off = lineOffset(c, id), n = lineDays(c, id, w), max = lineMaxDays(w);
-        JSONObject d = data(c);
-        int color = accent(d);
-        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_line);
+    /** Días que se ven encima de la lista. */
+    private static void lineHeader(RemoteViews v, int color, int off, int n) {
         String[] names = {"Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"};
         int[] heads = {R.id.wline_d0, R.id.wline_d1, R.id.wline_d2};
         for (int i = 0; i < 3; i++) {
@@ -343,6 +356,14 @@ public class Widgets {
             v.setTextViewText(heads[i], names[day.get(Calendar.DAY_OF_WEEK) - 1] + " " + day.get(Calendar.DAY_OF_MONTH));
             v.setTextColor(heads[i], off + i == 0 ? color : 0xFFD4D4DA);
         }
+    }
+
+    static void updateLine(Context c, AppWidgetManager m, int id) {
+        int w = lineWidth(c, m, id), off = lineOffset(c, id), n = lineDays(c, id, w), max = lineMaxDays(w);
+        JSONObject d = data(c);
+        int color = accent(d);
+        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_line);
+        lineHeader(v, color, off, n);
         v.setOnClickPendingIntent(R.id.wline_days, open(c, "agenda", 120));
         v.setInt(R.id.wline_prev, "setColorFilter", color);
         v.setInt(R.id.wline_next, "setColorFilter", color);
@@ -358,10 +379,10 @@ public class Widgets {
 
         Intent svc = new Intent(c, WidgetListService.class).putExtra("type", LINE).putExtra("wdp", w).putExtra("id", id);
         svc.setData(Uri.parse("temvra://widget/line/" + id + "/" + w));
-        v.setRemoteAdapter(R.id.wline_list, svc);
+        setList(c, v, R.id.wline_list, svc);
         v.setPendingIntentTemplate(R.id.wline_list, actionTemplate(c, 3000 + id % 1000));
         m.updateAppWidget(id, v);
-        m.notifyAppWidgetViewDataChanged(id, R.id.wline_list);
+        reloadList(m, id, R.id.wline_list);
 
         // Al colocarlo se centra en la hora actual; después solo con el botón, para respetar el scroll
         if (!sp(c).getBoolean("line_" + id, false)) {
@@ -403,7 +424,7 @@ public class Widgets {
         }
         if ("zoom".equals(op)) {
             sp(c).edit().putInt("zoom_" + id, sp(c).getInt("zoom_" + id, 0) + 1).apply();
-            m.notifyAppWidgetViewDataChanged(id, R.id.wn_list);
+            updateNotes(c, m, id);
             return;
         }
         int w = lineWidth(c, m, id), off = lineOffset(c, id);
@@ -487,7 +508,7 @@ public class Widgets {
         if (v == null) return;
         String k = "open_" + id + "_" + v.optString("id") + "_" + path;
         sp(c).edit().putBoolean(k, !sp(c).getBoolean(k, false)).apply();
-        m.notifyAppWidgetViewDataChanged(id, R.id.wn_list);
+        updateNotes(c, m, id);
     }
 
     static void pick(Context c, int id, String kind, String value) {
@@ -522,11 +543,11 @@ public class Widgets {
         v.setOnClickPendingIntent(R.id.wn_empty, open(c, "notes", 5501));
         Intent svc = new Intent(c, WidgetListService.class).putExtra("type", NOTES).putExtra("id", id);
         svc.setData(Uri.parse("temvra://widget/notes/" + id));
-        v.setRemoteAdapter(R.id.wn_list, svc);
+        setList(c, v, R.id.wn_list, svc);
         v.setEmptyView(R.id.wn_list, R.id.wn_empty);
         v.setPendingIntentTemplate(R.id.wn_list, actionTemplate(c, 6000 + id % 1000));
         m.updateAppWidget(id, v);
-        m.notifyAppWidgetViewDataChanged(id, R.id.wn_list);
+        reloadList(m, id, R.id.wn_list);
     }
 
     /* ---------- Registro ---------- */
@@ -546,11 +567,11 @@ public class Widgets {
         v.setOnClickPendingIntent(R.id.wg_empty, open(c, "regs", 7501));
         Intent svc = new Intent(c, WidgetListService.class).putExtra("type", REG).putExtra("id", id);
         svc.setData(Uri.parse("temvra://widget/reg/" + id));
-        v.setRemoteAdapter(R.id.wg_list, svc);
+        setList(c, v, R.id.wg_list, svc);
         v.setEmptyView(R.id.wg_list, R.id.wg_empty);
         v.setPendingIntentTemplate(R.id.wg_list, actionTemplate(c, 8000 + id % 1000));
         m.updateAppWidget(id, v);
-        m.notifyAppWidgetViewDataChanged(id, R.id.wg_list);
+        reloadList(m, id, R.id.wg_list);
     }
 
     /* ---------- Calendario: el mes ---------- */
