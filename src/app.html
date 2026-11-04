@@ -2990,7 +2990,8 @@ async function speakDesk(text){stopVoice();const id=dkVoiceId;let b=null;try{b=a
   try{const buf=await c.decodeAudioData(b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength));if(id!==dkVoiceId)return;
     const o=c.createBufferSource(),g=c.createGain();o.buffer=buf;g.gain.value=Math.min(2,S.vol/100);o.connect(g);g.connect(c.destination);o.onended=()=>{if(dkVoice===o)dkVoice=null};dkVoice=o;o.start()}catch(e){playSound('pitido')}}
 function speak(text){if(window.VTDesktop){speakDesk(text||S.tts.text);return}speakWeb(text)}
-function speakWeb(text){try{if(!('speechSynthesis' in window)){toast('Este navegador no tiene voces');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text||S.tts.text);u.lang=S.tts.lang;u.pitch=S.tts.pitch;u.rate=S.tts.rate;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.replace('_','-').startsWith(S.tts.lang.slice(0,2)));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+function speakWeb(text){try{if(!('speechSynthesis' in window)){toast('Este navegador no tiene voces');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text||S.tts.text);u.lang=S.tts.lang;u.pitch=S.tts.pitch;u.rate=S.tts.rate;u.volume=Math.min(1,S.vol/100);const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.replace('_','-').startsWith(S.tts.lang.slice(0,2)));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+if(window.VTDesktop&&'speechSynthesis' in window)speechSynthesis.getVoices();
 function playSound(kind=S.sound,loop=false){
   if(inBg()||S.soundOn===false)return;
   if(natSound()){VTNative.playAlert({kind,vol:S.vol,tts:S.tts,loop});return}
@@ -3180,14 +3181,18 @@ function checkAlarms(){
 }
 function ring(a){
   ringing=a;logAct('alarm',a.label||'Alarma','Sonó a las '+a.t);save();$('ring-label').textContent=a.label||'Alarma';$('ring-time').textContent=a.t;$('ringing').hidden=false;
+  if(window.VTDesktop)VTDesktop.attention('alarm');
   /* Una alarma siempre suena, aunque el aviso del temporizador esté en «Nada» */
   buzz([300,120,300,120,500]);duckMusic();
   if(natSound()){playSound(S.sound,true);ringLoop=setInterval(()=>buzz([300,120,300,120,500]),2500)}
-  else{playSound();ringDuck();ringLoop=setInterval(()=>{buzz([300,120,300,120,500]);playSound();ringDuck()},S.sound==='voz'?4000:2500)}
+  else{playSound();ringDuck();ringLoop=setInterval(()=>{buzz([300,120,300,120,500]);playSound();ringDuck()},S.sound==='voz'?4000:2500);
+    /* Como en Android: si nadie la para, se corta a los 5 minutos */
+    ringCap=setTimeout(()=>{if(ringing)stopRing()},3e5)}
 }
 /* En PC, la música sigue baja mientras la alarma suena, no solo los segundos del aviso */
 function ringDuck(){if(window.VTDesktop&&VTDesktop.canDuck&&S.aviso!=='none')VTDesktop.audioFocus(S.aviso==='pause'?'pause':'duck',6000,S.duck)}
-function stopRing(){clearInterval(ringLoop);if(natSound())VTNative.stopAlert();if(window.VTDesktop)VTDesktop.audioFocus('release');$('ringing').hidden=true;stopVoice();
+let ringCap=0;
+function stopRing(){clearInterval(ringLoop);clearTimeout(ringCap);if(natSound())VTNative.stopAlert();if(window.VTDesktop){VTDesktop.audioFocus('release');VTDesktop.attention('end')}$('ringing').hidden=true;stopVoice();
   if(ringing&&!ringing.days.length&&!ringing.snooze){ringing.on=false;save()}
   if(ringing&&ringing.snooze){S.alarms=S.alarms.filter(x=>x.id!==ringing.id);save()}
   ringing=null;renderAlarms()}
@@ -4976,7 +4981,7 @@ function checkReminders(){
 }
 let bnKind='event';
 function showBanner(t,s,e,imgData,kind){
-  bnEv=e;bnKind=kind||(e&&e.id==='_test'?'test':'event');
+  bnEv=e;bnKind=kind||(e&&e.id==='_test'?'test':'event');if(window.VTDesktop)VTDesktop.attention('aviso');
   $('bn-view').hidden=bnKind!=='event';$('bn-snooze').hidden=bnKind==='test'||bnKind==='done';$('bn-snooze').textContent='Posponer '+S.snooze+' min';$('bn-title').textContent=t;$('bn-sub').textContent=s;$('banner').hidden=false;
   const im=imgData||(e&&e.img?getImg(e.id):null);$('bn-img').hidden=!im;if(im)$('bn-img').src=im;
   buzz([200,100,200]);if(S.aviso!=='none'){duckMusic();if(S.aviso!=='duckOnly')tone(880,0,.15,'sine',.25),tone(1175,.18,.25,'sine',.25)}

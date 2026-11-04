@@ -1,6 +1,6 @@
 // Temvra para escritorio: abre el mismo www/ que Android en una ventana propia.
-const {app,BrowserWindow,Menu,ipcMain,net,protocol,shell}=require('electron');
-const path=require('node:path'),{pathToFileURL}=require('node:url'),{execFile,execFileSync}=require('node:child_process');
+const {app,BrowserWindow,Menu,Tray,ipcMain,net,protocol,shell}=require('electron');
+const fs=require('node:fs'),path=require('node:path'),{pathToFileURL}=require('node:url'),{execFile,execFileSync}=require('node:child_process');
 const www=path.join(__dirname,'www'),ORIGIN='app://temvra';
 // Origen propio y fijo: localStorage (los datos) no depende de dónde esté instalada la app
 protocol.registerSchemesAsPrivileged([{scheme:'app',privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true}}]);
@@ -9,7 +9,25 @@ app.commandLine.appendSwitch('ozone-platform-hint','auto');
 if(process.platform==='win32')app.setAppUserModelId('com.temvra.app.personal.desktop');
 // El temporizador y las alarmas deben sonar sin haber tocado antes la ventana
 app.commandLine.appendSwitch('autoplay-policy','no-user-gesture-required');
-let win=null;
+let win=null,tray=null,quitting=false;
+// En Windows la app sigue en la bandeja al cerrar la ventana: sin el motor de Android, los avisos los da este proceso
+const useTray=process.platform==='win32',ICON=path.join(__dirname,'icon-512.png'),LOGIN={args:['--hidden']};
+function showWin(){if(!win){open();return}if(win.isMinimized())win.restore();win.show();win.focus()}
+function quit(){quitting=true;app.quit()}
+function trayMenu(){tray.setContextMenu(Menu.buildFromTemplate([
+  {label:'Abrir Temvra',click:showWin},
+  {label:'Iniciar con Windows',type:'checkbox',checked:app.getLoginItemSettings(LOGIN).openAtLogin,click:i=>{app.setLoginItemSettings({...LOGIN,openAtLogin:i.checked});trayMenu()}},
+  {type:'separator'},
+  {label:'Salir',click:quit}]))}
+function setupTray(){tray=new Tray(ICON);tray.setToolTip('Temvra');tray.on('click',showWin);trayMenu()}
+// Solo la primera vez: si después se desactiva desde la bandeja, no vuelve a activarse. Un perfil de pruebas no debe tocar el inicio de Windows
+function firstRunLogin(){
+  if(!app.isPackaged||app.commandLine.hasSwitch('user-data-dir'))return;
+  const f=path.join(app.getPath('userData'),'inicio-configurado');
+  if(fs.existsSync(f))return;
+  app.setLoginItemSettings({...LOGIN,openAtLogin:true});
+  try{fs.writeFileSync(f,'1')}catch(e){}
+}
 const external=u=>{if(/^(https?:|mailto:)/i.test(u))shell.openExternal(u)};
 // Música de otras apps durante un aviso, como el foco de audio de Android. Usa pactl y las órdenes MPRIS del reproductor; si faltan, no hace nada
 const run=(c,a)=>new Promise(r=>execFile(c,a,{timeout:3000},(e,o)=>r(e?null:o)));
@@ -62,8 +80,17 @@ ipcMain.handle('tts',(e,text,lang,pitch,rate)=>new Promise(r=>{
   });
   c.on('error',()=>r(null));c.stdin.on('error',()=>{});c.stdin.end(String(text||'').slice(0,500));
 }));
-function open(){
-  win=new BrowserWindow({width:1280,height:820,minWidth:360,minHeight:500,backgroundColor:'#000000',icon:path.join(__dirname,'icon-512.png'),webPreferences:{backgroundThrottling:false,preload:path.join(__dirname,'preload.cjs')}});
+// La alarma se queda encima de todo hasta que se para, porque Windows no deja quitarle el foco a otra app. Los demás avisos aparecen sin molestar
+ipcMain.on('attention',(e,kind)=>{
+  if(!win||!e.senderFrame||!e.senderFrame.url.startsWith(ORIGIN+'/'))return;
+  if(kind==='alarm'){showWin();win.setAlwaysOnTop(true);return}
+  if(kind==='end'){win.setAlwaysOnTop(false);return}
+  if(win.isMinimized())win.restore();else if(!win.isVisible())win.showInactive();else if(!win.isFocused())win.flashFrame(true);
+});
+function open(hidden){
+  win=new BrowserWindow({show:!hidden,width:1280,height:820,minWidth:360,minHeight:500,backgroundColor:'#000000',icon:ICON,webPreferences:{backgroundThrottling:false,preload:path.join(__dirname,'preload.cjs')}});
+  win.on('close',e=>{if(tray&&!quitting){e.preventDefault();win.hide()}});
+  win.on('session-end',()=>{quitting=true});
   win.on('closed',()=>{win=null});
   const wc=win.webContents;
   wc.setWindowOpenHandler(({url})=>{external(url);return{action:'deny'}});
@@ -75,7 +102,8 @@ function open(){
 }
 if(!app.requestSingleInstanceLock())app.quit();
 else{
-  app.on('second-instance',()=>{if(win){if(win.isMinimized())win.restore();win.focus()}});
+  app.on('second-instance',(e,argv)=>{if(!argv.includes('--hidden'))showWin()});
+  app.on('before-quit',()=>{quitting=true});
   app.whenReady().then(()=>{
     Menu.setApplicationMenu(null);
     protocol.handle('app',req=>{
@@ -83,7 +111,8 @@ else{
       if(f!==www&&!f.startsWith(www+path.sep))return new Response('',{status:403});
       return net.fetch(pathToFileURL(f).toString());
     });
-    open();
+    if(useTray){setupTray();firstRunLogin()}
+    open(useTray&&process.argv.includes('--hidden'));
   });
-  app.on('window-all-closed',()=>app.quit());
+  app.on('window-all-closed',()=>{if(!tray)app.quit()});
 }
