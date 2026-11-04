@@ -25,6 +25,11 @@ public class AlarmService extends Service {
     private static final int NOTIF_RING = 7003;
     private static final long MAX_RING_MS = 5 * 60_000L;
 
+    /** La alarma que está sonando, para ofrecer Detener al abrir la app. Null si no suena ninguna. */
+    private static volatile String ringing = null;
+
+    static String ringingAlert() { return ringing; }
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Vibrator vibrator;
     private AudioFocusRequest focus;
@@ -39,7 +44,11 @@ public class AlarmService extends Service {
         }
     }
 
-    static void stop(Context c) { c.stopService(new Intent(c, AlarmService.class)); }
+    static void stop(Context c) {
+        // Ya, sin esperar a onDestroy: al cerrar la pantalla de alarma la app vuelve delante y no debe abrirla otra vez
+        ringing = null;
+        c.stopService(new Intent(c, AlarmService.class));
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -56,6 +65,7 @@ public class AlarmService extends Service {
             stopSelf();
             return START_NOT_STICKY;
         }
+        ringing = ring ? alert.toString() : null;
         sound(alert, ring);
         return START_NOT_STICKY;
     }
@@ -127,6 +137,7 @@ public class AlarmService extends Service {
 
     @Override
     public void onDestroy() {
+        ringing = null;
         handler.removeCallbacksAndMessages(null);
         AlertSound.get(this).stop();
         if (vibrator != null) vibrator.cancel();
