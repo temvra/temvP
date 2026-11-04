@@ -1247,6 +1247,8 @@ body.desknotes .desk-empty:not([hidden]){display:flex}
 .desk-empty h2{font-size:24px;font-weight:500;color:var(--muted);margin:0 0 10px}
 .desk-empty button{color:var(--accent);font-size:16px;display:flex;gap:10px;align-items:center}
 .desk-empty kbd{font:12px var(--font);color:var(--muted);background:var(--surface-2);padding:2px 6px;border-radius:6px}
+.has-bg .desk-empty>div{padding:28px 36px;border-radius:24px;background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.has-bg .desk-empty h2{color:var(--fg)}
 
 /* Agenda ⇄ Bloques */
 #v-cal.cal-fit{overflow:hidden;padding-bottom:0}
@@ -1375,6 +1377,14 @@ body.notes3 .ob-tools [data-tool=new]{display:none}
 body.notes3 .ob-chev.none{visibility:hidden}
 body.notes3 .ob-row{padding-inline:22px 8px}
 body.notes3 .ob-kids{margin-left:6px}
+body.notes3 .vn-head{gap:8px}
+body.notes3 .vn-head .ob-round{width:40px;height:40px}
+body.notes3 .vn-vault{gap:8px}
+body.notes3 .vn-vcount{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Con foto, la columna entera es un panel: sin blur, porque crearía otro contexto para los fijos que lleva dentro */
+.has-bg body.notes3 #v-notes{background:color-mix(in srgb,var(--surface) 90%,transparent)}
+.has-bg body.notes3 .vn-head{background:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.has-bg body.notes3 .ob-list{background:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:0;margin-inline:0}
 body.notes3 .vn-compose:not([hidden]){left:calc(84px + var(--nw,300px) + var(--nlw,280px) + 18px);right:18px;width:auto;max-width:420px;margin-left:auto}
 .has-bg body.notes3 .vn-list,body.notes3.has-bg .vn-list{background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .vl-head{display:flex;align-items:center;gap:8px;padding:14px 10px 8px 16px;flex:none}
@@ -3837,7 +3847,7 @@ const CV_COL={'1':'#e5484d','2':'#f2622e','3':'#e8a317','4':'#2fb35b','5':'#14a3
 function cvParse(n){try{const j=JSON.parse(n.body||'{}');return {nodes:j.nodes||[],edges:j.edges||[]}}catch(e){return {nodes:[],edges:[]}}}
 let cvNote=null,CV=null,cvT={x:0,y:0,k:1},cvSel=null,cvSelE=null,cvEditing=null;
 function newCanvas(folder){const n=newNote(uniqueTitle('Lienzo sin título'),folder!=null?folder:newNoteFolder(),JSON.stringify({nodes:[{id:'n1',type:'text',text:'# Idea central\nToca dos veces para escribir',x:-130,y:-60,width:260,height:120,color:'6'}],edges:[]},null,2));n.kind='canvas';save();renderNotes();openCanvas(n.id);return n}
-function openCanvas(id){const n=nget(id);if(!n)return;cvNote=n;CV=cvParse(n);cvSel=cvSelE=null;cvEditing=null;S.obActive=id;$('cv-title').value=n.title;$('canvasview').hidden=false;
+function openCanvas(id){const n=nget(id);if(!n)return;cvNote=n;CV=cvParse(n);cvSel=cvSelE=null;cvEditing=null;S.obActive=id;renderNoteCol();$('cv-title').value=n.title;$('canvasview').hidden=false;
   requestAnimationFrame(()=>{cvFit();cvRender()})}
 function cvSave(){if(!cvNote)return;cvNote.body=JSON.stringify({nodes:CV.nodes,edges:CV.edges},null,2);cvNote.updated=Date.now();save()}
 const cvNodeAt=id=>CV.nodes.find(x=>x.id===id);
@@ -5241,6 +5251,8 @@ function obSheet(title,items,onPick,sub){
   $('obs-body').onclick=e=>{const x=e.target.closest('[data-x]');if(x){onPick(+x.dataset.x,'close');return}const b=e.target.closest('[data-i]');if(b){$('ob-sheet').hidden=true;onPick(+b.dataset.i,null,items[+b.dataset.i])}};
   $('ob-sheet').hidden=false}
 $('ob-sheet').addEventListener('click',e=>{if(e.target===$('ob-sheet'))$('ob-sheet').hidden=true});
+function closeTopSheet(){const s=[...document.querySelectorAll('.sheet-back:not([hidden])')].sort((a,b)=>(+getComputedStyle(b).zIndex||0)-(+getComputedStyle(a).zIndex||0))[0];if(s)s.hidden=true;return !!s}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTopSheet()});
 function obConfirm(msg,btn,fn){obSheet(msg,[{t:btn,danger:true},{t:'Cancelar',sep:true}],i=>{if(i===0)fn()})}
 
 /* ===== Menús contextuales de Notas al estilo Obsidian, con iconos ===== */
@@ -5367,7 +5379,7 @@ const obPD=e=>{
   if(e.button>0||e.target.closest('input'))return;const row=e.target.closest('[data-note],[data-folder],[data-att],[data-bm],[data-bmg]');if(!row)return;
   lp={row,sx:e.clientX,sy:e.clientY,t:setTimeout(()=>{const r=lp&&lp.row;lp=null;if(r)startDrag(r,e.clientX,e.clientY)},420)}};
 $('ob-list').addEventListener('pointerdown',obPD);$('vn-list').addEventListener('pointerdown',obPD);
-document.addEventListener('pointermove',e=>{if(lp&&Math.hypot(e.clientX-lp.sx,e.clientY-lp.sy)>8){clearTimeout(lp.t);lp=null}if(drag){drag.x=e.clientX;drag.y=e.clientY;moveDrag()}});
+document.addEventListener('pointermove',e=>{if(lp&&Math.hypot(e.clientX-lp.sx,e.clientY-lp.sy)>8){const l=lp,d=l.row.dataset;clearTimeout(l.t);lp=null;if(e.pointerType==='mouse'&&(d.note||d.folder||d.att)){startDrag(l.row,e.clientX,e.clientY);drag.sx=l.sx;drag.sy=l.sy}}if(drag){drag.x=e.clientX;drag.y=e.clientY;moveDrag()}});
 document.addEventListener('pointerup',()=>{if(lp){clearTimeout(lp.t);lp=null}if(drag)endDrag(false)});
 document.addEventListener('pointercancel',()=>{if(lp){clearTimeout(lp.t);lp=null}if(drag)endDrag(true)});
 document.addEventListener('touchmove',e=>{if(drag)e.preventDefault()},{passive:false});
@@ -5775,7 +5787,7 @@ const I_READ=OBI('<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 
 function leaveNote(){clearTimeout(neSaveT);if(!curNote)return;if(neEdit)saveNote();selLay=null;
   if(!curNote.title.trim())curNote.title=uniqueTitle('Sin título');save()}
 function openNote(id,edit,fromNav){
-  const n=nget(id);if(!n)return;if(isCanvas(n)){openCanvas(id);return}if(curNote&&curNote!==n)leaveNote();curNote=n;S.obActive=id;save();renderNoteCol();
+  const n=nget(id);if(!n)return;if(isCanvas(n)){openCanvas(id);return}if(cvNote)closeCanvas();if(curNote&&curNote!==n)leaveNote();curNote=n;S.obActive=id;save();if(notes3())renderNotes();
   if(!fromNav){navH=navH.slice(0,navI+1);if(navH[navI]!==id){navH.push(id);navI=navH.length-1}}
   if(!openTabs.includes(id)){openTabs.push(id);if(openTabs.length>9)openTabs.shift()}
   $('noteview').hidden=false;$('ne-crumb').textContent=curNote.folder?baseName(curNote.folder):(S.vaults.find(v=>v.id===S.curVault)||{name:'Notas'}).name;$('ne-title').value=curNote.title;selLay=null;renderLayers();setMode(edit!=null?edit:S.ob.openMode==='read'?false:S.ob.openMode==='edit'?true:!curNote.body.trim());
@@ -5807,9 +5819,9 @@ function neDownBtn(){const b=neBody(),btn=$('ne-down');if(!btn)return;const far=
 function neGoBottom(){const b=neBody();b.scrollTo({top:b.scrollHeight,behavior:'smooth'});if(neEdit){const t=$('ne-text');t.focus({preventScroll:true});t.setSelectionRange(t.value.length,t.value.length);setTimeout(()=>b.scrollTo({top:b.scrollHeight,behavior:'smooth'}),60)}}
 function neToBottom(){if(S.ob.bottomUp===false)return;const b=neBody();b.scrollTop=b.scrollHeight}
 function saveNote(){if(!curNote)return;curNote.body=$('ne-text').value;curNote.updated=Date.now();snapshot(curNote);save()}
-$('ne-text').addEventListener('input',()=>{const ta=$('ne-text'),nearEnd=ta.value.length-ta.selectionEnd<80;autoGrow();edHL();if(nearEnd)neToBottom();neDownBtn();clearTimeout(neSaveT);neSaveT=setTimeout(()=>{saveNote();renderNoteMeta()},350);suggest()});
+$('ne-text').addEventListener('input',()=>{const ta=$('ne-text'),nearEnd=ta.value.length-ta.selectionEnd<80;autoGrow();edHL();if(nearEnd)neToBottom();neDownBtn();clearTimeout(neSaveT);neSaveT=setTimeout(()=>{saveNote();renderNoteMeta();renderNoteCol()},350);suggest()});
 $('ne-title').addEventListener('input',e=>{if(!curNote)return;const old=curNote.title,nw=e.target.value;curNote.title=nw;curNote.updated=Date.now();clearTimeout(neSaveT);
-  neSaveT=setTimeout(()=>{if(old&&nw&&old!==nw&&S.ob.autoLinks)S.notes.forEach(o=>{if(o!==curNote&&o.body.includes('[['+old)){o.body=o.body.split('[['+old+']]').join('[['+nw+']]').split('[['+old+'|').join('[['+nw+'|').split('[['+old+'#').join('[['+nw+'#')}});save();renderNoteMeta()},500)});
+  neSaveT=setTimeout(()=>{if(old&&nw&&old!==nw&&S.ob.autoLinks)S.notes.forEach(o=>{if(o!==curNote&&o.body.includes('[['+old)){o.body=o.body.split('[['+old+']]').join('[['+nw+']]').split('[['+old+'|').join('[['+nw+'|').split('[['+old+'#').join('[['+nw+'#')}});save();renderNoteMeta();if(document.body.classList.contains('desknotes')&&S.obPanel==='files')renderNotes();renderDeskTabs()},500)});
 $('ne-title').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();setMode(true);$('ne-text').focus()}});
 $('ne-mode').onclick=()=>{if(neEdit)saveNote();setMode(!neEdit)};
 function closeNote(){if(curNote&&S.gh.token&&ghLink()){const a=S.ob.sync.auto||'both';if(a==='note'||a==='both'){clearTimeout(window._pushT);window._pushT=setTimeout(()=>autoSync('note'),1200)}else if(PL('sync')&&S.ob.sync.pushOnClose){clearTimeout(window._pushT);window._pushT=setTimeout(()=>ghPush(ghLink()),1500)}}leaveNote();$('noteview').hidden=true;curNote=null;const ve=$('v-notes');ve.classList.remove('slidein');void ve.offsetWidth;ve.classList.add('slidein');if(view==='notes')renderNotes();if(!$('dayview').hidden)renderDay();if(view==='cal')renderCal();applyDesk()}
@@ -6340,7 +6352,7 @@ $('obp-body').addEventListener('input',e=>{if(e.target.type==='range'){const o=e
 /* Atajos de teclado globales en Notas */
 document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey))return;const inNotes=view==='notes'||!$('noteview').hidden;if(!inNotes)return;const k=e.key.toLowerCase();
   if(k==='p'&&PL('palette')){e.preventDefault();openQS('cmd')}else if(k==='o'&&PL('switcher')){e.preventDefault();openQS('note')}
-  else if(k==='f'&&e.shiftKey){e.preventDefault();COMMANDS().find(c=>c.t.startsWith('Buscar')).run()}else if(k==='n'){e.preventDefault();const x=newNote(uniqueTitle('Sin título'),newNoteFolder());openNote(x.id,true)}else if(k===','){e.preventDefault();openPrefs()}});
+  else if(k==='f'&&e.shiftKey){e.preventDefault();COMMANDS().find(c=>c.t.startsWith('Buscar')).run()}else if(k==='n'&&!document.body.classList.contains('desknotes')){e.preventDefault();const x=newNote(uniqueTitle('Sin título'),newNoteFolder());openNote(x.id,true)}else if(k===','){e.preventDefault();openPrefs()}});
 
 const HELP_NOTE=`# Ayuda de Temvra Notas
 
@@ -6909,7 +6921,7 @@ window.VTAPI={
   open(x){if(!x)return;if(x.type==='timer'){show('timer')}else if(x.type==='alarm'){show('alarm')}else if(x.type==='event'){const ev=realEv(x.id);if(ev){if(ev.cat){goBlocksDay(x.date||ev.date);setTimeout(()=>openBlock(x.id),300)}else{show('cal');openEvent(x.id)}}}},
   snoozeEvent(id,min){const ev=realEv(id);if(ev){ev.snoozeUntil=Date.now()+min*6e4;save()}},
   back(){const vis=id=>$(id)&&!$(id).hidden;
-    const sheets=[...document.querySelectorAll('.sheet-back:not([hidden])')].sort((a,b)=>(+getComputedStyle(b).zIndex||0)-(+getComputedStyle(a).zIndex||0));if(sheets.length){sheets[0].hidden=true;return true}
+    if(closeTopSheet())return true;
     if(vis('ringing')){stopRing();return true}
     if(vis('img-viewer')){$('iv-close').click();return true}
     if(vis('canvasview')){closeCanvas();return true}
