@@ -269,6 +269,7 @@ public class TemvraPlugin extends Plugin {
             out.put("endAt", t.optLong("endAt"));
             out.put("remain", t.optLong("remain"));
             out.put("lap", t.optInt("lap", 1));
+            out.put("held", t.optBoolean("held"));
             try { t.put("active", false); } catch (Exception ignored) {}
             TimerCtl.save(getContext(), t);
         }

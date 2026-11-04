@@ -55,14 +55,23 @@ final class TimerCtl {
             put(t, "endAt", now + Math.max(1000, t.optLong("remain", period)));
             put(t, "running", true);
         } else if ("reset".equals(action)) {
-            put(t, "running", false);
-            put(t, "remain", period);
+            /* Reiniciar desde la notificación: vuelve a empezar la vuelta y la notificación se queda.
+               En pausa queda en pausa con el tiempo completo, lista para darle a Reanudar. */
             put(t, "lap", 1);
+            if (running) {
+                put(t, "endAt", now + period);
+                put(t, "running", true);
+            } else {
+                put(t, "running", false);
+                put(t, "remain", period);
+                put(t, "held", true);
+            }
         } else if ("skip".equals(action)) {
             put(t, "lap", t.optInt("lap", 1) + 1);
             put(t, "endAt", now + period);
             put(t, "running", true);
         }
+        if (!"reset".equals(action)) put(t, "held", false);
         put(t, "active", true);
         save(c, t);
         sync(c);
@@ -101,7 +110,7 @@ final class TimerCtl {
     static void render(Context c, JSONObject t) {
         boolean running = t.optBoolean("running"), show = t.optBoolean("show", true);
         long period = t.optLong("period", 90_000), remain = t.optLong("remain", period);
-        if (!show || (!running && remain >= period)) { TimerMedia.clear(c); return; }
+        if (!show || (!running && remain >= period && !t.optBoolean("held"))) { TimerMedia.clear(c); return; }
         TimerMedia.update(c, t.optString("name", "Temporizador"),
                 "Vuelta " + t.optInt("lap", 1) + (running ? "" : " · En pausa " + Widgets.mmss(remain)), running, t.optLong("endAt"), period, remain);
     }

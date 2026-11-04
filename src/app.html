@@ -1933,6 +1933,47 @@ body.desk:not(.desknotes) #noteview{display:none!important}
   #ne-read th{overflow-wrap:normal;word-break:normal;hyphens:none}
   #ne-read table{font-size:.92em}
 }
+
+/* ===== Liquid Glass: lente de cristal que se desliza, botones que crecen y menús que nacen de donde tocas ===== */
+.lg-host{position:relative}
+.lg-host>button,.lg-host>.tab{position:relative;z-index:1}
+.lg-lens{position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:999px;transform-origin:50% 50%;will-change:transform,width;
+  background:color-mix(in srgb,var(--container) 62%,transparent);border:1px solid color-mix(in srgb,#fff 12%,transparent);
+  box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 22%,transparent),0 2px 10px color-mix(in srgb,var(--container) 45%,transparent);
+  transition:background-color .3s,border-color .3s,box-shadow .3s,opacity .2s}
+/* Al pulsar se levanta: cristal transparente que aumenta un poco lo de debajo, con el borde irisado */
+.lg-lens.lift{background:color-mix(in srgb,#fff 6%,transparent);border-color:color-mix(in srgb,#fff 42%,transparent);
+  backdrop-filter:blur(1px) saturate(190%) brightness(1.15);-webkit-backdrop-filter:blur(1px) saturate(190%) brightness(1.15);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.6),inset 0 -1px 2px rgba(255,255,255,.2),inset 4px 0 7px -4px rgba(255,110,200,.55),inset -4px 0 7px -4px rgba(80,200,255,.6),0 12px 28px rgba(0,0,0,.42)}
+:root:not(.dark) .lg-lens.lift,body.light .lg-lens.lift{background:color-mix(in srgb,#fff 35%,transparent);box-shadow:inset 0 1px 1px #fff,inset 4px 0 7px -4px rgba(255,110,200,.45),inset -4px 0 7px -4px rgba(80,180,255,.5),0 10px 24px rgba(0,0,0,.18)}
+body:not(.desk) .nav .nav-in.lg-host>button[aria-current="page"]{background:transparent!important;box-shadow:none!important;border-color:transparent!important}
+.tabs.lg-host .tab[aria-selected="true"] span{background:transparent}
+body.desk .nav .lg-lens{display:none}
+body:not(.desk) .nav{touch-action:none;overflow:visible}
+@media (prefers-reduced-motion:no-preference){
+  .nav button:active{transform:none}
+  /* Botones: al tocarlos crecen y se iluminan; al soltar vuelven con un pequeño rebote */
+  .btn,.icon-btn,.fab,.fab-s,.ob-pillbar button,.bk-zoom button,.pg-edge,.avatar,.cv-dock button,.seg button,.bks-quick button,.bk-filter button{transition:transform .55s cubic-bezier(.25,1.7,.4,1),filter .35s ease,background-color .2s ease,color .2s ease}
+  .btn:active,.icon-btn:active,.fab:active,.fab-s:active,.ob-pillbar button:active,.bk-zoom button:active,.avatar:active,.cv-dock button:active,.seg button:active,.bks-quick button:active,.bk-filter button:active{transform:scale(1.08);filter:brightness(1.25) saturate(1.1);transition-duration:.14s,.14s,.2s,.2s}
+  .pg-edge:active{transform:translateY(-50%) scale(1.08);filter:brightness(1.2)}
+  /* Hojas y menús: nacen como una gota desde donde has tocado y se asientan con un rebote */
+  .sheet-back.lg-in>.sheet{animation:lgIn .5s cubic-bezier(.2,.9,.25,1) both!important;transform-origin:50% 50%}
+  .sheet-back.lg-in{animation:lgFade .3s ease both}
+  .sheet-back.lg-out{pointer-events:none!important;animation:lgFade .26s ease reverse both}
+  .sheet-back.lg-out>.sheet{animation:lgOut .26s cubic-bezier(.4,0,.7,.4) both!important;transform-origin:50% 50%}
+  @keyframes lgIn{0%{transform:translate(var(--lgx,0),var(--lgy,40%)) scale(var(--lgs,.2),calc(var(--lgs,.2)*.7));opacity:0;filter:blur(12px);border-radius:60px}
+    45%{opacity:1;filter:blur(0)}72%{transform:scale(1.012,1.008)}100%{transform:none;opacity:1;filter:none}}
+  @keyframes lgOut{0%{transform:none;opacity:1;filter:none}100%{transform:translate(var(--lgx,0),var(--lgy,40%)) scale(var(--lgs,.2),calc(var(--lgs,.2)*.7));opacity:0;filter:blur(10px);border-radius:60px}}
+  @keyframes lgFade{from{background-color:transparent}}
+  .app>.scroll:not([hidden]){animation:lgView .38s cubic-bezier(.2,.9,.25,1)}
+  @keyframes lgView{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+  #toast:not([hidden]){animation:lgToast .45s cubic-bezier(.2,1.3,.4,1)}
+  @keyframes lgToast{from{opacity:0;transform:translate(-50%,14px) scale(.8)}to{opacity:1;transform:translate(-50%,0)}}
+}
+/* Cristal en hojas y menús */
+.sheet-back{background:rgba(0,0,0,.42)}
+.sheet-back>.sheet{backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 14%,transparent),0 -12px 40px rgba(0,0,0,.35)}
+#ob-sheet .sheet{background:color-mix(in srgb,var(--surface-2) 86%,transparent)}
 </style>
 
 <div class="bg" id="bg" hidden><div class="bg-img" id="bg-img"></div><div class="bg-dim" id="bg-dim"></div></div>
@@ -3068,12 +3109,13 @@ function finish(){
   else{running=false;$('clock').classList.remove('running');remain=S.period*1000;releaseWake();renderFabs();if(S.focusNote)focusDone();showBanner(S.name,'Tiempo cumplido',null,null,'timer')}
   tNotif();
 }
-function tStart(){recordRecent();ac();running=true;$('clock').classList.add('running');endAt=Date.now()+remain;lastTick=-1;requestWake();renderFabs();tNotif()}
+let tHeld=false;
+function tStart(){tHeld=false;recordRecent();ac();running=true;$('clock').classList.add('running');endAt=Date.now()+remain;lastTick=-1;requestWake();renderFabs();tNotif()}
 function tPause(){remain=Math.max(0,endAt-Date.now());running=false;$('clock').classList.remove('running');releaseWake();renderFabs();tNotif()}
-function tReset(){running=false;$('clock').classList.remove('running');remain=S.period*1000;lap=1;lastTick=-1;releaseWake();renderFabs();tNotif()}
+function tReset(){tHeld=false;running=false;$('clock').classList.remove('running');remain=S.period*1000;lap=1;lastTick=-1;releaseWake();renderFabs();tNotif()}
 function tSkip(){if(!running){tStart()}lap++;endAt=Date.now()+S.period*1000;toast('Vuelta '+lap);tNotif()}
 /* Notificación fija con la cuenta atrás (Android) + datos de los widgets */
-function tNotif(){if(!window.VTNative||!VTNative.hasPlugin||VTNative.bg)return;const show=S.notif!=='never'&&(running||remain<S.period*1000);
+function tNotif(){if(!window.VTNative||!VTNative.hasPlugin||VTNative.bg)return;const show=S.notif!=='never'&&(running||remain<S.period*1000||tHeld);
   VTNative.timerNotify({show,title:S.hide?'Temporizador':(S.name||'Temporizador'),body:T('Vuelta '+lap)+(running?'':' · '+T('En pausa')+' '+fmt(remain)),running,endAt,period:S.period*1000,remain});
   pushWidgets()}
 function pushWidgets(){if(window.VTNative&&VTNative.widgets&&!VTNative.bg&&window.VTAPI)VTNative.widgets(VTAPI.widgetData())}
@@ -5137,7 +5179,7 @@ const SORTS=[['az','Ordenar por nombre de archivo (A-Z)'],['za','Ordenar por nom
 /* Datos de la bóveda */
 if(!S.obOpen)S.obOpen={};if(!S.obPanel||S.obPanel==='star'&&!S.bookmarks)S.obPanel=S.obPanel||'files';
 if(S.obSort==='name'||!S.obSort)S.obSort='az';if(S.obSort==='mod')S.obSort='mnew';
-if(!S.obFSort)S.obFSort=S.obSort==='za'?'za':'az';if(!S.obOrder)S.obOrder={};if(!S.fMod)S.fMod={};
+if(!S.obFSort)S.obFSort=S.obSort==='za'?'za':'az';if(!S.obOrder)S.obOrder={};if(!S.fMod)S.fMod={};if(!S.obFolderSort)S.obFolderSort={};
 if(!S.vaults){S.vaults=[{id:'v1',name:'Notas'}];S.curVault='v1';S.vaultData={}}
 if(!S.atts)S.atts=[];if(!S.bmGroups)S.bmGroups=[];if(!S.bmOpen)S.bmOpen={};if(!S.tagOpen)S.tagOpen={};
 if(!S.bookmarks)S.bookmarks=S.notes.filter(n=>n.pinned).map(n=>({id:nid(),type:'note',ref:n.id,title:'',group:''}));
@@ -5157,10 +5199,21 @@ function fMod(p){let m=S.fMod[p]||0;[...S.notes,...S.atts].forEach(x=>{const f=x
 function sortFolders(a,mode){mode=mode||S.obFSort;const nm=(x,y)=>cmpName(baseName(x),baseName(y));let M=null;const fm=f=>(M||(M=new Map(a.map(x=>[x,fMod(x)])))).get(f);
   const f={az:nm,za:(x,y)=>-nm(x,y),mnew:(x,y)=>fm(y)-fm(x)||nm(x,y),mold:(x,y)=>fm(x)-fm(y)||nm(x,y),
     custom:(x,y)=>{const p=parentOf(x);if(p!==parentOf(y))return cmpName(x,y);const L=S.obOrder['F:'+p]||[],i=L.indexOf(x),j=L.indexOf(y);if(i<0&&j<0)return nm(x,y);if(i<0)return -1;if(j<0)return 1;return i-j}}[mode]||nm;return a.sort(f)}
+/* Orden propio de una carpeta (menú de la carpeta): manda sobre el general para lo que tiene dentro.
+   Sus subcarpetas siguen el mismo criterio; «creado» se aplica a ellas como «editado». */
+const modeFor=f=>(f&&S.obFolderSort[f])||S.obSort;
+const fModeFor=f=>{const m=f&&S.obFolderSort[f];return m?({cnew:'mnew',cold:'mold'}[m]||m):S.obFSort};
+function setFolderSort(p,mode){
+  if(mode==='custom'){if(!S.obOrder['N:'+p])S.obOrder['N:'+p]=sortItems([...S.notes,...S.atts].filter(x=>(x.folder||'')===p),modeFor(p)).map(x=>x.id);
+    if(!S.obOrder['F:'+p])S.obOrder['F:'+p]=sortFolders(allFolders().filter(f=>parentOf(f)===p),fModeFor(p))}
+  if(mode)S.obFolderSort[p]=mode;else delete S.obFolderSort[p];S.obOpen[p]=true;save();renderNotes();
+  toast(mode==='custom'?T('Mantén pulsada una nota de la carpeta y arrástrala para ordenarla'):T('Orden de «')+baseName(p)+'»: '+(mode?SORTS.concat([CUST]).find(x=>x[0]===mode)[1].replace(/^Ordenar por /,''):T('el general')))}
+function folderSortMenu(p){const cur=S.obFolderSort[p]||'',NS=SORTS.concat([CUST]);
+  obSheet(T('Ordenar contenido de «')+baseName(p)+'»',[{t:T('Como el resto (orden general)'),on:!cur},...NS.map(([k,t],j)=>({t,on:cur===k,sep:j%2===0}))],i=>setFolderSort(p,i?NS[i-1][0]:''))}
 /* Cambiar el orden. Al pasar a personalizado se parte del orden que se estaba viendo */
 function setObSort(kind,mode){const ps=['',...allFolders()];
-  if(mode==='custom'){if(kind==='F')ps.forEach(p=>{if(!S.obOrder['F:'+p])S.obOrder['F:'+p]=sortFolders(allFolders().filter(f=>parentOf(f)===p))});
-    else ps.forEach(p=>{if(!S.obOrder['N:'+p])S.obOrder['N:'+p]=sortItems([...S.notes,...S.atts].filter(x=>(x.folder||'')===p)).map(x=>x.id)})}
+  if(mode==='custom'){if(kind==='F')ps.forEach(p=>{if(!S.obOrder['F:'+p])S.obOrder['F:'+p]=sortFolders(allFolders().filter(f=>parentOf(f)===p),fModeFor(p))});
+    else ps.forEach(p=>{if(!S.obOrder['N:'+p])S.obOrder['N:'+p]=sortItems([...S.notes,...S.atts].filter(x=>(x.folder||'')===p),modeFor(p)).map(x=>x.id)})}
   if(kind==='F')S.obFSort=mode;else S.obSort=mode;save();renderNotes();if(mode==='custom')toast(T(kind==='F'?'Mantén pulsada una carpeta y arrástrala para ordenarla':'Mantén pulsada una nota y arrástrala para ordenarla'))}
 /* Soltar una carpeta o una nota antes o después de otra (orden personalizado) */
 function obReorder(kind,id,target,after){
@@ -5178,6 +5231,7 @@ function renameFolder(old,np){
   S.folders=[...new Set(S.folders.map(mv))];[...S.notes,...S.atts].forEach(x=>{x.folder=mv(x.folder||'')});
   Object.keys(S.obOpen).forEach(k=>{const nk=mv(k);if(nk!==k){S.obOpen[nk]=S.obOpen[k];delete S.obOpen[k]}});
   Object.keys(S.fMod).forEach(k=>{const nk=mv(k);if(nk!==k){S.fMod[nk]=S.fMod[k];delete S.fMod[k]}});
+  Object.keys(S.obFolderSort).forEach(k=>{const nk=mv(k);if(nk!==k){S.obFolderSort[nk]=S.obFolderSort[k];delete S.obFolderSort[k]}});
   /* Orden personalizado: la carpeta conserva su sitio y lo de dentro su orden */
   const O={};Object.keys(S.obOrder).forEach(k=>{const t=k.slice(0,2),nk=t+mv(k.slice(2));O[nk]=t==='F:'?S.obOrder[k].map(mv):S.obOrder[k]});
   const op=parentOf(old),np2=parentOf(np),L=O['F:'+op];if(L&&op!==np2){O['F:'+op]=L.filter(f=>f!==np)}else if(L&&!L.includes(np))L.push(np);S.obOrder=O;save()}
@@ -5190,12 +5244,12 @@ let obSel=null,obRenaming=null,obSuppress=false,obPmenu=false;
 function treeHTML(parent){
   let h='';
   const n3=notes3(),subs=f=>allFolders().some(x=>parentOf(x)===f);
-  sortFolders(allFolders().filter(f=>parentOf(f)===parent)).forEach(f=>{const open=!!S.obOpen[f],sel=n3?S.obFolder===f:obSel&&obSel.type==='folder'&&obSel.id===f;
+  sortFolders(allFolders().filter(f=>parentOf(f)===parent),fModeFor(parent)).forEach(f=>{const open=!!S.obOpen[f],sel=n3?S.obFolder===f:obSel&&obSel.type==='folder'&&obSel.id===f;
     if(obRenaming==='f:'+f)h+=`<div class="ob-row ob-editrow"><span class="ob-chev">${OB_IC.chev}</span><input class="ob-edit" id="ob-edit" value="${esc(baseName(f))}" data-kind="f" data-ref="${esc(f)}" aria-label="Nombre"></div>`;
     else{const cnt=[...S.notes,...S.atts].filter(x=>(x.folder||'')===f||(x.folder||'').startsWith(f+'/')).length;h+=`<button class="ob-row vn-frow${sel?' on':''}" data-folder="${esc(f)}" aria-expanded="${open}"><span class="ob-chev${open?' open':''}${n3&&!subs(f)?' none':''}">${OB_IC.chev}</span><span class="vn-ftile"${folderColor(f)?` style="color:${folderColor(f)}"`:''}>${OB_IC.folder.replace('width="16" height="16"','width="18" height="18"')}</span><span class="ob-name"${folderColor(f)?` style="color:${folderColor(f)}"`:''}>${esc(baseName(f))}</span><span class="vn-cnt">${cnt}</span></button>`}
     if(open)h+=`<div class="ob-kids">${treeHTML(f)}</div>`});
   if(n3)return h;
-  sortItems([...S.notes.filter(n=>(n.folder||'')===parent),...S.atts.filter(a=>(a.folder||'')===parent)]).forEach(x=>{
+  sortItems([...S.notes.filter(n=>(n.folder||'')===parent),...S.atts.filter(a=>(a.folder||'')===parent)],modeFor(parent)).forEach(x=>{
     const isN=x.title!=null,on=isN?S.obActive===x.id&&(!obSel||obSel.type!=='folder'):(obSel&&obSel.id===x.id);
     if(obRenaming==='n:'+x.id||obRenaming==='a:'+x.id){h+=`<div class="ob-row ob-editrow"><input class="ob-edit" id="ob-edit" value="${esc(isN?x.title:x.name.replace(/\.\w+$/,''))}" data-kind="${isN?'n':'a'}" data-ref="${x.id}" aria-label="Nombre"></div>`;return}
     h+=`<button class="ob-row${on?' on':''}" ${isN?`data-note="${x.id}"`:`data-att="${x.id}"`}><span class="vn-glyph${isN?(isCanvas(x)?' cvg':''):' img'}"${!isN&&attType(x)!=='img'?` style="color:${FT_IC[attType(x)][0]}"`:''}>${!isN&&attType(x)!=='img'?`<b class="ft-mini">${FT_IC[attType(x)][1]}</b>`:isN?(isCanvas(x)?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/></svg>':''):OB_IC.img}</span><span class="vn-ntext"><span class="ob-name"${isN&&x.color?` style="color:${x.color}"`:''}>${esc(isN?(x.title||'Sin título'):x.name.replace(/\.\w+$/,''))}</span>${isN?`<span class="vn-sub">${nAgo(x.updated||x.created||Date.now())}${isCanvas(x)?' · lienzo · '+cvParse(x).nodes.length+' tarjetas':''}${(isCanvas(x)?[]:tagsOf(x)).slice(0,2).map(t=>' · #'+esc(t)).join('')}</span>`:''}</span>${isN&&x.date?`<span class="ob-badge vn-date">${shortDate(x.date)}</span>`:''}${isN?'':`<span class="ob-badge">${esc((x.name.split('.').pop()||'').toUpperCase())}</span>`}</button>`});
@@ -5221,7 +5275,7 @@ const vlFolder=()=>{const f=S.obFolder==null?'*':S.obFolder;return f==='*'||f===
 function vlFolderRows(){const f=vlFolder(),root=[...S.notes,...S.atts].some(x=>!x.folder),row=(k,t,c)=>`<button class="ob-row vn-frow${f===k?' on':''}" data-fall="${k}"><span class="ob-chev none">${OB_IC.chev}</span><span class="vn-ftile">${OB_IC.note.replace(/width="\d+" height="\d+"/,'width="18" height="18"')}</span><span class="ob-name">${t}</span><span class="vn-cnt">${c}</span></button>`;
   return row('*',T('Todas las notas'),S.notes.length+S.atts.length)+(root?row('',T('Sin carpeta'),[...S.notes,...S.atts].filter(x=>!x.folder).length):'')}
 /* Columna central: lo que hay directamente en la carpeta elegida */
-function renderNoteCol(){if(!notes3())return;const f=vlFolder(),L=$('vn-list'),all=[...S.notes,...S.atts],items=sortItems(f==='*'?all:all.filter(x=>(x.folder||'')===f));
+function renderNoteCol(){if(!notes3())return;const f=vlFolder(),L=$('vn-list'),all=[...S.notes,...S.atts],items=f==='*'?sortItems(all,S.obSort==='custom'?'mnew':S.obSort):sortItems(all.filter(x=>(x.folder||'')===f),modeFor(f));
   const prev=L.querySelector('.vl-rows'),top=prev?prev.scrollTop:0;
   const date=t=>t?new Date(t).toLocaleDateString(LOC,{day:'numeric',month:'short'}):'';
   const snip=n=>isCanvas(n)?T('Lienzo'):(n.body||'').slice(0,240).replace(/<[^>]+>/g,'').replace(/[#*_`>~\[\]-]+/g,' ').replace(/\s+/g,' ').trim();
@@ -5422,7 +5476,8 @@ function noteCtx(n){const bm=isBm(n.id),g=gitTag('n',n.id);
   ctxSheet((n.title||'Sin título')+(isCanvas(n)?'.canvas':'.md'),`Última modificación: ${fmtDT(n.updated)}<br>Creado: ${fmtDT(n.created)}`,A)}
 function folderCtx(p){const files=[...S.notes,...S.atts].filter(x=>(x.folder||'')===p).length,subs=allFolders().filter(f=>f.startsWith(p+'/')&&!f.slice(p.length+1).includes('/')).length,g=gitTag('f',p);
   const isB=S.bookmarks.some(b=>b.type==='folder'&&b.ref===p),label=baseName(p);
-  const A=[['Color de la carpeta',MI.rename,()=>pickFolderColor(p)],
+  const fs=S.obFolderSort[p],fsl=fs?SORTS.concat([CUST]).find(x=>x[0]===fs)[1].replace(/^Ordenar por /,'').replace(/^./,c=>c.toUpperCase()):T('Como el resto');
+  const A=[['Color de la carpeta',MI.rename,()=>pickFolderColor(p)],['Ordenar contenido',MIC('<path d="M3 6h10M3 12h7M3 18h4"/><path d="M17 4v16M14 17l3 3 3-3"/>'),()=>folderSortMenu(p),fsl,1],
     ['Nueva nota',MI.newnote,()=>{obSel={type:'folder',id:p};$('ob-tools').querySelector('[data-tool=new]').click()}],['Nueva carpeta',MI.newfolder,()=>{obSel={type:'folder',id:p};$('ob-tools').querySelector('[data-tool=folder]').click()}],
     ['Nuevo lienzo',MI.canvas,()=>{S.obOpen[p]=true;newCanvas(p)}],['Nueva base',MI.base,()=>newBase(p)],
     ['sep'],['Hacer una copia',MI.copy,()=>dupFolder(p)],['Mover carpeta a…',MI.move,()=>moveTo('folder',p)],['Buscar en la carpeta',MI.findin,()=>runSearchFor(`path:"${p}" `)],
@@ -5467,15 +5522,15 @@ function startDrag(row,x,y){
 function dropTarget(){const el=document.elementFromPoint(drag.x,drag.y);if(!el)return null;const inVL=!!el.closest('#vn-list');if(!inVL&&!el.closest('#ob-list'))return null;
   const r=el.closest('[data-folder],[data-note],[data-att]'),rb=r&&r.getBoundingClientRect(),rel=r?(drag.y-rb.top)/rb.height:0;
   /* Columna de notas (PC): solo para ordenar dentro de la carpeta elegida */
-  if(inVL){const rid=r&&(r.dataset.note||r.dataset.att);if(!rid||rid===drag.id||drag.t==='folder'||S.obSort!=='custom'||vlFolder()==='*')return null;return {f:vlFolder(),el:null,re:{kind:'N',id:rid,after:rel>.5,row:r}}}
+  if(inVL){const rid=r&&(r.dataset.note||r.dataset.att);if(!rid||rid===drag.id||drag.t==='folder'||vlFolder()==='*'||modeFor(vlFolder())!=='custom')return null;return {f:vlFolder(),el:null,re:{kind:'N',id:rid,after:rel>.5,row:r}}}
   if(!r)return {f:'',el:null};
   if(r.dataset.folder){const rf=r.dataset.folder;
     /* Orden personalizado: arriba o abajo de una carpeta hermana la coloca antes o después; en el centro, dentro */
-    if(drag.t==='folder'&&S.obFSort==='custom'&&rf!==drag.id&&parentOf(rf)===parentOf(drag.id)&&(rel<.3||rel>.7))return {f:parentOf(drag.id),el:null,re:{kind:'F',id:rf,after:rel>.5,row:r}};
+    if(drag.t==='folder'&&fModeFor(parentOf(drag.id))==='custom'&&rf!==drag.id&&parentOf(rf)===parentOf(drag.id)&&(rel<.3||rel>.7))return {f:parentOf(drag.id),el:null,re:{kind:'F',id:rf,after:rel>.5,row:r}};
     return {f:rf,el:r}}
   const rid=r.dataset.note||r.dataset.att,x=r.dataset.note?nget(r.dataset.note):S.atts.find(a=>a.id===r.dataset.att);
   const f=x?x.folder||'':'';
-  if(drag.t!=='folder'&&S.obSort==='custom'&&rid!==drag.id)return {f,el:null,re:{kind:'N',id:rid,after:rel>.5,row:r}};
+  if(drag.t!=='folder'&&modeFor(f)==='custom'&&rid!==drag.id)return {f,el:null,re:{kind:'N',id:rid,after:rel>.5,row:r}};
   return {f,el:f?$('ob-list').querySelector(`[data-folder="${CSS.escape(f)}"]`):null}}
 function moveDrag(){if(!drag)return;
   if(Math.hypot(drag.x-drag.sx,drag.y-drag.sy)>6)drag.moved=true;
@@ -6952,6 +7007,60 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRS});applyLang();requestAnimationFrame(frame);
 
 /* ---------- API para la app de Android (notificaciones, botón atrás) ---------- */
+/* ===================== Liquid Glass ===================== */
+(()=>{const RM=matchMedia('(prefers-reduced-motion:reduce)');
+  /* Lente que sigue al elemento elegido con un muelle: se estira al moverse y, en la barra, se puede arrastrar de una pestaña a otra */
+  function lens(box,itemSel,cur,tgt,drag){if(!box)return;const L=document.createElement('i');L.className='lg-lens';L.setAttribute('aria-hidden','true');box.prepend(L);box.classList.add('lg-host');
+    let x=0,w=0,y=0,h=0,vx=0,vw=0,tx=0,tw=0,lift=false,raf=0,init=false,until=0,dg=null;
+    const on=()=>!(drag&&DESK.matches)&&box.offsetParent!==null;
+    function aim(){const c=cur();if(!c)return false;const r=tgt(c).getBoundingClientRect(),b=box.getBoundingClientRect();if(!r.width)return false;
+      if(!dg||!dg.moved){tx=r.left-b.left+box.scrollLeft;tw=r.width}y=r.top-b.top;h=r.height;return true}
+    function paint(sx,sy){L.style.width=w+'px';L.style.height=h+'px';L.style.transform=`translate3d(${x}px,${y}px,0) scale(${sx},${sy})`}
+    function step(){raf=0;if(!on()||!aim()){L.style.opacity='0';return}L.style.opacity='';
+      if(!init||RM.matches){x=tx;w=tw;init=true;vx=vw=0;paint(1,1);if(!dg&&Date.now()>until)return}
+      const k=dg?.3:.14,d=dg?.6:.72;vx=(vx+(tx-x)*k)*d;vw=(vw+(tw-w)*k)*d;x+=vx;w+=vw;
+      const sp=Math.min(1,Math.abs(vx)/26),up=lift?1.15:1;paint(up*(1+sp*.2),(lift?1.18:1)*(1-sp*.12));L.classList.toggle('lift',lift);
+      if(dg||Math.abs(tx-x)>.25||Math.abs(tw-w)>.25||Math.abs(vx)>.05||Date.now()<until)raf=requestAnimationFrame(step);else{x=tx;w=tw;paint(1,1)}}
+    const kick=ms=>{until=Math.max(until,Date.now()+(ms||600));if(!raf)raf=requestAnimationFrame(step)};
+    new MutationObserver(()=>kick(700)).observe(box,{subtree:true,attributes:true,attributeFilter:['aria-current','aria-selected','hidden']});
+    addEventListener('resize',()=>{init=false;kick(300)});if(box.scrollWidth>box.clientWidth)box.addEventListener('scroll',()=>kick(100),{passive:true});
+    const itemAt=cx=>{const b=box.getBoundingClientRect();let best=null,bd=1e9;box.querySelectorAll(itemSel).forEach(el=>{if(el.hidden||!el.offsetWidth)return;const r=el.getBoundingClientRect(),m=Math.abs(cx-(r.left+r.width/2));if(m<bd){bd=m;best=el}});return best};
+    box.addEventListener('pointerdown',e=>{if(e.button>0||!on())return;const it=e.target.closest(itemSel);if(!it)return;lift=true;
+      dg={id:e.pointerId,x0:e.clientX,it,moved:false};kick(400)});
+    box.addEventListener('pointermove',e=>{if(!dg||e.pointerId!==dg.id||!drag)return;if(!dg.moved&&Math.abs(e.clientX-dg.x0)<8)return;dg.moved=true;
+      const b=box.getBoundingClientRect();tx=Math.max(-6,Math.min(b.width-tw+6,e.clientX-b.left-tw/2));kick(200)});
+    const end=e=>{if(!dg||e.pointerId!==dg.id)return;const d=dg;dg=null;lift=false;
+      /* Tocar sin mover: el clic normal. Arrastrar: se elige la pestaña donde se suelta y se descarta el clic de la original */
+      if(d.moved&&drag&&e.type==='pointerup'){const t=itemAt(e.clientX);if(t)t.click();swallow()}kick(800)};
+    box.addEventListener('pointerup',end);box.addEventListener('pointercancel',end);
+    kick(800);return {kick}}
+  const nav=document.querySelector('.nav-in');
+  const NL=lens(nav,'button[data-view]',()=>nav.querySelector('button[aria-current="page"]'),el=>el,true);
+  lens($('tabs'),'.tab',()=>$('tabs').querySelector('.tab[aria-selected="true"]'),el=>el.querySelector('span')||el,false);
+  DESK.addEventListener('change',()=>NL&&NL.kick(600));
+
+  /* Hojas y menús: nacen desde donde has tocado y vuelven ahí al cerrarse */
+  let pd=null;document.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY,t:Date.now()}},true);
+  const origin=(sh,o)=>{const W=sh.offsetWidth,H=sh.offsetHeight,cx=sh.offsetLeft+W/2,cy=sh.offsetTop+H/2;
+    if(o){const s=Math.max(.12,Math.min(.45,90/Math.max(W,1)));return {x:(o.x-cx)+'px',y:(o.y-cy)+'px',s}}return {x:'0px',y:Math.round(H*.35)+'px',s:.85}};
+  const setO=(el,O)=>{el.style.setProperty('--lgx',O.x);el.style.setProperty('--lgy',O.y);el.style.setProperty('--lgs',O.s)};
+  const ST=new WeakMap();
+  function opened(b){const sh=b.querySelector(':scope>.sheet');if(!sh||RM.matches)return;const o=pd&&Date.now()-pd.t<1500&&pd.y<innerHeight-40?{x:pd.x,y:pd.y}:null;
+    const O=origin(sh,o);setO(b,O);ST.set(b,{O,top:0});/* La clase se queda hasta que se cierre: si se quitara al acabar, volvería a correr la animación de siempre */
+    b.classList.remove('lg-in');void b.offsetWidth;b.classList.add('lg-in');sh.addEventListener('scroll',()=>{const st=ST.get(b);if(st)st.top=sh.scrollTop},{passive:true})}
+  function closed(b){b.classList.remove('lg-in');const st=ST.get(b);if(!st||RM.matches)return;ST.delete(b);
+    const g=b.cloneNode(true);g.removeAttribute('hidden');g.removeAttribute('id');g.classList.remove('lg-in');g.classList.add('lg-out');g.setAttribute('aria-hidden','true');g.querySelectorAll('[id]').forEach(x=>x.removeAttribute('id'));
+    g.style.zIndex=b.style.zIndex||getComputedStyle(b).zIndex;setO(g,st.O);document.body.appendChild(g);const gs=g.querySelector(':scope>.sheet');if(gs)gs.scrollTop=st.top;
+    /* Sin id se pierde el color propio de algunas hojas: se copia el fondo de la original */
+    if(gs){const osh=b.querySelector(':scope>.sheet');if(osh)gs.style.background=ST2.get(osh)||''}
+    setTimeout(()=>g.remove(),300)}
+  const ST2=new WeakMap();
+  const backs=[...document.querySelectorAll('.sheet-back')];
+  const mo=new MutationObserver(ms=>{const seen=new Set();ms.forEach(m=>{const b=m.target;if(seen.has(b))return;seen.add(b);
+    if(!b.hidden&&m.oldValue!==null){opened(b);requestAnimationFrame(()=>{const sh=b.querySelector(':scope>.sheet');if(sh)ST2.set(sh,getComputedStyle(sh).backgroundColor)})}
+    else if(b.hidden&&m.oldValue===null)closed(b)})});
+  backs.forEach(b=>mo.observe(b,{attributes:true,attributeFilter:['hidden'],attributeOldValue:true}));
+})();
 window.VTAPI={
   state:()=>S,
   /* Acciones que llegan desde la notificación del temporizador o los widgets */
@@ -6971,11 +7080,11 @@ window.VTAPI={
     if(a==='newnote'){show('notes');openNote(newNote('').id,true);return}
     if(a==='newevent'){show('cal');openEvent(null,dk(new Date()));return}
     if(a==='newblock'){goBlocksDay(dk(new Date()));setTimeout(()=>openBlock(null,dk(new Date())),300);return}
-    if(a==='pause'){if(running)tPause()}else if(a==='resume'){if(!running)tStart()}else if(a==='reset')tReset();else if(a==='skip')tSkip();
+    if(a==='pause'){if(running)tPause()}else if(a==='resume'){if(!running)tStart()}else if(a==='reset'){/* Desde la notificación: vuelve a empezar y la notificación se queda */const was=running;tReset();if(was)tStart();else{tHeld=true;tNotif()}}else if(a==='skip')tSkip();
     if(['pause','resume','reset','skip'].includes(a))return;
     if(a==='alarms')show('alarm');else if(a==='agenda')show('cal');else show('timer')},
-  timerSnapshot(){return {running,endAt,remain:running?Math.max(0,endAt-Date.now()):remain,period:S.period*1000,lap,loop:!!S.loop,name:S.hide?'Temporizador':(S.name||'Temporizador'),show:S.notif!=='never'}},
-  timerApply(t){if(!t||!t.active)return;running=!!t.running;endAt=t.endAt||0;remain=t.running?Math.max(0,endAt-Date.now()):(t.remain||S.period*1000);lap=t.lap||1;$('clock').classList.toggle('running',running);if(running)requestWake();else releaseWake();renderFabs();tNotif()},
+  timerSnapshot(){return {running,endAt,remain:running?Math.max(0,endAt-Date.now()):remain,period:S.period*1000,lap,loop:!!S.loop,name:S.hide?'Temporizador':(S.name||'Temporizador'),show:S.notif!=='never',held:tHeld}},
+  timerApply(t){if(!t||!t.active)return;running=!!t.running;tHeld=!running&&!!t.held;endAt=t.endAt||0;remain=t.running?Math.max(0,endAt-Date.now()):(t.remain||S.period*1000);lap=t.lap||1;$('clock').classList.toggle('running',running);if(running)requestWake();else releaseWake();renderFabs();tNotif()},
   importFile(f){importIncoming(f)},
   /* Datos que pintan los widgets de la pantalla de inicio */
   widgetData(){const n=nextAlarm(),d=new Date();
