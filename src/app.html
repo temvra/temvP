@@ -1960,7 +1960,7 @@ body.desk:not(.desknotes) #noteview{display:none!important}
   transition:background-color .3s,border-color .3s,opacity .2s}
 /* La lente emite luz: su color baña a los vecinos por el lado que la mira, más cuanto más cerca; al moverse, el halo se estira */
 .lg-lens{box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 22%,transparent),0 2px 10px color-mix(in srgb,var(--container) 45%,transparent),0 0 calc(12px + var(--lv,0)*26px) color-mix(in srgb,var(--container) calc(50% + var(--lv,0)*35%),transparent)}
-.lg-host>button,.lg-host>.tab{background-image:radial-gradient(75% 150% at var(--lx,50%) 50%,color-mix(in srgb,var(--container) calc(var(--li,0)*85%),transparent),transparent 72%);transition:background-image .12s linear}
+.lg-host>button,.lg-host>.tab>span{background-image:radial-gradient(75% 150% at var(--lx,50%) 50%,color-mix(in srgb,var(--container) calc(var(--li,0)*85%),transparent),transparent 72%);transition:background-image .12s linear}
 .lg-host>button>.ic,.lg-host>.tab>span{text-shadow:0 0 calc(var(--li,0)*10px) color-mix(in srgb,var(--container) calc(var(--li,0)*80%),transparent)}
 /* Al pulsar se levanta: cristal transparente que aumenta un poco lo de debajo, con el borde irisado */
 .lg-lens.lift{background:color-mix(in srgb,#fff 6%,transparent);border-color:color-mix(in srgb,#fff 42%,transparent);
@@ -2066,6 +2066,24 @@ body:not(.desk) .nav{touch-action:none;overflow:visible}
 @media (prefers-reduced-motion:no-preference){.bk-now::after{animation:nowGlide 4.5s cubic-bezier(.45,0,.55,1) infinite}@keyframes nowGlide{0%{left:-14%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:102%;opacity:0}}
   .bk-now{animation:nowBreath 3.2s ease-in-out infinite}@keyframes nowBreath{0%,100%{filter:saturate(1.2) brightness(1)}50%{filter:saturate(1.35) brightness(1.18)}}}
 .bk-now span{background:rgba(229,72,77,.9);text-shadow:0 0 6px #fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 10px rgba(229,72,77,.55);border-radius:8px}
+/* Cristal en todas las secciones: tarjetas, filas, pastillas, segmentos y botones flotantes */
+.card,.row,.reg-card,.reg-day,.reg-wrap,.reg-head,.vl-row,.rcard,.nd-row,.ob-note .ne-pill{background:color-mix(in srgb,var(--card) 74%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low),0 4px 16px rgba(0,0,0,.12);backdrop-filter:blur(8px) saturate(150%);-webkit-backdrop-filter:blur(8px) saturate(150%)}
+.row{box-shadow:inset 0 1px 0 var(--lg-rim)}
+.pill,.tile,.bk-zoom,.dt.on{background:color-mix(in srgb,var(--surface-2) 62%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low);backdrop-filter:blur(10px) saturate(170%);-webkit-backdrop-filter:blur(10px) saturate(170%)}
+.seg{position:relative}
+.seg button{background:color-mix(in srgb,var(--surface-3) 58%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low)}
+.seg.lg-host button[aria-pressed="true"]{background:transparent;color:var(--fg)}
+.fab-s,.fab{backdrop-filter:blur(12px) saturate(180%);-webkit-backdrop-filter:blur(12px) saturate(180%)}
+.fab-s{background:color-mix(in srgb,var(--surface-3) 70%,transparent)}
+.fab{background:color-mix(in srgb,var(--container) 82%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 3px rgba(0,0,0,.15),0 10px 28px color-mix(in srgb,var(--container) 45%,transparent)}
+.ring-bg{stroke:color-mix(in srgb,var(--surface-3) 70%,transparent)}
+/* El anillo es luz: ilumina los dígitos y respira mientras corre */
+.ring{filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 80%,transparent)) drop-shadow(0 0 14px color-mix(in srgb,var(--accent) 40%,transparent))}
+.clock.running .digits{text-shadow:0 0 18px color-mix(in srgb,var(--accent) 45%,transparent)}
+.clock.running .ring{animation:ringGlow 2.4s ease-in-out infinite}
+@keyframes ringGlow{0%,100%{filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 80%,transparent)) drop-shadow(0 0 14px color-mix(in srgb,var(--accent) 40%,transparent))}50%{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--accent) 95%,transparent)) drop-shadow(0 0 26px color-mix(in srgb,var(--accent) 60%,transparent))}}
+.al-time,.city-time{text-shadow:0 0 12px color-mix(in srgb,var(--accent) 22%,transparent)}
+.row.active{box-shadow:inset 0 1px 0 var(--lg-rim),0 0 0 2px var(--accent) inset,0 0 18px color-mix(in srgb,var(--accent) 35%,transparent)}
 /* PC: la paleta y los ajustes bajan a la barra lateral */
 body.desk #open-settings,body.desk #cal-settings,body.desk #ob-settings{display:none}
 body.desk .nav-set{display:grid;place-items:center;position:absolute;left:50%;bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 18px);transform:translateX(-50%);width:46px;height:46px;border-radius:50%;color:var(--fg);background:color-mix(in srgb,var(--surface-2) 58%,transparent);border:1px solid color-mix(in srgb,#fff 12%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low),0 8px 24px rgba(0,0,0,.25);backdrop-filter:blur(12px) saturate(185%);-webkit-backdrop-filter:blur(12px) saturate(185%)}
@@ -7368,6 +7386,7 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
   DESK.addEventListener('change',()=>NL&&NL.kick(600));
   /* En los menús: vistas del menú de la Agenda y pestañas del panel de Notas */
   lens($('cdr-body'),'[data-cview]',()=>$('cdr-body').querySelector('[data-cview][aria-pressed="true"]'),el=>el,false);
+  document.querySelectorAll('.seg').forEach(sg=>{if(sg.querySelector('button[aria-pressed]'))lens(sg,'button',()=>sg.querySelector('button[aria-pressed="true"]'),el=>el,false)});
   lens($('bk-week'),'button[data-bkday]',()=>$('bk-week').querySelector('button.on'),el=>el,true);
   lens($('vn-tabs'),'[data-vtab]',()=>$('vn-tabs').querySelector('[data-vtab][aria-selected="true"]'),el=>el,false);
 
@@ -7396,7 +7415,7 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     /* Vigila la fluidez: si la pantalla no da abasto al desplazar, se quita la refracción y queda solo el desenfoque */
     let bad=0,chk=0;addEventListener('scroll',()=>{const n=Date.now();if(n<chk||document.documentElement.classList.contains('lg-lite'))return;chk=n+8000;let f=0,t0=performance.now();requestAnimationFrame(function fr(t){f++;if(t-t0<900){requestAnimationFrame(fr);return}if(f<22){if(++bad>=2){document.documentElement.classList.add('lg-lite');S.lgLite=true;save()}}else bad=0})},{passive:true,capture:true})}
   /* Gel: al pulsar, el control crece, sigue al dedo con resistencia y se ilumina desde el punto de contacto; la energía llega a los vecinos */
-  const LG_PRESS='.btn,.icon-btn,.fab,.fab-s,.ob-pillbar button,.bk-zoom button,.pg-edge,.avatar,.cv-dock button,.seg button,.bks-quick button,.bk-filter button,.ob-round,.vl-new,.cp-b,.ob-tools button,.ne-tools button,.dt-new,.switch';
+  const LG_PRESS='.row,.tm-row,.reg-card,.rcard,.vl-row,.nd-row,.mcell,.btn,.icon-btn,.fab,.fab-s,.ob-pillbar button,.bk-zoom button,.pg-edge,.avatar,.cv-dock button,.seg button,.bks-quick button,.bk-filter button,.ob-round,.vl-new,.cp-b,.ob-tools button,.ne-tools button,.dt-new,.switch';
   const GEL=new WeakMap(),gelOf=el=>{let g=GEL.get(el);if(!g){g={x:0,y:0,s:1,l:0,vx:0,vy:0,vs:0,vl:0,tx:0,ty:0,ts:1,tl:0,raf:0,t:0,resp:.3,damp:.6};GEL.set(el,g)}return g};
   function gelRun(el,g){if(g.raf)return;g.t=performance.now();el.classList.add('lg-gel');g.raf=requestAnimationFrame(function st(now){const dt=Math.min(.05,Math.max(.001,(now-g.t)/1000));g.t=now;
       spStep(g,'x',g.tx,g.resp,g.damp,dt);spStep(g,'y',g.ty,g.resp,g.damp,dt);spStep(g,'s',g.ts,g.resp,g.damp,dt);spStep(g,'l',g.tl,.34,1,dt);if(g.l<0){g.l=0;g.vl=0}
