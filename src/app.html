@@ -1964,8 +1964,9 @@ body.desk:not(.desknotes) #noteview{display:none!important}
   transition:background-color .3s,border-color .3s,opacity .2s}
 /* La lente emite luz: su color baña a los vecinos por el lado que la mira, más cuanto más cerca; al moverse, el halo se estira */
 .lg-lens{box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 22%,transparent),0 2px 10px color-mix(in srgb,var(--container) 45%,transparent),0 0 calc(12px + var(--lv,0)*26px) color-mix(in srgb,var(--container) calc(50% + var(--lv,0)*35%),transparent)}
-.lg-host>button,.lg-host>.tab>span{background-image:radial-gradient(75% 150% at var(--lx,50%) 50%,color-mix(in srgb,var(--container) calc(var(--li,0)*85%),transparent),transparent 72%);transition:background-image .12s linear}
-.lg-host>button>.ic,.lg-host>.tab>span{text-shadow:0 0 calc(var(--li,0)*10px) color-mix(in srgb,var(--container) calc(var(--li,0)*80%),transparent)}
+.lg-host>button:not(.tab),.lg-host>.tab>span{background-image:radial-gradient(circle at 32% 22%,rgba(255,255,255,.3),transparent 46%),radial-gradient(75% 150% at var(--lx,50%) 50%,color-mix(in srgb,var(--container) calc(var(--li,0)*85%),transparent),transparent 72%);transition:background-image .12s linear}
+.tab{background:none!important;box-shadow:none!important}
+.lg-host>.tab>span{text-shadow:0 0 calc(var(--li,0)*10px) color-mix(in srgb,var(--container) calc(var(--li,0)*80%),transparent)}
 /* Arrastrada por la barra, la lente dispersa la luz: un arcoíris en los bordes que crece con la velocidad */
 .lg-lens.drag{backdrop-filter:var(--lg-ref,) blur(.6px) saturate(200%) brightness(1.18);-webkit-backdrop-filter:blur(1px) saturate(200%) brightness(1.18)}
 .lg-lens.drag::before,.lg-lens.drag::after{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;opacity:calc(.35 + var(--lv,0)*.65)}
@@ -2086,11 +2087,17 @@ body:not(.desk) .nav{touch-action:none;overflow:visible}
 .fab-s{background:color-mix(in srgb,var(--surface-3) 70%,transparent)}
 .fab{background:color-mix(in srgb,var(--container) 82%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 3px rgba(0,0,0,.15),0 10px 28px color-mix(in srgb,var(--container) 45%,transparent)}
 .ring-bg{stroke:color-mix(in srgb,var(--surface-3) 70%,transparent)}
-/* El anillo es luz: ilumina los dígitos y respira mientras corre */
-.ring{filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 80%,transparent)) drop-shadow(0 0 14px color-mix(in srgb,var(--accent) 40%,transparent))}
+ /* El anillo es luz: un halo circular detrás (sin filtros, que recortaban un recuadro sobre el cristal) y dígitos iluminados mientras corre */
+.clock::after{content:"";position:absolute;left:50%;top:50%;width:calc(min(76vw,290px)*.857);height:calc(min(76vw,290px)*.857);transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;box-shadow:0 0 18px 3px color-mix(in srgb,var(--accent) 34%,transparent),inset 0 0 18px 3px color-mix(in srgb,var(--accent) 30%,transparent);opacity:.8}
+.clock.running::after{animation:ringHalo 2.4s ease-in-out infinite}
+@keyframes ringHalo{0%,100%{opacity:.8}50%{opacity:1;box-shadow:0 0 30px 6px color-mix(in srgb,var(--accent) 50%,transparent),inset 0 0 26px 5px color-mix(in srgb,var(--accent) 42%,transparent)}}
+.ring,.clock.running .ring{filter:none!important;animation:none!important}
 .clock.running .digits{text-shadow:0 0 18px color-mix(in srgb,var(--accent) 45%,transparent)}
-.clock.running .ring{animation:ringGlow 2.4s ease-in-out infinite}
-@keyframes ringGlow{0%,100%{filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 80%,transparent)) drop-shadow(0 0 14px color-mix(in srgb,var(--accent) 40%,transparent))}50%{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--accent) 95%,transparent)) drop-shadow(0 0 26px color-mix(in srgb,var(--accent) 60%,transparent))}}
+.digits{background:none}
+/* Gotas de agua: relieve con luz arriba, sombra abajo y bordes que dispersan el color */
+.seg button,.icon-btn,.btn.tonal,.avatar,.fab-s,.ob-round,.bk-zoom button,.bk-week button,.bk-filter button,.tab span,.vl-new,.cp-b,.step button,.stepper button{background-image:radial-gradient(circle at 32% 22%,rgba(255,255,255,.3),transparent 46%);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),inset 0 -2px 4px rgba(0,0,0,.28),inset 3px 0 6px -4px rgba(255,110,200,.4),inset -3px 0 6px -4px rgba(80,200,255,.45),0 4px 10px rgba(0,0,0,.22)}
+.seg button[aria-pressed="true"],.bk-filter button[aria-pressed="true"]{box-shadow:inset 0 1px 1px rgba(255,255,255,.6),inset 0 -2px 4px rgba(0,0,0,.25),inset 3px 0 6px -4px rgba(255,110,200,.5),inset -3px 0 6px -4px rgba(80,200,255,.55),0 6px 16px color-mix(in srgb,var(--accent) 40%,transparent)}
+.fab{background-image:radial-gradient(circle at 32% 22%,rgba(255,255,255,.35),transparent 48%)}
 .al-time,.city-time{text-shadow:0 0 12px color-mix(in srgb,var(--accent) 22%,transparent)}
 .row.active{box-shadow:inset 0 1px 0 var(--lg-rim),0 0 0 2px var(--accent) inset,0 0 18px color-mix(in srgb,var(--accent) 35%,transparent)}
 /* PC: la paleta y los ajustes bajan a la barra lateral */
