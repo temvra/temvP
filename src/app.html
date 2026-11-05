@@ -2026,6 +2026,48 @@ body:not(.desk) .nav{touch-action:none;overflow:visible}
 .sheet-back{background:rgba(0,0,0,.42)}
 .sheet-back>.sheet{backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 14%,transparent),0 -12px 40px rgba(0,0,0,.35)}
 #ob-sheet .sheet{background:color-mix(in srgb,var(--surface-2) 86%,transparent)}
+/* Selector de hora: gotas de cristal que se apartan del dedo y crecen al elegirlas */
+.tp{display:grid;gap:10px;justify-items:center;padding-bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 16px)}
+.tp-time{display:flex;align-items:center;gap:4px;font:300 56px/1 var(--font);font-variant-numeric:tabular-nums;color:var(--muted)}
+.tp-time button{font:inherit;color:inherit;padding:4px 10px;border-radius:16px}
+.tp-time button.on{color:var(--fg);background:color-mix(in srgb,var(--surface-3) 70%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim)}
+.tp-dial{position:relative;width:min(300px,78vw);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--surface-3) 70%,transparent),color-mix(in srgb,var(--surface-2) 40%,transparent));box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -2px 8px var(--lg-low),0 10px 30px rgba(0,0,0,.25);touch-action:none;user-select:none;-webkit-user-select:none}
+.tp-hand{position:absolute;left:50%;top:50%;width:var(--l,38%);height:2px;margin-top:-1px;transform-origin:0 50%;transform:rotate(var(--a,0deg));background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 40%,transparent));border-radius:2px;pointer-events:none;box-shadow:0 0 8px color-mix(in srgb,var(--accent) 60%,transparent)}
+.tp-hand::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.tp-drop{position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:500;color:var(--fg);pointer-events:none;will-change:transform;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.42),transparent 48%),color-mix(in srgb,var(--surface-3) 55%,transparent);box-shadow:inset 0 1px 1px var(--lg-rim),inset 0 -2px 3px var(--lg-low),0 2px 6px rgba(0,0,0,.18);backdrop-filter:blur(4px) saturate(160%);-webkit-backdrop-filter:blur(4px) saturate(160%)}
+.tp-drop.sm{width:32px;height:32px;margin:-16px;font-size:12.5px;color:var(--muted)}
+.tp-drop.on{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.55),transparent 50%),color-mix(in srgb,var(--accent) 80%,transparent);color:var(--on-accent);font-weight:700;box-shadow:inset 0 1px 1px rgba(255,255,255,.7),inset 0 -2px 4px rgba(0,0,0,.2),0 8px 20px color-mix(in srgb,var(--accent) 50%,transparent)}
+.tp-acts{display:flex;gap:10px;width:100%;justify-content:flex-end;padding-top:4px}
+/* Bloques: cristal en la cabecera, los días, los filtros y las columnas; y la hora actual como luz con estela */
+.bk-week button,.bk-filter button{background:color-mix(in srgb,var(--surface-2) 58%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low);backdrop-filter:blur(10px) saturate(170%);-webkit-backdrop-filter:blur(10px) saturate(170%)}
+.bk-week.lg-host button.on{background:transparent;color:var(--fg)}
+.bk-filter button[aria-pressed="true"]{background:color-mix(in srgb,var(--bc,var(--accent)) 62%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(0,0,0,.15),0 4px 14px color-mix(in srgb,var(--bc,var(--accent)) 35%,transparent)}
+.bk-sec{background:color-mix(in srgb,var(--card) 72%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low),0 6px 22px rgba(0,0,0,.14);backdrop-filter:blur(8px) saturate(150%);-webkit-backdrop-filter:blur(8px) saturate(150%)}
+.bk-band .bk-dc{background:color-mix(in srgb,var(--surface-3) 60%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 2px var(--lg-low)}
+.bk-b{box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.12)}
+.bk-now{height:2px;background:linear-gradient(90deg,#ffb3b6,#ff5a60 35%,#e5484d 70%,rgba(229,72,77,.45));box-shadow:0 0 6px rgba(255,90,96,.9),0 0 18px rgba(229,72,77,.35);border-radius:2px;overflow:visible}
+.bk-now::before{content:"";position:absolute;left:4%;right:0;bottom:1px;height:30px;background:linear-gradient(180deg,transparent 10%,rgba(255,110,116,.22) 70%,rgba(255,140,146,.4));filter:blur(1.5px);transform:skewX(-14deg);transform-origin:100% 100%;-webkit-mask:linear-gradient(90deg,transparent,#000 30%);mask:linear-gradient(90deg,transparent,#000 30%);pointer-events:none}
+.bk-now::after{content:"";position:absolute;top:-3px;left:0;width:70px;height:8px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(255,255,255,.95),rgba(255,170,174,.6) 40%,transparent 72%);filter:blur(1.2px);mix-blend-mode:screen;opacity:0}
+@media (prefers-reduced-motion:no-preference){.bk-now::after{animation:nowGlide 5.5s cubic-bezier(.45,0,.55,1) infinite}@keyframes nowGlide{0%{left:-8%;opacity:0}12%{opacity:1}88%{opacity:1}100%{left:102%;opacity:0}}}
+.bk-now span{background:rgba(229,72,77,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 10px rgba(229,72,77,.55);border-radius:8px}
+/* PC: la paleta y los ajustes bajan a la barra lateral */
+body.desk #open-settings,body.desk #cal-settings,body.desk #ob-settings{display:none}
+body.desk .nav-set{display:grid;place-items:center;position:absolute;left:50%;bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 18px);transform:translateX(-50%);width:46px;height:46px;border-radius:50%;color:var(--fg);background:color-mix(in srgb,var(--surface-2) 58%,transparent);border:1px solid color-mix(in srgb,#fff 12%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low),0 8px 24px rgba(0,0,0,.25);backdrop-filter:blur(12px) saturate(185%);-webkit-backdrop-filter:blur(12px) saturate(185%)}
+body.desk .nav-set:hover{background:var(--surface-2)}
+/* Registros: mapa de tarjetas */
+.rmap{display:grid;gap:14px}
+.rmap-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rmap-top h1{flex:1;margin:0;font-size:21px;font-weight:600}
+.rmap h2{margin:6px 0 0;font-size:12.5px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.rmap-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.rcard{position:relative;text-align:left;display:grid;gap:4px;padding:12px 12px 12px 16px;border-radius:16px;background:color-mix(in srgb,var(--card) 80%,transparent);color:var(--fg);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low),0 4px 14px rgba(0,0,0,.14);backdrop-filter:blur(8px) saturate(160%);-webkit-backdrop-filter:blur(8px) saturate(160%);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.rcard::before{content:"";position:absolute;left:6px;top:12px;bottom:12px;width:4px;border-radius:2px;background:var(--rc,var(--accent))}
+.rcard.on{outline:2px solid var(--rc,var(--accent))}
+.rcard b{font-size:15px;display:flex;align-items:center;gap:8px}
+.rcard b i{font-style:normal;font-size:20px}
+.rcard small{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rcard em{font-style:normal;font-size:12px;color:var(--rc,var(--accent))}
 /* Liquid Glass en todas las pantallas: borde que capta la luz, material fino sobre el contenido y luz que nace del punto de contacto */
 :root{--lg-hi:rgba(255,255,255,.1);--lg-rim:color-mix(in srgb,#fff 20%,transparent);--lg-low:rgba(0,0,0,.14)}
 :root.app-light,:root[data-theme="light"]{--lg-hi:rgba(255,255,255,.6);--lg-rim:rgba(255,255,255,.75);--lg-low:rgba(0,0,0,.06)}
@@ -2270,7 +2312,9 @@ body.desknotes .ne-tools,.ob-tools,.bk-zoom{background:color-mix(in srgb,var(--s
       <button data-view="notes"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span><span class="lb">Notas</span></button>
       <button data-view="reg" aria-label="Registros"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="17" rx="3"/><path d="M9 2.5h6v3.5H9zM8 11h1.5M12 11h4M8 15.5l1 1 1.8-2M13.5 16H16"/></svg></span><span class="lb">Registros</span></button>
     </div>
+    <button class="nav-set" id="nav-set" hidden aria-label="Temas y ajustes"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="10.5" r="1.2" fill="currentColor"/><circle cx="12" cy="7.5" r="1.2" fill="currentColor"/><circle cx="16.5" cy="10.5" r="1.2" fill="currentColor"/></svg></button>
   </nav>
+<div class="sheet-back" id="tp-sheet" hidden><div class="sheet tp"><div class="tp-time"><button id="tp-hb" class="on">21</button><span>:</span><button id="tp-mb">30</button></div><div class="tp-dial" id="tp-dial"><i class="tp-hand" id="tp-hand"></i></div><div class="tp-acts"><button class="btn tonal" id="tp-cancel">Cancelar</button><button class="btn" id="tp-ok">Establecer</button></div></div></div>
 </div>
 
 <!-- AJUSTES -->
@@ -4118,7 +4162,7 @@ document.addEventListener('keydown',e=>{if($('canvasview').hidden||cvEditing)ret
 /* ===================== Notas en ordenador ===================== */
 /* Móvil en horizontal: mismo diseño a dos paneles que en el ordenador, en vez de una columna estrecha */
 const DESK=matchMedia('(min-width:900px) and (min-height:500px), (min-width:640px) and (orientation:landscape)');
-function applyDesk(){const on=DESK.matches;document.body.classList.toggle('desk',on);document.body.classList.toggle('desknotes',on&&view==='notes');syncN3();
+function applyDesk(){const on=DESK.matches;document.body.classList.toggle('desk',on);document.body.classList.toggle('desknotes',on&&view==='notes');syncN3();$('nav-set').hidden=!on;
   if(on&&view==='notes'){renderDeskTabs();if(!curNote&&S.obActive&&nget(S.obActive)&&!isCanvas(nget(S.obActive))&&!window._deskBoot){window._deskBoot=1;openNote(S.obActive,false)}}
   $('desk-empty').hidden=!(on&&view==='notes'&&$('noteview').hidden)}
 DESK.addEventListener?DESK.addEventListener('change',applyDesk):DESK.addListener(applyDesk);
@@ -4199,7 +4243,7 @@ $('pg-to-blocks').onclick=()=>goPage('blocks');$('pg-to-cal').onclick=()=>goPage
 let pgSw=null;
 /* Desde el borde, la pantalla sigue al dedo; al soltar, la inercia decide si cambia o vuelve con un muelle */
 document.addEventListener('touchstart',e=>{if(e.touches.length!==1||DESK.matches||(view!=='cal'&&view!=='blocks')||!$('dayview').hidden||!$('ev-sheet').hidden||!$('bk-sheet').hidden){pgSw=null;return}
-  const t=e.touches[0],W=innerWidth,edge=view==='cal'?t.clientX>W*.82:t.clientX<W*.18;pgSw=edge?{x:t.clientX,y:t.clientY,on:false,d:0,s:[],el:$(view==='cal'?'v-cal':'v-blocks'),dir:view==='cal'?-1:1}:null},{passive:true,capture:true});
+  const t=e.touches[0],W=innerWidth,edge=(view==='cal'?t.clientX>W*.82:t.clientX<W*.18)&&!(e.target.closest&&e.target.closest('.lg-host,.bk-filter,.tabs,.nav'));pgSw=edge?{x:t.clientX,y:t.clientY,on:false,d:0,s:[],el:$(view==='cal'?'v-cal':'v-blocks'),dir:view==='cal'?-1:1}:null},{passive:true,capture:true});
 document.addEventListener('touchmove',e=>{if(!pgSw||e.touches.length!==1)return;if(bkDrag||Date.now()-bkNoClick<600){pgSw=null;return}const g=pgSw,t=e.touches[0],dx=t.clientX-g.x,dy=t.clientY-g.y;
   if(!g.on){if(dx*g.dir>10&&Math.abs(dx)>Math.abs(dy)*1.3){g.on=true;g.el.style.transition='none'}else if(Math.abs(dy)>12){pgSw=null;return}else return}
   e.preventDefault();g.d=dx*g.dir>0?dx:rubber(dx,80,.3);g.s.push({p:g.d,t:performance.now()});if(g.s.length>8)g.s.shift();g.el.style.transform=`translateX(${g.d.toFixed(1)}px)`},{passive:false,capture:true});
@@ -4297,7 +4341,7 @@ $('bk-tl').addEventListener('pointerdown',e=>{if(e.button>0||e.target.closest('.
 $('cal-grid').addEventListener('pointerdown',e=>{if(e.button>0)return;const ch=e.target.closest('.mchip[data-evid]');if(!ch)return;
   const go=()=>{if(!bkLP)return;const ev=realEv(ch.dataset.evid);if(ev){ch.classList.add('dragging');dragStart({mode:'day',ev,iid:ch.dataset.evid,el:ch,id:bkLP.id})}bkLP=null};
   bkLP={x:e.clientX,y:e.clientY,id:e.pointerId,go,mouse:e.pointerType==='mouse',t:setTimeout(go,e.pointerType==='mouse'?260:380)}});
-$('cal-grid').addEventListener('contextmenu',e=>{if(e.target.closest('.mchip[data-evid]'))e.preventDefault()});
+$('cal-grid').addEventListener('contextmenu',e=>{const c=e.target.closest('.mchip[data-evid]');if(!c)return;e.preventDefault();if(lastPT!=='mouse')return;if(bkLP){clearTimeout(bkLP.t);bkLP=null}itemMenu(c.dataset.evid)});
 document.addEventListener('pointermove',e=>{if(bkLP&&e.pointerId===bkLP.id&&Math.hypot(e.clientX-bkLP.x,e.clientY-bkLP.y)>(bkLP.mouse?5:9)){clearTimeout(bkLP.t);if(bkLP.mouse)bkLP.go();bkLP=null}
   if(!bkDrag||e.pointerId!==bkDrag.id)return;const d=bkDrag,x=e.clientX,y=e.clientY;
   if(!d.moved&&d.x0!=null&&Math.hypot(x-d.x0,y-d.y0)>8)d.moved=true;
@@ -6811,6 +6855,7 @@ $('fab2').onclick=()=>{
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{const v=b.dataset.view;if(v==='cal'){if(view==='blocks'||view==='cal')goPage(view==='blocks'?'cal':'cal');else show(S.calPage==='blocks'&&!DESK.matches?'blocks':'cal');return}show(v)});
 $('tabs').onclick=e=>{const t=e.target.closest('[data-tab]');if(t)show(t.dataset.tab)};
 $('open-settings').onclick=()=>{$('settings').hidden=false};
+$('nav-set').onclick=()=>{const b=['ob-settings','cal-settings','open-settings'].map(i=>$(i)).find(x=>x&&x.closest('[id]')&&!x.closest('.scroll,#v-notes,.ob-ex')?.hidden&&(view==='notes'?x.id==='ob-settings':x.id!=='ob-settings'));(b||$('open-settings')).click()};
 $('close-settings').onclick=()=>{$('settings').hidden=true};
 [$('kp'),$('al-sheet'),$('city-sheet')].forEach(s=>s.addEventListener('click',e=>{if(e.target===s)s.hidden=true}));
 
@@ -6913,7 +6958,7 @@ if((S.uiV||0)<6){S.uiV=6;S.ob.bottomUp=false;save();applyObPrefs()}
     const pm=e.target.closest('.ob-pwrap.open .ob-pmenu');const t=e.touches[0];
     if(pm){g={pm,x:t.clientX,y:t.clientY};return}
     const b=e.target.closest('.sheet-back');if(!b||b.hidden)return;const panel=[...b.children].find(c=>c.matches('.sheet,.cdr'));
-    if(!panel||!panel.contains(e.target)||e.target.closest('input[type=range],textarea,[contenteditable="true"]'))return;
+    if(!panel||!panel.contains(e.target)||e.target.closest('input[type=range],textarea,[contenteditable="true"],.tp-dial'))return;
     g={b,panel,side:panel.classList.contains('cdr'),x:t.clientX,y:t.clientY,at:Date.now(),on:false,target:e.target}},{passive:true});
   const put=(c,d)=>{c.panel.style.transform=c.side?`translateX(${d.toFixed(1)}px)`:`translateY(${d.toFixed(1)}px)`;const size=c.side?c.panel.offsetWidth:c.panel.offsetHeight;c.b.style.background=`rgba(0,0,0,${(.45*(1-Math.min(1,Math.abs(d)/size))).toFixed(3)})`};
   document.addEventListener('touchmove',e=>{if(!g)return;const t=e.touches[0],dx=t.clientX-g.x,dy=t.clientY-g.y;
@@ -7155,7 +7200,15 @@ function tableHTML(t,ctx){const tot=regTotals(t),byDay=!!ctx.byDay;return `<div 
   ${tot.some(v=>v!=='')?`<tfoot><tr>${byDay?'<td class="dc">Total</td>':''}${tot.map(v=>`<td>${v}</td>`).join('')}<td></td></tr></tfoot>`:''}</table></div>`}
 function renderRegs(){ensureDiary();ensureRegs();if(!regCur||!S.regs.some(x=>x.id===regCur))regCur=S.regLast&&S.regs.some(x=>x.id===S.regLast)?S.regLast:(S.regs[0]||{}).id||null;const r=S.regs.find(x=>x.id===regCur);
   $('rg-in').placeholder=r?(r.kind==='diary'?'Escribe en el diario de hoy…':'Apunta en '+r.name+'…'):'Crea un registro con +';
+  if(S.regMap&&S.regs.length){renderRegMap();return}
   if(r){S.regLast=r.id;renderReg(r);return}$('v-reg').innerHTML='<div class="reg-empty"><p>Aún no tienes registros.</p><button class="btn" id="reg-add">+ Nuevo registro</button></div>'}
+/* Mapa: todos los registros como tarjetas por tipo, arrastrables para ordenarlos */
+function renderRegMap(){const grp={},lab=r=>r.kind==='diary'?'Diario':(REG_TYPES[r.type]||{}).n||'Otros';S.regs.forEach(r=>{(grp[lab(r)]=grp[lab(r)]||[]).push(r)});const td=today();
+  const card=r=>{const n=r.kind==='diary'?Object.keys(r.days||{}).length:[...new Set((r.rows||[]).map(x=>x.d))].length,hoy=r.kind==='diary'?((r.days||{})[td]||{}).text||'':regSummary(r,td).split('\n')[0];
+    return `<button class="rcard${r.id===regCur?' on':''}" data-rcard="${r.id}" style="--rc:${r.color||'var(--accent)'}"><b><i>${r.icon||'🗂️'}</i>${esc(r.name)}</b><small>${hoy?esc(hoy):T('Hoy sin apuntar')}</small><em>${n} ${n===1?T('día'):T('días')}${r.tag?' · #'+esc(r.tag):''}</em></button>`};
+  $('v-reg').innerHTML=`<div class="rmap"><div class="rmap-top"><h1>${T('Registros')}</h1><button class="btn tonal" data-rmap="0">${T('Abrir')}</button></div>${Object.entries(grp).map(([k,v])=>`<h2>${esc(k)}</h2><div class="rmap-g">${v.map(card).join('')}</div>`).join('')}</div>`}
+$('v-reg').addEventListener('click',e=>{const m=e.target.closest('[data-rmap]');if(m){S.regMap=m.dataset.rmap==='1';save();renderRegs();return}const c=e.target.closest('[data-rcard]');if(c&&Date.now()-(window._rcNo||0)>450){regCur=c.dataset.rcard;S.regMap=false;save();renderRegs()}});
+setTimeout(()=>sortable($('v-reg'),'rcard',{render:renderRegs,move:(f,t,af)=>{S.regs=moveIn(S.regs,x=>x.id,f,t,af)},menu:el=>{const r=S.regs.find(x=>x.id===el.dataset.rcard);if(r)regMenu(r)}}),0);
 function openRegDrawer(){const dayTxt=r=>r.kind==='diary'?((r.days[today()]||{}).text||'Hoy sin escribir'):regSummary(r,today()).split('\n')[0]||'Hoy sin apuntar';
   $('rd-body').innerHTML=S.regs.map(r=>`<div class="nd-item"><button class="nd-row reg-r${r.id===regCur?' on':''}" data-pick="${r.id}" style="--rc:${r.color||'var(--accent)'}"><span class="ic2">${r.icon||'🗂️'}</span><span><b>${esc(r.name)}</b><small>${r.tag?'#'+esc(r.tag)+' · ':''}${esc(dayTxt(r))}</small></span></button></div>`).join('');$('reg-drawer').hidden=false}
 const csvCell=v=>{const t=String(v==null?'':v);return /[",;\n]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t};
@@ -7198,7 +7251,7 @@ $('rg-plus').onclick=()=>{const r=S.regs.find(x=>x.id===regCur),o=[{t:'Nuevo reg
 $('rg-send').onclick=()=>{const ta=$('rg-in'),v=ta.value.trim();if(!v)return;const r=S.regs.find(x=>x.id===regCur);if(!r){openRegWizard({});return}const t=today();
   if(r.kind==='diary'){const e=r.days[t];e.text=(e.text?e.text.replace(/\s*$/,'')+'\n':'')+v;regFolders(v)}else{let x=r.rows.find(y=>y.d===t&&rowEmpty(y));if(!x){x=blankRow(r,t);r.rows.push(x);r.rows.sort((a,b)=>a.d.localeCompare(b.d))}const parts=v.split(/\s*[,;]\s*/);parts.slice(0,r.cols.length).forEach((p,j)=>x.c[j]=p);regFolders(v)}
   ta.value='';ta.style.height='';saveReg(r);renderRegs()};
-function renderReg(r){const B=$('v-reg'),head=`<div class="reg-head"><input class="rn" data-rname value="${esc(r.name)}" aria-label="Nombre"><button class="icon-btn" data-rmenu aria-label="Opciones"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></div>`;
+function renderReg(r){const B=$('v-reg'),head=`<div class="reg-head"><input class="rn" data-rname value="${esc(r.name)}" aria-label="Nombre"><button class="icon-btn" data-rmap="1" aria-label="Mapa de registros" title="Mapa"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></button><button class="icon-btn" data-rmenu aria-label="Opciones"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></div>`;
   if(r.kind==='diary'){const days=Object.keys(r.days).sort().reverse();B.innerHTML=head+days.map(d=>{const e=r.days[d],fs=[...new Set(regFoldersPeek(e.text))];return `<div class="reg-day${d===today()?' today':''}" data-d="${d}"><h3>${esc(fromKey(d).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long'}))}</h3><textarea data-dtext placeholder="Escribe aquí. Usa /[carpeta] o /a/b/[carpeta] para enlazar carpetas.">${esc(e.text||'')}</textarea>${fs.length?`<div class="reg-chips">${fs.map(f=>`<button data-folder-go="${esc(f)}">📁 ${esc(f)}</button>`).join('')}</div>`:''}${(e.tables||[]).map((t,k)=>tableHTML(t,{key:'dt|'+d+'|'+k})+`<div class="reg-acts"><button class="btn tonal" data-trow="${d}|${k}">+ Fila</button><button class="btn tonal" data-tcolor="${d}|${k}">Color</button></div>`).join('')}<div class="reg-acts"><button class="btn tonal" data-tnew="${d}">+ Tabla</button></div></div>`}).join('');return}
   const fs=[...new Set(r.rows.flatMap(x=>x.c.flatMap(regFoldersPeek)))];
   B.innerHTML=head+`<div class="t2" style="margin:0 2px 6px">${r.goal?esc(r.goal)+' · ':''}${r.tag?'#'+esc(r.tag):'Sin etiqueta'}</div>`+tableHTML(r,{key:'reg',byDay:true})+(fs.length?`<div class="reg-chips">${fs.map(f=>`<button data-folder-go="${esc(f)}">📁 ${esc(f)}</button>`).join('')}</div>`:'')+`<div class="reg-acts"><button class="btn" data-addrow>+ Fila hoy</button>${(REG_TYPES[r.type]||{}).noBlock?'':'<button class="btn tonal" data-sess>Pasar a la línea de tiempo</button>'}${r.tag?'<button class="btn tonal" data-tagnote>Nota acumulada</button>':''}</div>`;
@@ -7289,7 +7342,7 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
       const b=box.getBoundingClientRect();if(vert){const p=e.clientY-b.top-th/2,m=b.height-th;ty=p<0?rubber(p,80):p>m?m+rubber(p-m,80):p}else{const p=e.clientX-b.left-tw/2,m=b.width-tw;tx=p<0?rubber(p,80):p>m?m+rubber(p-m,80):p}kick(200)});
     const end=e=>{if(!dg||e.pointerId!==dg.id)return;const d=dg;dg=null;lift=false;
       /* Tocar sin mover: el clic normal. Arrastrar: se elige la pestaña donde se suelta y se descarta el clic de la original */
-      if(d.moved&&drag&&e.type==='pointerup'){const t=itemAt(e.clientX+d.sx*.12,e.clientY+d.sy*.12);if(t)t.click();swallow()}kick(800)};
+      if(d.moved&&drag&&e.type==='pointerup'){const t=itemAt(e.clientX+d.sx*.05,e.clientY+d.sy*.05);if(t)t.click();swallow()}kick(800)};
     box.addEventListener('pointerup',end);box.addEventListener('pointercancel',end);
     kick(800);return {kick}}
   const nav=document.querySelector('.nav-in');
@@ -7298,6 +7351,7 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
   DESK.addEventListener('change',()=>NL&&NL.kick(600));
   /* En los menús: vistas del menú de la Agenda y pestañas del panel de Notas */
   lens($('cdr-body'),'[data-cview]',()=>$('cdr-body').querySelector('[data-cview][aria-pressed="true"]'),el=>el,false);
+  lens($('bk-week'),'button[data-bkday]',()=>$('bk-week').querySelector('button.on'),el=>el,true);
   lens($('vn-tabs'),'[data-vtab]',()=>$('vn-tabs').querySelector('[data-vtab][aria-selected="true"]'),el=>el,false);
 
   /* ---------- Física del cristal ---------- */
@@ -7345,6 +7399,35 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
   if(matchMedia('(hover:hover)').matches&&!RM.matches){let hv=null,hraf=0,he=null;const LG_HOV=LG_PRESS+',.row,.vl-row,.mcell,.ob-row,.nd-row,.reg-card,.tm-row,.bk-b,.mchip';
     document.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;he=e;if(!hraf)hraf=requestAnimationFrame(()=>{hraf=0;const t=he.target,el=t.closest&&t.closest(LG_HOV);if(el!==hv){if(hv)hv.classList.remove('lg-hov');hv=el;if(el)el.classList.add('lg-hov')}if(el){const r=el.getBoundingClientRect();el.style.setProperty('--hx',(he.clientX-r.left)+'px');el.style.setProperty('--hy',(he.clientY-r.top)+'px')}})},{passive:true})}
 
+  /* ---------- Selector de hora: esfera de gotas con física ---------- */
+  {const sh=$('tp-sheet'),dial=$('tp-dial'),hand=$('tp-hand');let inp=null,mode='h',h=0,m=0,drops=[],raf=0,last=0,fin=null,dragging=false;
+    const R=()=>dial.clientWidth/2;
+    function build(){drops.forEach(d=>d.el.remove());drops=[];const mk=(v,ring,txt,sm)=>{const el=document.createElement('i');el.className='tp-drop'+(sm?' sm':'');el.textContent=txt;dial.appendChild(el);drops.push({el,v,ring,a:-Math.PI/2+(mode==='h'?(v%12):(v/5))/12*2*Math.PI,x:0,y:0,s:1,vx:0,vy:0,vs:0})};
+      if(mode==='h'){for(let v=1;v<=12;v++)mk(v,.8,String(v));for(let v=13;v<=24;v++)mk(v%24,.52,v===24?'00':String(v),true)}else for(let v=0;v<60;v+=5)mk(v,.8,String(v).padStart(2,'0'));place(true)}
+    function place(now){const r=R();drops.forEach(d=>{const px=Math.cos(d.a)*r*d.ring,py=Math.sin(d.a)*r*d.ring;if(now){d.x=px;d.y=py}d.px=px;d.py=py;d.el.style.transform=`translate(${d.x}px,${d.y}px) scale(${d.s})`});sel()}
+    function sel(){const cur=mode==='h'?h:m,r=R();drops.forEach(d=>{const on=mode==='h'?d.v===cur:d.v===Math.round(cur/5)*5%60;d.el.classList.toggle('on',on);d.ts=on?1.32:1});const ring=mode==='h'?(h===0||h>12?.52:.8):.8,ang=-90+(mode==='h'?(h%12)*30:m*6);hand.style.setProperty('--a',ang+'deg');hand.style.setProperty('--l',(ring*100)+'%');$('tp-hb').textContent=String(h).padStart(2,'0');$('tp-mb').textContent=String(m).padStart(2,'0');$('tp-hb').classList.toggle('on',mode==='h');$('tp-mb').classList.toggle('on',mode==='m')}
+    function tick(now){raf=0;const dt=Math.min(.05,Math.max(.001,(now-last)/1000));last=now;let live=false;
+      drops.forEach(d=>{let tx=d.px,ty=d.py;if(fin){const dx=d.px-fin.x,dy=d.py-fin.y,dist=Math.hypot(dx,dy)||1;if(dist<70){const k=(70-dist)/70*26;tx+=dx/dist*k;ty+=dy/dist*k}}
+        spStep(d,'x',tx,.3,.6,dt);spStep(d,'y',ty,.3,.6,dt);spStep(d,'s',d.ts||1,.34,.55,dt);
+        d.el.style.transform=`translate(${d.x.toFixed(1)}px,${d.y.toFixed(1)}px) scale(${d.s.toFixed(3)})`;if(Math.abs(d.x-tx)+Math.abs(d.y-ty)>.2||Math.abs(d.s-(d.ts||1))>.002)live=true});
+      if(live||fin)raf=requestAnimationFrame(tick)}
+    const kick=()=>{if(!raf){last=performance.now();raf=requestAnimationFrame(tick)}};
+    function pick(e){const b=dial.getBoundingClientRect(),x=e.clientX-b.left-b.width/2,y=e.clientY-b.top-b.height/2,r=Math.hypot(x,y)/R();fin={x,y};let ang=Math.atan2(y,x)+Math.PI/2;if(ang<0)ang+=2*Math.PI;
+      if(mode==='h'){let v=Math.round(ang/(2*Math.PI)*12)%12;const inner=r<.66;h=inner?(v===0?0:v+12):(v===0?12:v);if(h===24)h=0}else{let v=Math.round(ang/(2*Math.PI)*60)%60;if(v!==m&&navigator.vibrate)navigator.vibrate(3);m=v}
+      sel();kick()}
+    dial.addEventListener('pointerdown',e=>{if(e.button>0)return;try{dial.setPointerCapture(e.pointerId)}catch(_){}dragging=true;pick(e);if(navigator.vibrate)navigator.vibrate(6)});
+    dial.addEventListener('pointermove',e=>{if(dragging)pick(e)});
+    const up=e=>{if(!dragging)return;dragging=false;fin=null;kick();if(mode==='h')setTimeout(()=>{mode='m';build()},180)};
+    dial.addEventListener('pointerup',up);dial.addEventListener('pointercancel',up);
+    $('tp-hb').onclick=()=>{mode='h';build()};$('tp-mb').onclick=()=>{mode='m';build()};
+    $('tp-cancel').onclick=()=>{sh.hidden=true};
+    $('tp-ok').onclick=()=>{if(inp){inp.value=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');inp.dispatchEvent(new Event('input',{bubbles:true}));inp.dispatchEvent(new Event('change',{bubbles:true}))}sh.hidden=true};
+    sh.addEventListener('click',e=>{if(e.target===sh)sh.hidden=true});
+    window.openTimePick=i=>{inp=i;if(sh.parentElement!==document.body)document.body.appendChild(sh);const v=/^(\d{1,2}):(\d{2})/.exec(i.value||'');h=v?+v[1]:new Date().getHours();m=v?+v[2]:0;mode='h';sh.hidden=false;sh.style.zIndex=60;requestAnimationFrame(build)};
+    /* Con el dedo, el selector del sistema se sustituye por este; con ratón y teclado se mantiene el del navegador */
+    document.addEventListener('click',e=>{const i=e.target.closest&&e.target.closest('input[type=time]');if(!i||i.disabled||!matchMedia('(pointer:coarse)').matches)return;e.preventDefault();i.blur();openTimePick(i)},true);
+    document.addEventListener('pointerdown',e=>{const i=e.target.closest&&e.target.closest('input[type=time]');if(i&&e.pointerType!=='mouse')e.preventDefault()},true)}
+
   /* Hojas y menús: nacen desde donde has tocado y vuelven ahí al cerrarse */
   let pd=null;document.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY,t:Date.now()}},true);
   const origin=(sh,o)=>{const W=sh.offsetWidth,H=sh.offsetHeight,cx=sh.offsetLeft+W/2,cy=sh.offsetTop+H/2;
@@ -7371,6 +7454,8 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
    Una vez al día mira la última Release del repositorio. En Android la comprobación también la hace el sistema con la app cerrada
    (UpdateReceiver.java). Al encontrar una versión nueva pregunta o la descarga sola; instalar siempre lo confirma Android o Windows. */
 if(!S.upd)S.upd={on:true,mode:'ask',last:0,token:'',skip:''};
+/* En PC se actualiza sola: se descarga en silencio y se instala al cerrar la app */
+if(window.VTDesktop&&!S.upd.touched)S.upd.mode='auto';
 const UPD_REPO='temvra/temvP';
 const updTV=()=>window.VTNative&&VTNative.hasPlugin&&window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Temvra||null;
 const updDesk=()=>window.VTDesktop&&VTDesktop.version?VTDesktop:null;
@@ -7414,6 +7499,7 @@ async function updGet(auto){const f=updFound;if(!f)return;updBusy=true;updMsg=''
   catch(e){updMsg=T('No se pudo descargar')+' ('+e.message+')';toast(updMsg)}
   finally{updBusy=false;renderUpd()}
   if(!path)return;
+  if(auto&&updDesk()&&updDesk().installOnQuit){const r=await updDesk().installOnQuit(path);if(!r||!r.error){updMsg=T('Lista')+' '+f.v+' · '+T('se instalará al cerrar la app');renderUpd();toast('Temvra '+f.v+' '+T('se instalará al cerrar la app'));return}}
   if(auto)obSheet('Temvra '+f.v+' '+T('descargada'),[{t:T('Instalar ahora')},{t:T('Más tarde'),s:T('La tienes en Ajustes → Actualizaciones')}],i=>{if(i===0)updInstall()});else updInstall()}
 async function updInstall(){if(!updFile){updGet(false);return}
   const tv=updTV();
@@ -7421,12 +7507,12 @@ async function updInstall(){if(!updFile){updGet(false);return}
       if(/perm/.test(m))toast(T('Permite «Instalar apps desconocidas» para Temvra y vuelve a pulsar Instalar'));else if(/missing/.test(m)){updFile='';updGet(false)}else toast(T('No se pudo abrir el instalador'))}return}
   const r=await updDesk().installUpdate(updFile);if(r.error){if(r.error==='missing'){updFile='';updGet(false)}else toast(T('No se pudo instalar')+': '+r.error)}else if(r.shown)toast(T('Descargada: ábrela para instalarla'))}
 $('upd-on').onclick=()=>{S.upd.on=S.upd.on===false;save();updSync()};
-$('upd-mode').onclick=e=>{const b=e.target.closest('[data-um]');if(!b)return;S.upd.mode=b.dataset.um;save();updSync()};
+$('upd-mode').onclick=e=>{const b=e.target.closest('[data-um]');if(!b)return;S.upd.mode=b.dataset.um;S.upd.touched=true;save();updSync()};
 $('upd-token').onchange=()=>{S.upd.token=$('upd-token').value.trim();save();updSync();if(S.upd.token)updCheck(true)};
 $('upd-now').onclick=()=>updCheck(true);
 $('upd-inst').onclick=()=>{if(updFile&&updFound&&updFile.includes(updFound.asset.name))updInstall();else updGet(false)};
 /* Una vez al día: al abrir la app y al volver a ella */
-const updDaily=()=>{if(updOk()&&S.upd.on!==false&&Date.now()-(S.upd.last||0)>20*3600e3)updCheck(false)};
+const updDaily=()=>{if(updOk()&&S.upd.on!==false&&Date.now()-(S.upd.last||0)>(updDesk()?3:20)*3600e3)updCheck(false)};
 setTimeout(()=>{updSync().then(updDaily)},4000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(updDaily,1500)});
 window.VTAPI={

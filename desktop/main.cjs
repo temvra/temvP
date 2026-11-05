@@ -107,6 +107,14 @@ ipcMain.handle('upd-download',async(e,url,token,name)=>{
     // Repositorio público: si el token guardado ya no vale, sin él
     if(token&&/http 40[13]/.test(String(err.message)))try{await fetchTo(url,null,file);return {path:file}}catch(e2){return {error:String(e2.message||e2)}}
     return {error:String(err.message||err)}}});
+/* Actualización en silencio: se guarda y se aplica cuando la app se cierra */
+let updPending='';
+ipcMain.handle('upd-quit',(e,file)=>{if(!fromApp(e))return {error:'origin'};file=String(file||'');const dir=path.join(app.getPath('userData'),'updates');if(!file.startsWith(dir+path.sep)||!fs.existsSync(file))return {error:'missing'};
+  if(process.platform!=='win32'&&!process.env.APPIMAGE)return {error:'unsupported'};updPending=file;return {ok:true}});
+app.on('will-quit',()=>{if(!updPending)return;const f=updPending;updPending='';try{
+  if(process.platform==='win32'){const {spawn}=require('node:child_process');spawn(f,['/S'],{detached:true,stdio:'ignore'}).unref()}
+  else if(process.env.APPIMAGE){const dst=process.env.APPIMAGE,tmp=dst+'.new';fs.copyFileSync(f,tmp);fs.chmodSync(tmp,0o755);fs.renameSync(tmp,dst)}
+  }catch(e){}});
 ipcMain.handle('upd-install',async(e,file)=>{
   if(!fromApp(e))return {error:'origin'};file=String(file||'');
   const dir=path.join(app.getPath('userData'),'updates');if(!file.startsWith(dir+path.sep)||!fs.existsSync(file))return {error:'missing'};
