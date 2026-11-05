@@ -73,7 +73,7 @@ public class TemvraPlugin extends Plugin {
 
     private void sendBars() {
         float d = getContext().getResources().getDisplayMetrics().density;
-        String js = String.format(java.util.Locale.ROOT, "(function(s){s.setProperty('--sat','%.1fpx');s.setProperty('--sab','%.1fpx');s.setProperty('--sal','%.1fpx');s.setProperty('--sar','%.1fpx')})(document.documentElement.style)",
+        String js = String.format(java.util.Locale.ROOT, "(function(s){s.setProperty('--sat','%.1fpx');s.setProperty('--sab','%.1fpx');s.setProperty('--sal','%.1fpx');s.setProperty('--sar','%.1fpx')})(document.documentElement&&document.documentElement.style||{setProperty(){}})",
                 bars[0] / d, bars[1] / d, bars[2] / d, bars[3] / d);
         if (getBridge() != null && getBridge().getWebView() != null) getBridge().getWebView().post(() -> getBridge().getWebView().evaluateJavascript(js, null));
     }
