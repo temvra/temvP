@@ -2198,7 +2198,19 @@ body.desknotes .ne-tools,.ob-tools,.bk-zoom{background:color-mix(in srgb,var(--s
 .lg-landing{z-index:8}
 .lg-lens,#drag-chip,.ob-ghost,.bk-b.dragging,.lg-float,.sheet-back>.sheet,.g3 canvas{will-change:transform}
 .bk-sec,.mcell,.card,.row{contain:layout paint}
-#lg-dust{will-change:contents}
+/* Agujero negro al pulsar: halo de luz (debajo, lo curva el velo), velo que curva la luz y anillo del horizonte (encima) */
+.lg-hglow,.lg-hole,.lg-hring{position:fixed;left:0;top:0;pointer-events:none;z-index:70;transform-origin:50% 50%;will-change:transform,opacity}
+.lg-hglow{opacity:0;border-radius:var(--hr);box-shadow:0 0 0 2px rgba(255,255,255,.85),0 0 calc(var(--hR) * .35) calc(var(--hR) * .1) rgba(255,255,255,.6),0 0 var(--hR) calc(var(--hR) * .2) rgba(255,255,255,.22)}
+/* El disco de luz: una banda que pasa por detrás del control, algo inclinada; en el tramo del control no se ve */
+.lg-hglow::after{content:'';position:absolute;left:50%;top:50%;width:calc(var(--hw) + var(--hR) * 2.3);height:calc(var(--hR) * .34);transform:translate(-50%,-50%) rotate(-7deg);border-radius:50%;
+  background:radial-gradient(closest-side,#fff,rgba(255,255,255,.8) 30%,rgba(255,255,255,.35) 60%,transparent),linear-gradient(90deg,transparent,#ff6cf2 12%,#5fe3ff 30%,#fff 50%,#fff46e 70%,#ff5d8f 88%,transparent);background-blend-mode:screen;filter:blur(calc(var(--hR) * .07));
+  -webkit-mask:linear-gradient(90deg,#000 calc(50% - var(--hw) / 2 - 2px),transparent calc(50% - var(--hw) / 2 + 8px),transparent calc(50% + var(--hw) / 2 - 8px),#000 calc(50% + var(--hw) / 2 + 2px));mask:linear-gradient(90deg,#000 calc(50% - var(--hw) / 2 - 2px),transparent calc(50% - var(--hw) / 2 + 8px),transparent calc(50% + var(--hw) / 2 - 8px),#000 calc(50% + var(--hw) / 2 + 2px))}
+.lg-hglow::before{content:'';position:absolute;inset:calc(var(--hR) * -.26);border-radius:calc(var(--hr) + var(--hR) * .26);padding:calc(var(--hR) * .16);
+  background:conic-gradient(from var(--ha,0deg),#ff5d8f,#ffb15e,#fff46e,#7dff9e,#5fe3ff,#7d6cff,#ff6cf2,#ff5d8f);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;filter:blur(calc(var(--hR) * .09));opacity:.8}
+.lg-hring{opacity:0;margin:-1.5px;padding:1.5px;border-radius:calc(var(--hr) + 1.5px);box-sizing:content-box;border:1.5px solid rgba(255,255,255,.95);box-shadow:0 0 6px rgba(255,255,255,.85),inset 3px 0 4px -2px rgba(255,90,190,.7),inset -3px 0 4px -2px rgba(80,200,255,.75)}
+.app-light .lg-hring{box-shadow:0 0 0 1px rgba(0,0,0,.1),0 0 8px rgba(255,255,255,.95),inset 3px 0 4px -2px rgba(255,60,170,.8),inset -3px 0 4px -2px rgba(40,160,255,.85)}
+.app-light .lg-hglow{box-shadow:0 0 0 1.5px rgba(255,255,255,.9),0 0 calc(var(--hR) * .3) calc(var(--hR) * .07) rgba(120,140,255,.35),0 0 calc(var(--hR) * .8) calc(var(--hR) * .14) rgba(255,120,200,.18)}
+.app-light .lg-hglow::before{opacity:1}
 /* PC: la barra lateral es una cápsula de cristal que flota, con la misma lente que el móvil */
 @media (min-height:521px){
   body.desk .nav{background:transparent!important;border-right:0;padding-inline:8px}
@@ -7469,8 +7481,9 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
 (()=>{const RM=matchMedia('(prefers-reduced-motion:reduce)');
   /* Lente que sigue al elemento elegido con un muelle: se estira al moverse y, en la barra, se puede arrastrar de una pestaña a otra */
   function lens(box,itemSel,cur,tgt,drag){if(!box)return;const L=document.createElement('i');L.className='lg-lens';L.setAttribute('aria-hidden','true');box.prepend(L);box.classList.add('lg-host');
-    const o={x:0,y:0,w:0,h:0,vx:0,vy:0,vw:0,vh:0};let tx=0,ty=0,tw=0,th=0,lift=false,raf=0,init=false,until=0,dg=null,last=0;
-    const on=()=>box.offsetParent!==null,V=()=>DESK.matches&&box.scrollWidth<=box.clientWidth&&box.clientHeight>box.clientWidth;
+    const o={x:0,y:0,w:0,h:0,vx:0,vy:0,vw:0,vh:0};let tx=0,ty=0,tw=0,th=0,lift=false,raf=0,init=false,until=0,dg=null,last=0,hole=null;
+    /* Vertical solo por la forma de la caja: la propia lente, al crecer, desborda y cambiaría scrollWidth en mitad del arrastre */
+    const on=()=>box.offsetParent!==null,V=()=>DESK.matches&&box.clientHeight>box.clientWidth*1.4;
     function aim(){const c=cur();if(!c)return false;const r=tgt(c).getBoundingClientRect(),b=box.getBoundingClientRect();if(!r.width)return false;const cx=box.clientLeft,cy=box.clientTop;
       /* Mientras se arrastra, el eje del gesto lo marca el dedo (lo fija pointermove); el otro eje sigue a la pestaña */
       const dr=!!(dg&&dg.moved),vt=V();if(!dr||vt)tx=r.left-b.left-cx+(vt?0:box.scrollLeft);if(!dr||!vt)ty=r.top-b.top-cy+box.scrollTop;
@@ -7485,7 +7498,11 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
       /* Como en iOS 26: mientras viaja de una pestaña a otra se levanta como una gota (más grande y con refracción) y al llegar se posa.
          Arrastrada con el dedo crece todavía más y aumenta lo que tiene debajo */
       const dr=!!(dg&&dg.moved),hz=Math.min(1,Math.abs(o.vx)/1500),ve=Math.min(1,Math.abs(o.vy)/1500),tv=Math.min(1,Math.hypot(o.vx,o.vy)/700),
-        ux=lift?(dr?1.26:1.14):1+tv*.1,uy=lift?(dr?1.34:1.16):1+tv*.16;paint(ux*(1+hz*.2-ve*.1),uy*(1+ve*.2-hz*.12));if(window.lgLensDust&&Math.random()<.5)window.lgLensDust(L,o.vx,o.vy);
+        ux=lift?(dr?1.26:1.14):1+tv*.1,uy=lift?(dr?1.34:1.16):1+tv*.16;const px=ux*(1+hz*.2-ve*.1),py=uy*(1+ve*.2-hz*.12);paint(px,py);
+      /* Levantada o viajando, la gota curva la luz de lo que tiene alrededor como un agujero negro con su forma */
+      if((lift||tv>.25)&&window.lgHole){const b=box.getBoundingClientRect(),c={x:b.left+box.clientLeft+o.x-box.scrollLeft+o.w/2,y:b.top+box.clientTop+o.y-box.scrollTop+o.h/2},rad=Math.min(o.w,o.h)/2;
+        if(!hole)hole=window.lgHole(o.w,o.h,rad,Math.max(24,Math.min(60,o.h*.95)));if(hole)hole.resize(o.w,o.h,rad).at(c.x,c.y,px,py).str(lift?(dr?1.15:1):Math.min(1,tv))}
+      else if(hole){hole.str(0);hole=null}
       const lf=lift||tv>.3;if(L.classList.contains('lift')!==lf){L.classList.toggle('lift',lf);if(lf&&window.lgRefract)window.lgRefract(L,true)}
       if(L.classList.contains('drag')!==dr){L.classList.toggle('drag',dr);box.classList.toggle('lg-drag',dr)}if(dr)L.style.setProperty('--la',((o.x+o.y)*2.4%360).toFixed(1));
       if(dg||Math.abs(tx-o.x)>.25||Math.abs(ty-o.y)>.25||Math.abs(tw-o.w)>.25||Math.abs(o.vx)>4||Math.abs(o.vy)>4||Date.now()<until)raf=requestAnimationFrame(step);else{o.x=tx;o.y=ty;o.w=tw;o.h=th;o.vx=o.vy=0;paint(1,1)}}
@@ -7588,26 +7605,53 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     document.addEventListener('click',e=>{const i=e.target.closest&&e.target.closest('input[type=time]');if(!i||i.disabled||!matchMedia('(pointer:coarse)').matches)return;e.preventDefault();i.blur();openTimePick(i)},true);
     document.addEventListener('pointerdown',e=>{const i=e.target.closest&&e.target.closest('input[type=time]');if(i&&e.pointerType!=='mouse')e.preventDefault()},true)}
 
-  /* ---------- Partículas de luz: motas que saltan de la lente al moverse, del gel al pulsar y del rayo de la hora ---------- */
-  {const cv=document.createElement('canvas');cv.id='lg-dust';cv.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9;mix-blend-mode:screen';document.body.appendChild(cv);const cx=cv.getContext('2d');let ps=[],raf=0,last=0,W=0,H=0;
-    const size=()=>{const d=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)};size();addEventListener('resize',size);
-    const colorOf=el=>{const c=getComputedStyle(el||document.body).getPropertyValue('--container').trim()||'#c6c4f4';cx.fillStyle=c;return cx.fillStyle};
-    /* Cada color tiene su sprite: un disco difuso dibujado una vez, sin sombras por fotograma */
-    const SPR=new Map();const sprite=c=>{let k=SPR.get(c);if(k)return k;const s=document.createElement('canvas');s.width=s.height=32;const g=s.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);r.addColorStop(0,'#fff');r.addColorStop(.25,c);r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,32,32);SPR.set(c,s);return s};
-    function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;cx.clearRect(0,0,W,H);
-      ps=ps.filter(p=>{p.life-=dt;if(p.life<=0)return false;p.ph+=dt*p.w;p.vx+=Math.cos(p.ph)*p.wob*dt;p.vy+=Math.sin(p.ph*1.3)*p.wob*dt;p.vx*=Math.exp(-p.drag*dt);p.vy*=Math.exp(-p.drag*dt);p.x+=p.vx*dt;p.y+=p.vy*dt;const a=Math.min(1,p.life/p.max*1.6);
-        const d=p.r*(2.6+a*2);cx.globalAlpha=a;cx.drawImage(sprite(p.c),p.x-d,p.y-d,d*2,d*2);return true});
-      cx.globalAlpha=1;if(ps.length)raf=requestAnimationFrame(tick);else{raf=0;cx.clearRect(0,0,W,H)}}
-    /* n motas en (x,y) con color c; vx/vy base, apertura y gravedad (negativa: suben) */
-    window.lgDust=(x,y,c,n,o={})=>{if(RM.matches||document.hidden)return;for(let i=0;i<n&&ps.length<90;i++){const a=(o.a||0)+(Math.random()-.5)*(o.spread||Math.PI*2),sp=(o.sp||60)*(.4+Math.random()*.9);
-        ps.push({x:x+(Math.random()-.5)*(o.w||6),y:y+(Math.random()-.5)*(o.h||6),vx:Math.cos(a)*sp+(o.vx||0),vy:Math.sin(a)*sp+(o.vy||0),ph:Math.random()*6.3,w:2+Math.random()*3,wob:o.wob==null?60:o.wob,drag:o.drag||1.1,r:(o.r||1.6)*(.6+Math.random()*.8),c:c||'#c6c4f4',life:0,max:0})}
-      ps.slice(-n).forEach(p=>{p.max=p.life=(o.life||.9)*(.6+Math.random()*.8)});if(!raf){last=performance.now();raf=requestAnimationFrame(tick)}};
-    /* Al pulsar: chispas desde el punto de contacto, del color del control */
-    document.addEventListener('pointerdown',e=>{if(e.button>0)return;const el=e.target.closest&&e.target.closest(LG_PRESS+',.nav-in button,.tab,#bk-week button');if(!el)return;window.lgDust(e.clientX,e.clientY,colorOf(el),7,{sp:70,r:1.4,life:1.1})},{passive:true});
-    /* El rayo de la hora suelta motas que suben por la estela */
-    setInterval(()=>{const n=document.querySelector('.bk-now');if(!n||!n.offsetParent||document.hidden)return;const r=n.getBoundingClientRect();if(r.top<0||r.top>H)return;const x=r.left+Math.random()*Math.min(r.width,W-r.left);window.lgDust(x,r.top,'#ff8a90',1,{a:-Math.PI/2,spread:.9,sp:18,vx:-10,r:1.2,life:2.4,drag:.5,wob:40})},260);}
-  /* Las lentes sueltan motas al correr: cuanto más rápido, más */
-  window.lgLensDust=(L,vx,vy)=>{const sp=Math.hypot(vx,vy);if(sp<260||!window.lgDust)return;const r=L.getBoundingClientRect(),c=getComputedStyle(L).backgroundColor;window.lgDust(vx>0?r.left:r.right,r.top+r.height/2,c,sp>900?2:1,{a:Math.atan2(-vy,-vx),spread:1.2,sp:sp*.25,r:1.3,life:1.2,h:r.height*.8})};
+  /* ---------- Agujero negro: al pulsar, la luz de lo que hay detrás se curva alrededor del control ----------
+     Un velo con backdrop-filter y un mapa de desplazamiento: junto al borde se ve la luz de puntos más alejados, que además gira
+     como un disco de acreción. La forma es la del control (redondo, cuadrado o píldora). Debajo va un halo de luz blanca con arcoíris
+     que el velo también curva, para que el efecto se vea aunque detrás solo haya negro; encima, el anillo fino del horizonte */
+  {const NS='http://www.w3.org/2000/svg',HM=new Map();let hdefs=null,uid=0;
+    const lite=()=>!REFR||document.documentElement.classList.contains('lg-lite');
+    function holeMap(w,h,rad,R){const key=[w,h,rad,R].map(v=>Math.round(v/2)).join('x');let m=HM.get(key);if(m)return m;
+      const TW=w+2*R,TH=h+2*R,sc=Math.min(1,150/Math.max(TW,TH)),W=Math.max(8,Math.round(TW*sc)),H=Math.max(8,Math.round(TH*sc)),c=document.createElement('canvas');c.width=W;c.height=H;
+      const x=c.getContext('2d'),im=x.createImageData(W,H),hw=w/2,hh=h/2,r=Math.min(rad,hw,hh);
+      for(let j=0;j<H;j++)for(let i=0;i<W;i++){const px=(i+.5)/W*TW-TW/2,py=(j+.5)/H*TH-TH/2,qx=Math.abs(px)-(hw-r),qy=Math.abs(py)-(hh-r),ox=Math.max(qx,0),oy=Math.max(qy,0),ol=Math.hypot(ox,oy),d=ol+Math.min(Math.max(qx,qy),0)-r;
+        let nx,ny;if(ol>0){nx=ox/ol;ny=oy/ol}else if(qx>qy){nx=1;ny=0}else{nx=0;ny=1}nx*=Math.sign(px)||1;ny*=Math.sign(py)||1;
+        const u=Math.max(0,Math.min(1,d/R)),k=(j*W+i)*4;let vx=0,vy=0;
+        if(d>0){const pull=(1-u)*(1-u)*(1+u*.6),sw=Math.pow(1-u,2.2)*.3;vx=nx*pull-ny*sw;vy=ny*pull+nx*sw;const l=Math.hypot(vx,vy);if(l>1){vx/=l;vy/=l}}
+        im.data[k]=128+vx*127;im.data[k+1]=128+vy*127;im.data[k+2]=128;im.data[k+3]=255}
+      x.putImageData(im,0,0);m={url:c.toDataURL(),TW,TH};HM.set(key,m);if(HM.size>40)HM.delete(HM.keys().next().value);return m}
+    /* Un agujero con forma w×h; at() lo coloca (centro y escala), str() lleva su fuerza con un muelle y al llegar a 0 desaparece */
+    window.lgHole=(w,h,rad,R)=>{if(RM.matches)return null;const id='lgh'+(++uid),bg=document.documentElement.classList.contains('has-bg');
+      const glow=document.createElement('i'),veil=document.createElement('i'),ring=document.createElement('i');glow.className='lg-hglow';veil.className='lg-hole';ring.className='lg-hring';
+      [glow,veil,ring].forEach(e=>{e.setAttribute('aria-hidden','true');document.body.appendChild(e)});
+      let f=null,dm=null,M=null,cx=0,cy=0,sx=1,sy=1,raf=0,last=0,t0=performance.now(),dead=false;const st={v:0,vv:0,t:0};
+      const shape=(W2,H2,r2)=>{w=W2;h=H2;rad=Math.min(r2,w/2,h/2);[glow,ring].forEach(e=>{e.style.width=w+'px';e.style.height=h+'px';e.style.setProperty('--hr',rad+'px');e.style.setProperty('--hR',R+'px');e.style.setProperty('--hw',w+'px')});
+        if(lite())return;M=holeMap(w,h,rad,R);veil.style.width=M.TW+'px';veil.style.height=M.TH+'px';
+        if(!hdefs){const sv=document.createElementNS(NS,'svg');sv.setAttribute('width','0');sv.setAttribute('height','0');sv.setAttribute('aria-hidden','true');sv.style.cssText='position:fixed;width:0;height:0';hdefs=document.createElementNS(NS,'defs');sv.appendChild(hdefs);document.body.appendChild(sv)}
+        if(!f){f=document.createElementNS(NS,'filter');f.id=id;f.setAttribute('color-interpolation-filters','sRGB');f.setAttribute('filterUnits','userSpaceOnUse');['x','y'].forEach(a=>f.setAttribute(a,'0'));hdefs.appendChild(f)}
+        f.setAttribute('width',M.TW);f.setAttribute('height',M.TH);f.innerHTML=`<feImage href="${M.url}" x="0" y="0" width="${M.TW}" height="${M.TH}" preserveAspectRatio="none" result="m"/><feDisplacementMap in="SourceGraphic" in2="m" scale="0" xChannelSelector="R" yChannelSelector="G"/>`;
+        dm=f.lastElementChild;veil.style.backdropFilter=veil.style.webkitBackdropFilter=`url(#${id})`};
+      const put=()=>{const k=1+st.v*.05;glow.style.transform=ring.style.transform=`translate(${(cx-w/2).toFixed(1)}px,${(cy-h/2).toFixed(1)}px) scale(${(sx*k).toFixed(4)},${(sy*k).toFixed(4)})`;
+        if(M)veil.style.transform=`translate(${(cx-M.TW/2).toFixed(1)}px,${(cy-M.TH/2).toFixed(1)}px) scale(${sx.toFixed(4)},${sy.toFixed(4)})`};
+      const kill=()=>{if(dead)return;dead=true;cancelAnimationFrame(raf);[glow,veil,ring].forEach(e=>e.remove());if(f)f.remove()};
+      const tick=now=>{raf=0;if(dead)return;const dt=Math.min(.05,Math.max(.001,(now-last)/1000));last=now;spStep(st,'v',st.t,st.t?.2:.34,st.t?.62:.9,dt);if(st.v<0)st.v=0;
+        const v=Math.min(1.25,st.v);if(dm)dm.setAttribute('scale',(v*R*1.2).toFixed(1));glow.style.opacity=(Math.min(1,v)*(bg?.8:1)).toFixed(3);ring.style.opacity=Math.min(1,v*1.3).toFixed(3);
+        glow.style.setProperty('--ha',((now-t0)*.24%360).toFixed(1)+'deg');put();
+        if(!st.t&&st.v<.01&&Math.abs(st.vv)<.05){kill();return}raf=requestAnimationFrame(tick)};
+      shape(w,h,rad);
+      return {at(x,y,a=1,b=1){cx=x;cy=y;sx=a;sy=b;put();return this},str(t){st.t=t;if(!raf&&!dead){last=performance.now();raf=requestAnimationFrame(tick)}return this},
+        resize(W2,H2,r2){if(Math.abs(W2-w)>8||Math.abs(H2-h)>8)shape(W2,H2,r2);return this},kill}};
+    /* En cada pulsación: los controles pequeños curvan la luz con su propia forma; en el resto, un agujero pequeño donde está el dedo */
+    const HOLE_SKIP='input,textarea,select,[contenteditable="true"],canvas,.lg-host,.tp-dial,.ne-text,#ne-text,.cm-editor';
+    let hp=null;const hpEnd=()=>{if(!hp)return;clearTimeout(hp.tm);if(hp.H)hp.H.str(0);hp=null};
+    document.addEventListener('pointerdown',e=>{hpEnd();if(RM.matches||(e.pointerType==='mouse'&&e.button>2)||!e.target.closest)return;if(e.target.closest(HOLE_SKIP))return;
+      const el=e.target.closest(LG_PRESS+',button,[role=button],a,.chip,.mchip,.bk-b,.wk-ev'),r=el&&el.getBoundingClientRect();
+      if(el&&r.width&&r.width<=240&&r.height<=130){const rad=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0,R=Math.max(40,Math.min(110,Math.max(r.width,r.height)));
+        const H=window.lgHole(r.width,r.height,rad,R);if(H)hp={H:H.at(r.left+r.width/2,r.top+r.height/2).str(1)};return}
+      /* En superficies grandes espera un instante: si el dedo se pone a desplazar, no aparece */
+      const x=e.clientX,y=e.clientY;hp={x,y,id:e.pointerId,tm:setTimeout(()=>{if(!hp||hp.H)return;hp.H=window.lgHole(24,24,12,64);if(hp.H)hp.H.at(hp.x,hp.y).str(1)},70)}},true);
+    document.addEventListener('pointermove',e=>{if(hp&&!hp.H&&hp.id===e.pointerId&&Math.hypot(e.clientX-hp.x,e.clientY-hp.y)>8){clearTimeout(hp.tm);hp=null}},{passive:true});
+    document.addEventListener('pointerup',hpEnd,true);document.addEventListener('pointercancel',hpEnd,true);}
 
   /* Deslizadores: el recorrido se ilumina hasta el pulgar */
   {const fill=r=>{const a=+r.min||0,b=r.max===''?100:+r.max,v=+r.value;r.style.setProperty('--p',(Math.max(0,Math.min(1,(v-a)/((b-a)||1)))*100).toFixed(1)+'%')};
