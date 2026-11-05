@@ -1314,6 +1314,8 @@ body.deskcal #v-blocks .bk-top .cal-month{font-size:24px}
 .bk-zoom{position:fixed;right:max(14px,var(--sar,env(safe-area-inset-right,0px)));bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 104px);display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;background:var(--surface-2);box-shadow:0 6px 18px rgba(0,0,0,.35);z-index:6}
 .bk-zoom button{width:40px;height:40px;border-radius:50%;font-size:20px;color:var(--fg)}
 .bk-zoom span{min-width:34px;text-align:center;font-size:13px;font-weight:600}
+.bk-zsep{width:1px;height:22px;margin:0 3px;background:color-mix(in srgb,var(--fg) 18%,transparent)}
+#bk-nowb{color:#ff5a60;display:grid;place-items:center}
 
 /* ===== Nota en el móvil: fondo puro negro/blanco, cabecera en una píldora centrada ===== */
 body:not(.desk) #noteview.ob-black{--ob-note:#000;--ob-side:#000;--ob-chrome:#17181d;--surface:#141519;--surface-2:#1d1e26;--surface-3:#2a2b35;--card:#141519;--outline:#2c2e38;--bg:#000;--fg:#f4f4f6;--muted:#a0a0a8;--ob-text:#f4f4f6;--ob-muted:#a0a0a8}
@@ -2330,7 +2332,7 @@ body.desknotes .ne-tools,.ob-tools,.bk-zoom{background:color-mix(in srgb,var(--s
     <div class="bk-filter" id="bk-filter"></div>
     <div class="bk-sum" id="bk-sum"></div>
     <div class="bk-tl" id="bk-tl"></div>
-    <div class="bk-zoom" id="bk-zoomc"><button id="bk-zout" aria-label="Alejar">−</button><span id="bk-zv">1×</span><button id="bk-zin" aria-label="Acercar">＋</button></div>
+    <div class="bk-zoom" id="bk-zoomc"><button id="bk-nowb" aria-label="Ir a la hora actual" title="Hora actual"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button><i class="bk-zsep"></i><button id="bk-zout" aria-label="Alejar">−</button><span id="bk-zv">1×</span><button id="bk-zin" aria-label="Acercar">＋</button></div>
   </div>
   <!-- ASISTENTE -->
   <div class="scroll ai-view" id="v-ai" hidden>
@@ -3961,6 +3963,11 @@ function bkZoom(dir){const nz=Math.max(0,Math.min(BK_Z.length-1,bkZ+dir));if(nz=
   const mid=grid?(sc.getBoundingClientRect().top+sc.clientHeight/2-grid.getBoundingClientRect().top)/BH*60:600;bkZ=nz;BH=BK_Z[bkZ];S.bkZoom=bkZ;save();const k=s?s.dataset.bksec:bkDay;
   bkReady=false;bkHead();$('bk-tl').innerHTML=bkDays.map(secBk).join('');bkAlign();const ng=$('bk-tl').querySelector(`[data-bksec="${k}"] .bk-grid`);if(ng)sc.scrollTop=ng.offsetTop+Math.max(0,Math.min(1440,mid))/60*BH-sc.clientHeight/2;requestAnimationFrame(()=>bkReady=true)}
 $('bk-zin').onclick=()=>bkZoom(1);$('bk-zout').onclick=()=>bkZoom(-1);
+/* Centrar la hora actual: si hoy no está a la vista, salta a hoy; luego el rayo viaja al centro con un muelle */
+$('bk-nowb').onclick=()=>{const todayK=dk(new Date());if(!bkDays.includes(todayK)){bkJump(todayK);setTimeout(bkCenterNow,80);return}bkCenterNow()};
+function bkCenterNow(){const sc=$('v-blocks'),ln=sc.querySelector('.bk-now');if(!ln)return;const to=Math.max(0,sc.scrollTop+ln.getBoundingClientRect().top-sc.getBoundingClientRect().top-sc.clientHeight*.45);
+  if(bkColsN()){const r=ln.closest('.bk-sec');if(r){const x=r.offsetLeft-sc.clientWidth/2+r.offsetWidth/2;sc.scrollTo({left:Math.max(0,x),behavior:'smooth'})}}
+  spFly(sc.scrollTop,to,0,.5,1,v=>{sc.scrollTop=v});lgSettle(ln.querySelector('span'))}
 {let pd=null;$('bk-tl').addEventListener('touchstart',e=>{if(e.touches.length===2){const [a,b]=e.touches;pd=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)}},{passive:true});
  $('bk-tl').addEventListener('touchmove',e=>{if(pd&&e.touches.length===2){const [a,b]=e.touches,d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);if(d/pd>1.35){bkZoom(1);pd=d}else if(d/pd<.74){bkZoom(-1);pd=d}}},{passive:true});
  $('bk-tl').addEventListener('touchend',()=>{pd=null},{passive:true})}
