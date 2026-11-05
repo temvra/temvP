@@ -14,6 +14,8 @@ public class MainActivity extends BridgeActivity {
         // La web se dibuja de borde a borde (detrás de la barra de estado y la de navegación).
         // Va después de super.onCreate: antes crearía la ventana con el tema de arranque, que tiene barra de acción
         EdgeToEdge.enable(this);
+        // Inspección por cable (chrome://inspect) también en la versión publicada: solo responde al ordenador autorizado por USB
+        android.webkit.WebView.setWebContentsDebuggingEnabled(true);
     }
 
     @Override
