@@ -4501,7 +4501,7 @@ $('iv-share').onclick=()=>$('img-viewer').querySelector('[data-fv="open"]')?$('i
 let swallowAt=0;const swallow=()=>{swallowAt=Date.now()};
 document.addEventListener('click',e=>{if(Date.now()-swallowAt<600){e.stopImmediatePropagation();e.preventDefault()}},true);
 /* ===================== Time: temporizadores guardados, bloques (carpetas), opciones y búsqueda ===================== */
-if(!S.timers)S.timers=PRESETS.map((p,i)=>({id:'t'+i,s:p.s,t:p.t,d:p.d,loop:false,f:''}));
+if(!S.timers)S.timers=[];
 if(!S.tfolders)S.tfolders=[];
 const tmFolder=id=>S.tfolders.find(f=>f.id===id);
 const tmTile=s=>s<60?s+'s':s%60?Math.floor(s/60)+'m'+(s%60):(s/60)+'m';
@@ -6962,19 +6962,10 @@ applyObPrefs();
 if((S.uiV||0)<3){S.uiV=3;const t=dk(new Date()),now=Date.now(),day=n=>{const d=new Date();d.setDate(d.getDate()+n);return dk(d)};
   S.notes=S.notes.filter(n=>!['n_welcome','n_leg','n_day'].includes(n.id));S.events=S.events.filter(e=>!['e1','e2','e3','bk1','bk2'].includes(e.id));
   S.alarms=S.alarms.filter(a=>a.id!==1&&a.id!==2);if(S.name==='Descanso entre series')S.name='Temporizador';
-  const old=['Diario','Entreno','Estudios'];S.folders=S.folders.filter(f=>!old.includes(f)||S.notes.some(n=>n.folder===f));['Casa','Personal'].forEach(f=>{if(!S.folders.includes(f))S.folders.push(f)});
-  S.notes.push({id:'n_shop',title:'Lista de la compra',folder:'Casa',pinned:false,created:now,updated:now,body:'- [ ] Leche\n- [ ] Pan\n- [ ] Huevos\n- [ ] Fruta\n- [ ] Café\n'},
-    {id:'n_home',title:'Tareas de casa',folder:'Casa',pinned:false,created:now,updated:now-1000,body:'## Esta semana\n- [ ] Poner la lavadora\n- [ ] Regar las plantas\n- [ ] Sacar la basura\n\n## Pendiente\n- [ ] Llamar al fontanero\n'},
-    {id:'n_ideas',title:'Planes para el finde',folder:'Personal',pinned:false,created:now,updated:now-2000,body:'- Ir al cine\n- Paseo por el parque\n- Cena con amigos\n\n<span style="color:#e2559a">Mantén pulsada una nota o carpeta para cambiar su color.</span>\n'});
-  S.events.push({id:'x1',kind:'event',title:'Comida familiar',date:day(1),start:'14:00',end:'15:30',allDay:false,remind:60},
-    {id:'x2',kind:'event',title:'Cita con el dentista',date:day(3),start:'10:30',end:'11:00',allDay:false,remind:60},
-    {id:'x3',kind:'task',title:'Pagar el recibo de la luz',date:t,start:'',end:'',allDay:true,remind:-1,done:false},
-    {id:'x4',kind:'event',cat:'work',title:'Trabajo',date:t,start:'09:00',end:'13:00',allDay:false,remind:-1,rec:{f:'wd',i:1}},
-    {id:'x5',kind:'event',cat:'study',title:'Leer un rato',date:t,start:'21:30',end:'22:00',allDay:false,remind:-1,rec:{f:'wd',i:1}});
-  S.alarms.push({id:3,t:'07:30',label:'Despertador',days:[1,2,3,4,5],on:false});
+  const old=['Diario','Entreno','Estudios'];S.folders=S.folders.filter(f=>!old.includes(f)||S.notes.some(n=>n.folder===f));
   S.obActive=null;S.blocksSeeded=true;save();calDirty=true;renderNotes();renderAlarms();renderPresets()}
 if((S.uiV||0)<4){S.uiV=4;if(S.vol===100)S.vol=150;if(S.soundOn==null)S.soundOn=true;
-  const oldT=['Descanso corto','Descanso estándar','Descanso medio','Descanso largo','Intervalo HIIT'];S.timers=S.timers.filter(t=>!oldT.includes(t.t));PRESETS.slice().reverse().forEach((p,i)=>{if(!S.timers.some(t=>t.t===p.t))S.timers.unshift({id:'td'+i,s:p.s,t:p.t,d:p.d,loop:false,f:''})});save();renderPresets();renderSounds()}
+  const oldT=['Descanso corto','Descanso estándar','Descanso medio','Descanso largo','Intervalo HIIT'];S.timers=S.timers.filter(t=>!oldT.includes(t.t));[].forEach((p,i)=>{if(!S.timers.some(t=>t.t===p.t))S.timers.unshift({id:'td'+i,s:p.s,t:p.t,d:p.d,loop:false,f:''})});save();renderPresets();renderSounds()}
 if((S.uiV||0)<5){S.uiV=5;
   /* Quita los restos de mis pruebas y lo del asistente */
   S.notes.filter(n=>n.title==='PRUEBA Abel'||n.title.startsWith('Hecho: nota y recordatorio')).forEach(trashNote);
@@ -6983,6 +6974,14 @@ if((S.uiV||0)<5){S.uiV=5;
   S.ai=(S.ai||[]).filter(x=>x.title!=='Crea cosas');delete S.aiCfg;try{Object.keys(localStorage).filter(k=>k.includes('aiapi_')).forEach(k=>localStorage.removeItem(k))}catch(e){}
   if(view==='ai')show('notes');save();renderNotes();renderCal()}
 if((S.uiV||0)<6){S.uiV=6;S.ob.bottomUp=false;save();applyObPrefs()}
+/* Sin ejemplos: se quitan los que sembraban las versiones anteriores, solo si siguen tal cual los dejó la app */
+if((S.uiV||0)<7){S.uiV=7;
+  const exN={n_shop:'- [ ] Leche',n_home:'## Esta semana',n_ideas:'- Ir al cine'};S.notes=S.notes.filter(n=>!(exN[n.id]&&(n.body||'').startsWith(exN[n.id])));
+  const exE={x1:'Comida familiar',x2:'Cita con el dentista',x3:'Pagar el recibo de la luz',x4:'Trabajo',x5:'Leer un rato'};S.events=S.events.filter(e=>!(exE[e.id]&&e.title===exE[e.id]));
+  S.alarms=S.alarms.filter(a=>!(a.id===3&&a.t==='07:30'&&a.label==='Despertador'&&!a.on));
+  const exT=PRESETS.map(p=>p.t);S.timers=S.timers.filter(t=>!(/^td?\d$/.test(String(t.id))&&exT.includes(t.t)&&!t.f));
+  ['Casa','Personal'].forEach(f=>{if(!S.notes.some(n=>n.folder===f||(n.folder||'').startsWith(f+'/'))&&!S.atts.some(a=>(a.folder||'')===f)&&!S.folders.some(x=>x.startsWith(f+'/')))S.folders=S.folders.filter(x=>x!==f)});
+  if(S.obActive&&!S.notes.some(n=>n.id===S.obActive))S.obActive=null;save();calDirty=true;renderNotes();renderAlarms();renderPresets();renderCal()}
 /* Deslizar para cerrar: cada menú se cierra en sentido contrario al que se abrió (hojas hacia abajo, paneles laterales hacia la izquierda) */
 (()=>{let g=null;
   const scrolled=(el,top)=>{for(;el&&el!==top.parentElement;el=el.parentElement)if(el.scrollTop>0&&getComputedStyle(el).overflowY!=='visible')return true;return false};
