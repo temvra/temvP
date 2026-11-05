@@ -7490,19 +7490,19 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     const size=()=>{const d=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)};size();addEventListener('resize',size);
     const colorOf=el=>{const c=getComputedStyle(el||document.body).getPropertyValue('--container').trim()||'#c6c4f4';cx.fillStyle=c;return cx.fillStyle};
     function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;cx.clearRect(0,0,W,H);
-      ps=ps.filter(p=>{p.life-=dt;if(p.life<=0)return false;p.vy+=p.g*dt;p.vx*=Math.exp(-p.drag*dt);p.vy*=Math.exp(-p.drag*dt);p.x+=p.vx*dt;p.y+=p.vy*dt;const a=Math.min(1,p.life/p.max*1.6);
+      ps=ps.filter(p=>{p.life-=dt;if(p.life<=0)return false;p.ph+=dt*p.w;p.vx+=Math.cos(p.ph)*p.wob*dt;p.vy+=Math.sin(p.ph*1.3)*p.wob*dt;p.vx*=Math.exp(-p.drag*dt);p.vy*=Math.exp(-p.drag*dt);p.x+=p.vx*dt;p.y+=p.vy*dt;const a=Math.min(1,p.life/p.max*1.6);
         cx.globalAlpha=a*.9;cx.fillStyle=p.c;cx.shadowColor=p.c;cx.shadowBlur=p.r*5;cx.beginPath();cx.arc(p.x,p.y,p.r*(.7+a*.5),0,7);cx.fill();cx.shadowBlur=0;cx.globalAlpha=a*.85;cx.fillStyle='#fff';cx.beginPath();cx.arc(p.x,p.y,p.r*.45*a,0,7);cx.fill();return true});
       cx.shadowBlur=0;cx.globalAlpha=1;if(ps.length)raf=requestAnimationFrame(tick);else{raf=0;cx.clearRect(0,0,W,H)}}
     /* n motas en (x,y) con color c; vx/vy base, apertura y gravedad (negativa: suben) */
     window.lgDust=(x,y,c,n,o={})=>{if(RM.matches||document.hidden)return;for(let i=0;i<n&&ps.length<90;i++){const a=(o.a||0)+(Math.random()-.5)*(o.spread||Math.PI*2),sp=(o.sp||60)*(.4+Math.random()*.9);
-        ps.push({x:x+(Math.random()-.5)*(o.w||6),y:y+(Math.random()-.5)*(o.h||6),vx:Math.cos(a)*sp+(o.vx||0),vy:Math.sin(a)*sp+(o.vy||0),g:o.g==null?40:o.g,drag:o.drag||2.2,r:(o.r||1.6)*(.6+Math.random()*.8),c:c||'#c6c4f4',life:0,max:0})}
+        ps.push({x:x+(Math.random()-.5)*(o.w||6),y:y+(Math.random()-.5)*(o.h||6),vx:Math.cos(a)*sp+(o.vx||0),vy:Math.sin(a)*sp+(o.vy||0),ph:Math.random()*6.3,w:2+Math.random()*3,wob:o.wob==null?60:o.wob,drag:o.drag||1.1,r:(o.r||1.6)*(.6+Math.random()*.8),c:c||'#c6c4f4',life:0,max:0})}
       ps.slice(-n).forEach(p=>{p.max=p.life=(o.life||.9)*(.6+Math.random()*.8)});if(!raf){last=performance.now();raf=requestAnimationFrame(tick)}};
     /* Al pulsar: chispas desde el punto de contacto, del color del control */
-    document.addEventListener('pointerdown',e=>{if(e.button>0)return;const el=e.target.closest&&e.target.closest(LG_PRESS+',.nav-in button,.tab,#bk-week button');if(!el)return;window.lgDust(e.clientX,e.clientY,colorOf(el),7,{sp:90,g:120,r:1.4,life:.6})},{passive:true});
+    document.addEventListener('pointerdown',e=>{if(e.button>0)return;const el=e.target.closest&&e.target.closest(LG_PRESS+',.nav-in button,.tab,#bk-week button');if(!el)return;window.lgDust(e.clientX,e.clientY,colorOf(el),7,{sp:70,r:1.4,life:1.1})},{passive:true});
     /* El rayo de la hora suelta motas que suben por la estela */
-    setInterval(()=>{const n=document.querySelector('.bk-now');if(!n||!n.offsetParent||document.hidden)return;const r=n.getBoundingClientRect();if(r.top<0||r.top>H)return;const x=r.left+Math.random()*Math.min(r.width,W-r.left);window.lgDust(x,r.top,'#ff8a90',1,{a:-Math.PI/2,spread:.6,sp:22,g:-14,vx:-12,r:1.2,life:1.8,drag:.8})},260);}
+    setInterval(()=>{const n=document.querySelector('.bk-now');if(!n||!n.offsetParent||document.hidden)return;const r=n.getBoundingClientRect();if(r.top<0||r.top>H)return;const x=r.left+Math.random()*Math.min(r.width,W-r.left);window.lgDust(x,r.top,'#ff8a90',1,{a:-Math.PI/2,spread:.9,sp:18,vx:-10,r:1.2,life:2.4,drag:.5,wob:40})},260);}
   /* Las lentes sueltan motas al correr: cuanto más rápido, más */
-  window.lgLensDust=(L,vx,vy)=>{const sp=Math.hypot(vx,vy);if(sp<260||!window.lgDust)return;const r=L.getBoundingClientRect(),c=getComputedStyle(L).backgroundColor;window.lgDust(vx>0?r.left:r.right,r.top+r.height/2,c,sp>900?2:1,{a:Math.atan2(-vy,-vx),spread:1.2,sp:sp*.25,g:30,r:1.3,life:.7,h:r.height*.8})};
+  window.lgLensDust=(L,vx,vy)=>{const sp=Math.hypot(vx,vy);if(sp<260||!window.lgDust)return;const r=L.getBoundingClientRect(),c=getComputedStyle(L).backgroundColor;window.lgDust(vx>0?r.left:r.right,r.top+r.height/2,c,sp>900?2:1,{a:Math.atan2(-vy,-vx),spread:1.2,sp:sp*.25,r:1.3,life:1.2,h:r.height*.8})};
 
   /* Hojas y menús: nacen desde donde has tocado y vuelven ahí al cerrarse */
   let pd=null;document.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY,t:Date.now()}},true);
