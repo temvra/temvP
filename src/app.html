@@ -2117,6 +2117,23 @@ body:not(.desk) .nav{touch-action:none;overflow:visible}
 .fab{background-image:radial-gradient(circle at 32% 22%,rgba(255,255,255,.35),transparent 48%)}
 .al-time,.city-time{text-shadow:0 0 12px color-mix(in srgb,var(--accent) 22%,transparent)}
 .row.active{box-shadow:inset 0 1px 0 var(--lg-rim),0 0 0 2px var(--accent) inset,0 0 18px color-mix(in srgb,var(--accent) 35%,transparent)}
+/* Formularios con el mismo cristal: selectores, campos, deslizadores, casillas y color */
+select,.field select,input[type=text],.field input[type=text],input[type=number],input[type=date],input[type=time],input[type=search],input[type=url],input[type=password],input[type=email],textarea{appearance:none;-webkit-appearance:none;background:color-mix(in srgb,var(--surface-2) 72%,transparent);color:var(--fg);border:1px solid color-mix(in srgb,#fff 10%,transparent);border-radius:12px;box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low);font:inherit;outline:none}
+select,.field select{padding:0 38px 0 12px;height:44px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a0a0ac' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 12px center;background-size:16px;cursor:pointer}
+select:focus,input:not([type=range]):not([type=checkbox]):not([type=color]):focus,textarea:focus{border-color:color-mix(in srgb,var(--accent) 60%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent),0 0 14px color-mix(in srgb,var(--accent) 30%,transparent)}
+option{background:var(--surface-2);color:var(--fg)}
+input[type=range],.field input[type=range]{appearance:none;-webkit-appearance:none;height:34px;background:transparent;border:0;box-shadow:none;padding:0;accent-color:var(--accent);--p:50%}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--accent) var(--p),color-mix(in srgb,var(--surface-3) 75%,transparent) var(--p));box-shadow:inset 0 1px 0 var(--lg-low),0 0 8px color-mix(in srgb,var(--accent) 25%,transparent)}
+input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:24px;height:24px;margin-top:-9px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,color-mix(in srgb,var(--accent) 65%,#fff) 60%,color-mix(in srgb,var(--accent) 85%,#fff));box-shadow:inset 0 1px 1px rgba(255,255,255,.85),inset 0 -2px 3px rgba(0,0,0,.25),inset 3px 0 5px -3px rgba(255,110,200,.45),inset -3px 0 5px -3px rgba(80,200,255,.5),0 0 12px color-mix(in srgb,var(--accent) 60%,transparent),0 3px 8px rgba(0,0,0,.3)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:color-mix(in srgb,var(--surface-3) 75%,transparent)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:3px;background:var(--accent)}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--accent) 65%)}
+input[type=checkbox]{appearance:none;-webkit-appearance:none;width:24px;height:24px;margin:0;border-radius:8px;background:color-mix(in srgb,var(--surface-3) 70%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 2px var(--lg-low);position:relative;vertical-align:middle;cursor:pointer;flex:none}
+input[type=checkbox]:checked{background:var(--accent);box-shadow:inset 0 1px 1px rgba(255,255,255,.6),0 0 10px color-mix(in srgb,var(--accent) 55%,transparent)}
+input[type=checkbox]:checked::after{content:"";position:absolute;left:8px;top:4px;width:6px;height:11px;border:solid var(--on-accent);border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+input[type=color],.field input[type=color]{appearance:none;-webkit-appearance:none;width:52px;height:40px;padding:0;border:0;border-radius:12px;background:none;box-shadow:inset 0 1px 0 var(--lg-rim),0 3px 8px rgba(0,0,0,.25);overflow:hidden;cursor:pointer}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-webkit-color-swatch{border:0;border-radius:12px}
+.settings .row,.settings .card{background:color-mix(in srgb,var(--card) 74%,transparent)}
 /* PC: la paleta y los ajustes bajan a la barra lateral */
 body.desk #open-settings,body.desk #cal-settings,body.desk #ob-settings{display:none}
 body.desk .nav-set{display:grid;place-items:center;position:absolute;left:50%;bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 18px);transform:translateX(-50%);width:46px;height:46px;border-radius:50%;color:var(--fg);background:color-mix(in srgb,var(--surface-2) 58%,transparent);border:1px solid color-mix(in srgb,#fff 12%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low),0 8px 24px rgba(0,0,0,.25);backdrop-filter:blur(12px) saturate(185%);-webkit-backdrop-filter:blur(12px) saturate(185%)}
@@ -7530,6 +7547,11 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     setInterval(()=>{const n=document.querySelector('.bk-now');if(!n||!n.offsetParent||document.hidden)return;const r=n.getBoundingClientRect();if(r.top<0||r.top>H)return;const x=r.left+Math.random()*Math.min(r.width,W-r.left);window.lgDust(x,r.top,'#ff8a90',1,{a:-Math.PI/2,spread:.9,sp:18,vx:-10,r:1.2,life:2.4,drag:.5,wob:40})},260);}
   /* Las lentes sueltan motas al correr: cuanto más rápido, más */
   window.lgLensDust=(L,vx,vy)=>{const sp=Math.hypot(vx,vy);if(sp<260||!window.lgDust)return;const r=L.getBoundingClientRect(),c=getComputedStyle(L).backgroundColor;window.lgDust(vx>0?r.left:r.right,r.top+r.height/2,c,sp>900?2:1,{a:Math.atan2(-vy,-vx),spread:1.2,sp:sp*.25,r:1.3,life:1.2,h:r.height*.8})};
+
+  /* Deslizadores: el recorrido se ilumina hasta el pulgar */
+  {const fill=r=>{const a=+r.min||0,b=r.max===''?100:+r.max,v=+r.value;r.style.setProperty('--p',(Math.max(0,Math.min(1,(v-a)/((b-a)||1)))*100).toFixed(1)+'%')};
+    const all=()=>document.querySelectorAll('input[type=range]').forEach(fill);all();document.addEventListener('input',e=>{if(e.target.type==='range')fill(e.target)});
+    new MutationObserver(all).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['value','hidden']})}
 
   /* Hojas y menús: nacen desde donde has tocado y vuelven ahí al cerrarse */
   let pd=null;document.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY,t:Date.now()}},true);
