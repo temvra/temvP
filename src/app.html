@@ -1957,7 +1957,11 @@ body.desk:not(.desknotes) #noteview{display:none!important}
 .lg-lens{position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:999px;transform-origin:50% 50%;will-change:transform,width;
   background:color-mix(in srgb,var(--container) 62%,transparent);border:1px solid color-mix(in srgb,#fff 12%,transparent);
   box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 22%,transparent),0 2px 10px color-mix(in srgb,var(--container) 45%,transparent);
-  transition:background-color .3s,border-color .3s,box-shadow .3s,opacity .2s}
+  transition:background-color .3s,border-color .3s,opacity .2s}
+/* La lente emite luz: su color baña a los vecinos por el lado que la mira, más cuanto más cerca; al moverse, el halo se estira */
+.lg-lens{box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 22%,transparent),0 2px 10px color-mix(in srgb,var(--container) 45%,transparent),0 0 calc(12px + var(--lv,0)*26px) color-mix(in srgb,var(--container) calc(50% + var(--lv,0)*35%),transparent)}
+.lg-host>button,.lg-host>.tab{background-image:radial-gradient(75% 150% at var(--lx,50%) 50%,color-mix(in srgb,var(--container) calc(var(--li,0)*85%),transparent),transparent 72%);transition:background-image .12s linear}
+.lg-host>button>.ic,.lg-host>.tab>span{text-shadow:0 0 calc(var(--li,0)*10px) color-mix(in srgb,var(--container) calc(var(--li,0)*80%),transparent)}
 /* Al pulsar se levanta: cristal transparente que aumenta un poco lo de debajo, con el borde irisado */
 .lg-lens.lift{background:color-mix(in srgb,#fff 6%,transparent);border-color:color-mix(in srgb,#fff 42%,transparent);
   backdrop-filter:var(--lg-ref,) blur(.6px) saturate(190%) brightness(1.15);-webkit-backdrop-filter:blur(1px) saturate(190%) brightness(1.15);
@@ -7333,7 +7337,9 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     function aim(){const c=cur();if(!c)return false;const r=tgt(c).getBoundingClientRect(),b=box.getBoundingClientRect();if(!r.width)return false;const cx=box.clientLeft,cy=box.clientTop;
       if(!dg||!dg.moved||!V())tx=r.left-b.left-cx+box.scrollLeft;if(!dg||!dg.moved||V())ty=r.top-b.top-cy+box.scrollTop;if(!dg||!dg.moved){if(V())tx=r.left-b.left-cx;else ty=r.top-b.top-cy+box.scrollTop}
       tw=r.width;th=r.height;L.style.borderRadius=getComputedStyle(tgt(c)).borderRadius;return true}
-    function paint(sx,sy){L.style.width=o.w+'px';L.style.height=o.h+'px';L.style.transform=`translate3d(${o.x}px,${o.y}px,0) scale(${sx},${sy})`}
+    function paint(sx,sy){L.style.width=o.w+'px';L.style.height=o.h+'px';L.style.transform=`translate3d(${o.x}px,${o.y}px,0) scale(${sx},${sy})`;
+      const vert=V(),c=vert?o.y+o.h/2:o.x+o.w/2,sz=vert?o.h:o.w,sp=Math.min(1,Math.hypot(o.vx,o.vy)/1400);L.style.setProperty('--lv',sp.toFixed(2));
+      box.querySelectorAll(itemSel).forEach(el=>{const m=vert?el.offsetTop+el.offsetHeight/2:el.offsetLeft+el.offsetWidth/2,d=m-c,li=Math.max(0,1-Math.abs(d)/(sz*2.6));el.style.setProperty('--li',(li*li*1.25).toFixed(3));el.style.setProperty('--lx',vert?'50%':d>0?'0%':'100%')})}
     function step(now){raf=0;if(!on()||!aim()){L.style.opacity='0';return}L.style.opacity='';
       if(!init||RM.matches){o.x=tx;o.y=ty;o.w=tw;o.h=th;init=true;o.vx=o.vy=o.vw=o.vh=0;paint(1,1);last=now;if(!dg&&Date.now()>until)return;raf=requestAnimationFrame(step);return}
       const dt=Math.min(.05,Math.max(.001,(now-last)/1000));last=now;const R=dg?.2:.42,D=dg?.74:.68;spStep(o,'x',tx,R,D,dt);spStep(o,'y',ty,R,D,dt);spStep(o,'w',tw,R,.85,dt);spStep(o,'h',th,R,.85,dt);
