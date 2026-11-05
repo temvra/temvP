@@ -1258,6 +1258,8 @@ body.desknotes .desk-empty:not([hidden]){display:flex}
 .pg-r{right:0;border-radius:14px 0 0 14px;transform:translateY(-50%)}
 .pg-l{left:0;border-radius:0 14px 14px 0;transform:translateY(-50%)}
 .pg-l span{transform:rotate(180deg)}
+.pg-card{position:fixed!important;inset:0;z-index:4;pointer-events:none;transform-origin:50% 60%;perspective:1200px}
+.app{perspective:1400px}
 .pg-in-r{animation:pgR .28s cubic-bezier(.2,.8,.2,1)}.pg-in-l{animation:pgL .28s cubic-bezier(.2,.8,.2,1)}
 @keyframes pgR{from{transform:translateX(40%);opacity:.3}to{transform:none;opacity:1}}
 @keyframes pgL{from{transform:translateX(-40%);opacity:.3}to{transform:none;opacity:1}}
@@ -1656,7 +1658,7 @@ body:not(.desk) .nav{background:linear-gradient(180deg,color-mix(in srgb,var(--s
   backdrop-filter:var(--lg-ref,) blur(12px) saturate(185%)!important;-webkit-backdrop-filter:blur(14px) saturate(185%)!important;
   border:1px solid color-mix(in srgb,#fff 14%,transparent)!important;
   box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 1px 0 color-mix(in srgb,#fff 18%,transparent),inset 0 -1px 0 rgba(0,0,0,.15)!important}
-body:not(.desk) .nav button[aria-current="page"]{background:color-mix(in srgb,var(--container) 62%,transparent)!important;
+body:not(.desk) .nav button[aria-current="page"]{background:color-mix(in srgb,#fff 26%,transparent)!important;
   box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 22%,transparent),0 2px 10px color-mix(in srgb,var(--container) 45%,transparent);
   border:1px solid color-mix(in srgb,#fff 12%,transparent)}
 body:not(.desk) .nav button:not([aria-current="page"]):active{background:color-mix(in srgb,#fff 8%,transparent)}
@@ -1963,8 +1965,16 @@ body.desk:not(.desknotes) #noteview{display:none!important}
   box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 22%,transparent),0 2px 10px color-mix(in srgb,var(--container) 45%,transparent);
   transition:background-color .3s,border-color .3s,opacity .2s}
 /* La lente emite luz: su color baña a los vecinos por el lado que la mira, más cuanto más cerca; al moverse, el halo se estira */
-.lg-lens{box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 22%,transparent),0 2px 10px color-mix(in srgb,var(--container) 45%,transparent),0 0 calc(12px + var(--lv,0)*26px) color-mix(in srgb,var(--container) calc(50% + var(--lv,0)*35%),transparent)}
-.lg-host>button:not(.tab),.lg-host>.tab>span{background-image:radial-gradient(circle at 32% 22%,rgba(255,255,255,.3),transparent 46%),radial-gradient(75% 150% at var(--lx,50%) 50%,color-mix(in srgb,var(--container) calc(var(--li,0)*85%),transparent),transparent 72%);transition:background-image .12s linear}
+.lg-lens{background:color-mix(in srgb,var(--container) 82%,#fff);box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 40%,transparent),0 2px 10px color-mix(in srgb,var(--container) 60%,transparent),0 0 calc(14px + var(--lv,0)*28px) color-mix(in srgb,var(--container) calc(70% + var(--lv,0)*30%),transparent)}
+/* La barra inferior: lente de luz blanca */
+.nav-in .lg-lens{background:color-mix(in srgb,#fff 34%,transparent);border-color:rgba(255,255,255,.55);box-shadow:inset 0 1px 1px rgba(255,255,255,.8),inset 0 -1px 2px rgba(255,255,255,.25),0 0 calc(16px + var(--lv,0)*30px) rgba(255,255,255,calc(.45 + var(--lv,0)*.3)),0 4px 18px rgba(255,255,255,.18)}
+.nav-in .lg-lens.lift{background:color-mix(in srgb,#fff 42%,transparent)}
+.nav-in>button{--container:#ffffff}
+body:not(.desk) .nav button[aria-current="page"]{color:#fff}
+body:not(.desk) .nav button[aria-current="page"] .ic{filter:drop-shadow(0 0 6px rgba(255,255,255,.7))}
+.nav .lb{text-shadow:none}
+.seg.lg-host button[aria-pressed="true"],.bk-week.lg-host button.on,#vn-tabs.lg-host [aria-selected="true"]{color:#fff;text-shadow:0 0 8px color-mix(in srgb,var(--container) 80%,#fff)}
+.lg-host>button:not(.tab),.lg-host>.tab>span{background-image:radial-gradient(circle at 32% 22%,rgba(255,255,255,.3),transparent 46%),radial-gradient(75% 150% at var(--lx,50%) 50%,color-mix(in srgb,var(--container) calc(var(--li,0)*100%),transparent),transparent 72%);transition:background-image .12s linear}
 .tab{background:none!important;box-shadow:none!important}
 .lg-host>.tab>span{text-shadow:0 0 calc(var(--li,0)*10px) color-mix(in srgb,var(--container) calc(var(--li,0)*80%),transparent)}
 /* Arrastrada por la barra, la lente dispersa la luz: un arcoíris en los bordes que crece con la velocidad */
@@ -2064,7 +2074,14 @@ body:not(.desk) .nav{touch-action:none;overflow:visible}
 .bk-filter button[aria-pressed="true"]{background:color-mix(in srgb,var(--bc,var(--accent)) 62%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(0,0,0,.15),0 4px 14px color-mix(in srgb,var(--bc,var(--accent)) 35%,transparent)}
 .bk-sec{background:color-mix(in srgb,var(--card) 72%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low),0 6px 22px rgba(0,0,0,.14);backdrop-filter:blur(8px) saturate(150%);-webkit-backdrop-filter:blur(8px) saturate(150%)}
 .bk-band .bk-dc{background:color-mix(in srgb,var(--surface-3) 60%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 2px var(--lg-low)}
-.bk-b{box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.12)}
+/* Eventos y bloques: cristal del color del evento que emite luz; al arrastrarlos, borde de arcoíris */
+.bk-b{background:color-mix(in srgb,var(--bc) 42%,color-mix(in srgb,var(--surface) 60%,transparent));background-image:radial-gradient(circle at 30% 18%,rgba(255,255,255,.28),transparent 48%);border-left-color:color-mix(in srgb,var(--bc) 85%,#fff);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.2),0 0 14px color-mix(in srgb,var(--bc) 45%,transparent);backdrop-filter:blur(6px) saturate(170%);-webkit-backdrop-filter:blur(6px) saturate(170%)}
+.mchip.ev,.wk-ev,.bk-chip{box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 8px color-mix(in srgb,var(--bc,var(--accent)) 55%,transparent)}
+.mchip.ev{background:color-mix(in srgb,var(--accent) 80%,#fff)}
+.bk-b.dragging,.mchip.dragging,.wk-ev.dragging,.bk-chip.dragging,#drag-chip{position:relative}
+.bk-b.dragging::after,.wk-ev.dragging::after,#drag-chip::after{content:"";position:absolute;inset:-2px;border-radius:inherit;pointer-events:none;padding:2.5px;background:conic-gradient(from 0deg,#ff3b6b,#ffb02e,#ffe95c,#3ddc84,#2ec5ff,#8f6bff,#ff3b6b);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;filter:blur(1px) saturate(1.5);opacity:.85;animation:prismSpin 2.2s linear infinite}
+@keyframes prismSpin{to{filter:blur(1px) saturate(1.5) hue-rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.bk-b.dragging::after,.wk-ev.dragging::after,#drag-chip::after{animation:none}}
 /* El rayo sale del reloj y sigue hasta perderse: cruza las columnas y se desvanece a lo lejos */
 .bk-now{left:-64px;right:-100vw;height:2px;background:linear-gradient(90deg,#fff 0,#ffd9db 3%,#ff6b70 14%,#ff3b43 34%,rgba(255,59,67,.55) 60%,rgba(255,59,67,.18) 85%,transparent);box-shadow:0 0 2px #fff,0 0 7px rgba(255,120,124,.8),0 0 18px rgba(255,59,67,.45),0 0 36px rgba(229,72,77,.2);border-radius:2px;overflow:visible;filter:saturate(1.2)}
 /* Como un láser: núcleo blanco, halo rojo y una neblina de luz por encima y por debajo que se curva hacia atrás */
@@ -2073,7 +2090,7 @@ body:not(.desk) .nav{touch-action:none;overflow:visible}
 .bk-now i{position:absolute;left:0;right:0;bottom:2px;height:76px;background:repeating-linear-gradient(180deg,transparent 0,rgba(255,120,126,.26) 5px,rgba(255,170,174,.12) 9px,transparent 16px);background-size:100% 16px;-webkit-mask:linear-gradient(180deg,transparent,rgba(0,0,0,.7) 70%,#000),linear-gradient(90deg,transparent,#000 22%,#000 75%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(180deg,transparent,rgba(0,0,0,.7) 70%,#000),linear-gradient(90deg,transparent,#000 22%,#000 75%,transparent);mask-composite:intersect;filter:blur(.6px);transform:skewX(-18deg);transform-origin:100% 100%;pointer-events:none}
 @media (prefers-reduced-motion:no-preference){.bk-now i{animation:nowWave 2.4s linear infinite}@keyframes nowWave{from{background-position:0 0}to{background-position:0 -32px}}}
 .bk-now::after{content:"";position:absolute;top:-4px;left:0;width:170px;height:10px;border-radius:50%;background:linear-gradient(90deg,transparent,rgba(255,110,116,.25) 45%,rgba(255,170,174,.6) 80%,#fff 93%,transparent);filter:blur(1px);mix-blend-mode:screen;opacity:0}
-@media (prefers-reduced-motion:no-preference){.bk-now::after{animation:nowGlide 4.5s cubic-bezier(.45,0,.55,1) infinite}@keyframes nowGlide{0%{left:-14%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:102%;opacity:0}}
+@media (prefers-reduced-motion:no-preference){.bk-now::after{left:0;will-change:transform,opacity;animation:nowGlide 4.5s cubic-bezier(.45,0,.55,1) infinite}@keyframes nowGlide{0%{transform:translateX(-120px);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateX(100vw);opacity:0}}
   .bk-now{animation:nowBreath 3.2s ease-in-out infinite}@keyframes nowBreath{0%,100%{filter:saturate(1.2) brightness(1)}50%{filter:saturate(1.35) brightness(1.18)}}}
 .bk-now span{background:rgba(229,72,77,.9);text-shadow:0 0 6px #fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 10px rgba(229,72,77,.55);border-radius:8px}
 /* Cristal en todas las secciones: tarjetas, filas, pastillas, segmentos y botones flotantes */
@@ -2127,6 +2144,9 @@ body.desknotes .ne-tools,.ob-tools,.bk-zoom{background:color-mix(in srgb,var(--s
 .lg-gel{background-image:radial-gradient(circle at var(--px,50%) var(--py,50%),rgba(255,255,255,calc(var(--lg-g,0)*.36)),transparent 74%)}
 @media (hover:hover){.lg-hov:not(.lg-gel){background-image:radial-gradient(140px circle at var(--hx,50%) var(--hy,50%),var(--lg-hi),transparent)}}
 .lg-landing{z-index:8}
+.lg-lens,#drag-chip,.ob-ghost,.bk-b.dragging,.lg-float,.sheet-back>.sheet,.g3 canvas{will-change:transform}
+.bk-sec,.mcell,.card,.row{contain:layout paint}
+#lg-dust{will-change:contents}
 /* PC: la barra lateral es una cápsula de cristal que flota, con la misma lente que el móvil */
 @media (min-height:521px){
   body.desk .nav{background:transparent!important;border-right:0;padding-inline:8px}
@@ -4292,7 +4312,12 @@ function applyAgenda(){const desk=DESK.matches,ag=view==='cal'||view==='blocks';
   $('pg-to-blocks').hidden=!(view==='cal'&&!desk);$('bk-zoomc').hidden=!(view==='blocks'||desk&&view==='cal');$('pg-to-cal').hidden=!(view==='blocks'&&!desk);
   if(view==='cal'&&!desk&&!S.pgHint){S.pgHint=1;save();setTimeout(()=>toast(T('Desliza desde el borde derecho para ver tus bloques de trabajo')),900)}}
 function goPage(pg){if(DESK.matches){show('cal');return}const from=view;S.calPage=pg;save();show(pg==='blocks'?'blocks':'cal');
-  if(from!==view){const el=$(pg==='blocks'?'v-blocks':'v-cal');el.classList.remove('pg-in-r','pg-in-l');void el.offsetWidth;el.classList.add(pg==='blocks'?'pg-in-r':'pg-in-l')}}
+  if(from!==view){const el=$(pg==='blocks'?'v-blocks':'v-cal'),old=$(pg==='blocks'?'v-cal':'v-blocks'),dir=pg==='blocks'?1:-1;el.classList.remove('pg-in-r','pg-in-l');
+    if(lgRM.matches){void el.offsetWidth;el.classList.add(pg==='blocks'?'pg-in-r':'pg-in-l');return}
+    /* Cartas: la que se va se aparta girando un poco y la nueva entra desde el otro lado con el muelle */
+    const E=getComputedStyle(document.documentElement).getPropertyValue('--sp-soft').trim()||'cubic-bezier(.2,.9,.25,1)',D=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sp-soft-d'))*1000||420;
+    old.hidden=false;old.classList.add('pg-card');old.animate([{transform:'none',opacity:1},{transform:`translateX(${-dir*42}%) scale(.9) rotateY(${dir*9}deg)`,opacity:0}],{duration:D*.7,easing:'cubic-bezier(.4,0,.6,1)',fill:'forwards'}).onfinish=()=>{old.hidden=true;old.classList.remove('pg-card');old.style.transform=''};
+    el.animate([{transform:`translateX(${dir*60}%) scale(.94) rotateY(${-dir*10}deg)`,opacity:.4},{transform:'none',opacity:1}],{duration:D,easing:E})}}
 $('pg-to-blocks').onclick=()=>goPage('blocks');$('pg-to-cal').onclick=()=>goPage('cal');
 let pgSw=null;
 /* Desde el borde, la pantalla sigue al dedo; al soltar, la inercia decide si cambia o vuelve con un muelle */
@@ -7489,10 +7514,12 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
   {const cv=document.createElement('canvas');cv.id='lg-dust';cv.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9;mix-blend-mode:screen';document.body.appendChild(cv);const cx=cv.getContext('2d');let ps=[],raf=0,last=0,W=0,H=0;
     const size=()=>{const d=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)};size();addEventListener('resize',size);
     const colorOf=el=>{const c=getComputedStyle(el||document.body).getPropertyValue('--container').trim()||'#c6c4f4';cx.fillStyle=c;return cx.fillStyle};
+    /* Cada color tiene su sprite: un disco difuso dibujado una vez, sin sombras por fotograma */
+    const SPR=new Map();const sprite=c=>{let k=SPR.get(c);if(k)return k;const s=document.createElement('canvas');s.width=s.height=32;const g=s.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);r.addColorStop(0,'#fff');r.addColorStop(.25,c);r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,32,32);SPR.set(c,s);return s};
     function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;cx.clearRect(0,0,W,H);
       ps=ps.filter(p=>{p.life-=dt;if(p.life<=0)return false;p.ph+=dt*p.w;p.vx+=Math.cos(p.ph)*p.wob*dt;p.vy+=Math.sin(p.ph*1.3)*p.wob*dt;p.vx*=Math.exp(-p.drag*dt);p.vy*=Math.exp(-p.drag*dt);p.x+=p.vx*dt;p.y+=p.vy*dt;const a=Math.min(1,p.life/p.max*1.6);
-        cx.globalAlpha=a*.9;cx.fillStyle=p.c;cx.shadowColor=p.c;cx.shadowBlur=p.r*5;cx.beginPath();cx.arc(p.x,p.y,p.r*(.7+a*.5),0,7);cx.fill();cx.shadowBlur=0;cx.globalAlpha=a*.85;cx.fillStyle='#fff';cx.beginPath();cx.arc(p.x,p.y,p.r*.45*a,0,7);cx.fill();return true});
-      cx.shadowBlur=0;cx.globalAlpha=1;if(ps.length)raf=requestAnimationFrame(tick);else{raf=0;cx.clearRect(0,0,W,H)}}
+        const d=p.r*(2.6+a*2);cx.globalAlpha=a;cx.drawImage(sprite(p.c),p.x-d,p.y-d,d*2,d*2);return true});
+      cx.globalAlpha=1;if(ps.length)raf=requestAnimationFrame(tick);else{raf=0;cx.clearRect(0,0,W,H)}}
     /* n motas en (x,y) con color c; vx/vy base, apertura y gravedad (negativa: suben) */
     window.lgDust=(x,y,c,n,o={})=>{if(RM.matches||document.hidden)return;for(let i=0;i<n&&ps.length<90;i++){const a=(o.a||0)+(Math.random()-.5)*(o.spread||Math.PI*2),sp=(o.sp||60)*(.4+Math.random()*.9);
         ps.push({x:x+(Math.random()-.5)*(o.w||6),y:y+(Math.random()-.5)*(o.h||6),vx:Math.cos(a)*sp+(o.vx||0),vy:Math.sin(a)*sp+(o.vy||0),ph:Math.random()*6.3,w:2+Math.random()*3,wob:o.wob==null?60:o.wob,drag:o.drag||1.1,r:(o.r||1.6)*(.6+Math.random()*.8),c:c||'#c6c4f4',life:0,max:0})}
