@@ -2562,6 +2562,48 @@ body.desknotes .ne-tools,.ob-tools,.bk-zoom{background:color-mix(in srgb,var(--s
   body:not(.desk) .app>.scroll:not(#v-cal){-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - var(--sab,env(safe-area-inset-bottom,0px)) - 96px),rgba(0,0,0,.2) calc(100% - var(--sab,env(safe-area-inset-bottom,0px)) - 12px));mask-image:linear-gradient(180deg,#000 calc(100% - var(--sab,env(safe-area-inset-bottom,0px)) - 96px),rgba(0,0,0,.2) calc(100% - var(--sab,env(safe-area-inset-bottom,0px)) - 12px))}
 }
 :root.lg-lite *{--lg-ref:initial!important}
+
+/* ===== Rayo de la hora en todas las vistas del calendario ===== */
+.wk-body{position:relative;overflow-x:clip}
+.bk-now.wk-laser{left:44px;right:0;z-index:4;pointer-events:none;
+  background:linear-gradient(90deg,transparent 0,rgba(255,59,67,.18) calc(var(--p) - 46%),rgba(255,59,67,.5) calc(var(--p) - 22%),#ff3b43 calc(var(--p) - 7%),#ffd9db calc(var(--p) - 2%),#fff var(--p),#ffd9db calc(var(--p) + 2%),#ff3b43 calc(var(--p) + 8%),rgba(255,59,67,.5) calc(var(--p) + 24%),rgba(255,59,67,.18) calc(var(--p) + 46%),transparent 100%)}
+.bk-now.wk-laser span{left:-44px;width:40px;text-align:center;padding:1px 0;font-size:10.5px;top:-9px}
+.wk-laser .wk-dot{position:absolute;top:-4px;left:var(--c0);width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff,0 0 10px #ff3b43,0 0 22px rgba(255,59,67,.65)}
+/* Mes: en el día de hoy, el avance del día es un rayo vertical que deja su luz por donde ya ha pasado */
+.mcell .nowbar{width:2px;margin-left:-1px;background:linear-gradient(180deg,transparent,#ff6b70 14%,#ffd9db 40%,#fff 50%,#ffd9db 60%,#ff6b70 86%,transparent);box-shadow:0 0 2px #fff,0 0 7px rgba(255,120,124,.85),0 0 16px rgba(255,59,67,.5);border-radius:2px}
+.mcell .nowbar::before{content:"";position:absolute;top:8%;bottom:8%;right:2px;width:26px;background:linear-gradient(270deg,rgba(255,140,146,.32),rgba(255,90,96,.1) 60%,transparent);filter:blur(1.5px);pointer-events:none}
+.mcell.today .fill{background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 10%,transparent),color-mix(in srgb,#ff3b43 14%,transparent))}
+/* Año: una línea de luz bajo el día de hoy que avanza con las horas */
+.yr-now{position:absolute;left:18%;bottom:12%;height:2px;width:calc(64% * var(--f));border-radius:2px;background:linear-gradient(90deg,#ff6b70,#fff);box-shadow:0 0 4px #fff,0 0 8px rgba(255,59,67,.8);pointer-events:none}
+.yr-g button.today.has::after{display:none}
+/* Programación: el rayo separa lo que ya ha pasado de lo que queda hoy */
+.sc-now{position:relative;height:2px;margin:7px 0 7px 4px;border-radius:2px;background:linear-gradient(90deg,#fff 0,#ffd9db 3%,#ff6b70 12%,#ff3b43 30%,rgba(255,59,67,.55) 60%,rgba(255,59,67,.15) 88%,transparent);box-shadow:0 0 2px #fff,0 0 7px rgba(255,120,124,.8),0 0 18px rgba(255,59,67,.4)}
+.sc-now::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff,0 0 10px #ff3b43,0 0 22px rgba(255,59,67,.6)}
+.sc-now i{position:absolute;left:0;right:0;bottom:2px;height:26px;background:linear-gradient(180deg,transparent,rgba(255,110,116,.14));-webkit-mask:linear-gradient(90deg,#000,transparent 85%);mask:linear-gradient(90deg,#000,transparent 85%);pointer-events:none}
+.sc-now span{position:absolute;right:0;top:-10px;font-size:10.5px;font-weight:700;color:#fff;padding:1px 6px;border-radius:8px;background:rgba(229,72,77,.9);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 10px rgba(229,72,77,.5)}
+@media (prefers-reduced-motion:no-preference){
+  .mcell .nowbar,.sc-now,.yr-now{animation:nowBreath 3.2s ease-in-out infinite}
+  .sc-now::after{content:"";position:absolute;top:-4px;left:0;width:120px;height:10px;border-radius:50%;background:linear-gradient(90deg,transparent,rgba(255,170,174,.6) 80%,#fff 93%,transparent);filter:blur(1px);mix-blend-mode:screen;opacity:0;animation:nowGlide 4.5s cubic-bezier(.45,0,.55,1) infinite}
+  .sc-l{overflow-x:clip}
+}
+/* ===== Cambio de vista del calendario ===== */
+html.cal-vt #v-cal{view-transition-name:calview}
+::view-transition-old(root),::view-transition-new(root){animation:none}
+::view-transition-group(calview){animation-duration:.5s;animation-timing-function:cubic-bezier(.2,.9,.25,1)}
+::view-transition-old(calview){animation:cvOut .26s cubic-bezier(.4,0,.8,.4) both}
+::view-transition-new(calview){animation:cvIn .52s cubic-bezier(.2,1.05,.3,1) both}
+@keyframes cvOut{to{opacity:0;transform:scale(.94) translateY(calc(var(--cvd,1) * -10px));filter:blur(10px) saturate(1.4)}}
+@keyframes cvIn{from{opacity:0;transform:scale(1.04) translateY(calc(var(--cvd,1) * 16px));filter:blur(12px) saturate(1.4)}60%{opacity:1;filter:blur(0)}to{transform:none;filter:none}}
+.cal-in{animation:cvIn .5s cubic-bezier(.2,1.05,.3,1) both}
+@media (prefers-reduced-motion:reduce){::view-transition-old(calview),::view-transition-new(calview),.cal-in{animation:none}}
+/* ===== Cabecera de días de Semana y 3 días: cápsulas como el selector de Bloques ===== */
+.wk-head .wk-d{margin:4px 2px;border-radius:999px;padding:6px 0 5px;background:color-mix(in srgb,var(--surface-2) 38%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim,rgba(255,255,255,.08));transition:background-color .25s,transform .45s cubic-bezier(.25,1.6,.4,1)}
+.wk-head .wk-d:active{transform:scale(1.06)}
+.wk-head .wk-d b{width:32px;height:32px;font-size:16.5px}
+.wk-head .wk-d.today{background:color-mix(in srgb,var(--accent) 22%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 1px rgba(255,255,255,.06),0 0 16px color-mix(in srgb,var(--accent) 30%,transparent)}
+.compact .wk-head .wk-d{margin:3px 2px;padding:3px 0}
+.compact .wk-head .wk-d b{width:26px;height:26px;font-size:14px}
+.sc-n b,.yr-g button{transition:transform .45s cubic-bezier(.25,1.6,.4,1)}
 </style>
 
 <div class="bg" id="bg" hidden><div class="bg-img" id="bg-img"></div><div class="bg-dim" id="bg-dim"></div></div>
@@ -4182,7 +4224,14 @@ const weekNo=d=>{const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDat
 const CAL_VIEWS=[['day','Día','<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8"/>'],['3d','3 días','<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16M15 4v16"/>'],['week','Semana','<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7.5 4v16M12 4v16M16.5 4v16"/>'],['month','Mes','<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9.5h18M3 14.5h18M9 4v16M15 4v16"/>'],['year','Año','<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'],['sched','Programación','<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1.3"/><circle cx="4" cy="12" r="1.3"/><circle cx="4" cy="18" r="1.3"/>']];
 const CSV=d=>`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ckBox=(on,c)=>`<i class="cdr-ck${on?' on':''}" style="--cc:${c||'var(--accent)'}">${on?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>':''}</i>`;
-function setCalView(v){if(v==='day'){openDay(dk(new Date()));if(DESK.matches)lgSettle($('bk-title'));return}S.calView=v;save();$('v-cal').scrollTop=0;$('v-cal').classList.remove('compact');renderCal()}
+function setCalView(v){if(v==='day'){openDay(dk(new Date()));if(DESK.matches)lgSettle($('bk-title'));return}calSwap(()=>{S.calView=v;save();$('v-cal').scrollTop=0;$('v-cal').classList.remove('compact');renderCal()},v)}
+/* Cambio de vista fluido: con la API de transiciones la vista vieja se hunde desenfocándose mientras la nueva sube con un muelle; sin ella, solo entra la nueva */
+function calSwap(fn,v){const same=v&&v===S.calView,RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(same||RM||view!=='cal'){fn();return}
+  const order=['day','3d','week','month','year','sched'],dir=v?Math.sign(order.indexOf(v)-order.indexOf(S.calView))||1:1,root=document.documentElement;
+  root.style.setProperty('--cvd',dir);
+  if(document.startViewTransition){root.classList.add('cal-vt');try{const t=document.startViewTransition(fn);t.finished.finally(()=>root.classList.remove('cal-vt'))}catch(e){root.classList.remove('cal-vt');fn()}return}
+  fn();const box=$('cal-grid').hidden?$('cal-alt'):$('cal-grid');box.classList.remove('cal-in');void box.offsetWidth;box.classList.add('cal-in');box.addEventListener('animationend',()=>box.classList.remove('cal-in'),{once:true})}
 /* En PC las vistas están a la vista, debajo de la cabecera: sin ellas no se veía cómo volver al mes */
 $('cal-vseg').onclick=e=>{const b=e.target.closest('[data-cv]');if(b)setCalView(b.dataset.cv)};
 function openCalDrawer(){renderCalDrawer();$('cal-drawer').hidden=false}
@@ -4335,25 +4384,29 @@ function renderWeek(n){const d0=viewStart(),days=[...Array(n)].map((_,i)=>{const
     if(k>=todayK)S.appts.forEach(ap=>{if(k>dk(new Date(Date.now()+(ap.days||60)*864e5)))return;(ap.av[d.getDay()]||[]).forEach(([s,e])=>{g+=`<button class="wk-ap" data-apedit="${ap.id}" style="top:${toMin(s)/60*WH}px;height:${(toMin(e)-toMin(s))/60*WH}px;--ac:${ap.color}"><span>${esc(ap.title)}</span></button>`})});
     layoutCols(CE.filter(e=>e.date===k&&e.start&&!e.allDay)).forEach(p=>{const e=p.e,hgt=Math.max(20,(Math.max(p.en,p.s+20)-p.s)/60*WH-2),col=evColorOf(e);
       g+=`<button class="wk-ev${e.kind==='task'?' task':''}${e.done?' done':''}${e.type?' t-'+e.type:''}" data-ev="${e.id}" style="top:${p.s/60*WH}px;height:${hgt}px;left:calc(${p.c/p.n*100}% + 1px);width:calc(${100/p.n}% - 2px);${col?evCss({color:col}):''}"><b>${typeIc(e)}${esc(e.title)}</b>${hgt>34?`<span>${e.start}${e.end?'–'+e.end:''}</span>`:''}</button>`});
-    if(k===todayK){const nw=new Date();g+=`<i class="wk-now" style="top:${(nw.getHours()*60+nw.getMinutes())/60*WH}px"></i>`}
     return `<div class="wk-col${k===todayK?' today':''}" data-wcol="${k}" style="height:${24*WH}px">${g}</div>`}).join('');
+  /* La hora actual como el rayo de Bloques: cruza toda la vista y brilla más sobre la columna de hoy */
+  const ti=days.indexOf(todayK);if(ti>=0)h+=wkLaser(ti,n);
   return h+'</div></div>'}
+function wkLaser(ti,n){const nw=new Date(),m=nw.getHours()*60+nw.getMinutes();
+  return `<div class="bk-now wk-laser" style="top:${m/60*WH}px;--p:${((ti+.5)/n*100).toFixed(2)}%;--c0:${(ti/n*100).toFixed(2)}%;--cw:${(100/n).toFixed(2)}%"><i></i><b class="wk-dot"></b><span>${hm(nw)}</span></div>`}
 function renderYear(){const y=calMonth.getFullYear(),todayK=dk(new Date()),CE=calEvents(),has=new Set(CE.filter(e=>e.date&&e.date.startsWith(y+'')).map(e=>e.date)),fd=firstDay();
   return `<div class="yr">${[...Array(12)].map((_,m)=>{const first=new Date(y,m,1),off=(first.getDay()-fd+7)%7,nd=new Date(y,m+1,0).getDate();let c='';
-    for(let i=0;i<off;i++)c+='<i></i>';for(let dd=1;dd<=nd;dd++){const k=dk(new Date(y,m,dd));c+=`<button data-day="${k}" class="${k===todayK?'today':''}${holOn(k).length?' hol':''}${has.has(k)?' has':''}">${dd}</button>`}
+    for(let i=0;i<off;i++)c+='<i></i>';for(let dd=1;dd<=nd;dd++){const k=dk(new Date(y,m,dd));c+=`<button data-day="${k}" class="${k===todayK?'today':''}${holOn(k).length?' hol':''}${has.has(k)?' has':''}">${dd}${k===todayK?`<i class="yr-now" style="--f:${((new Date().getHours()*60+new Date().getMinutes())/1440).toFixed(3)}"></i>`:''}</button>`}
     return `<div class="yr-m"><button class="yr-t" data-ymonth="${m}">${cap(first.toLocaleDateString(LOC,{month:'long'}))}</button><div class="yr-wd">${dayOrder().map(x=>`<i>${DAYN[x]}</i>`).join('')}</div><div class="yr-g">${c}</div></div>`}).join('')}</div>`}
 let schedDays=45;
 function renderSched(){const out=[],todayK=dk(new Date()),CE=calEvents();let lastM='';
   for(let i=0;i<schedDays;i++){const d=new Date();d.setDate(d.getDate()+i);const k=dk(d),it=[...holOn(k).map(t=>({hol:t})),...CE.filter(e=>e.date===k).sort((a,b)=>(a.start||'').localeCompare(b.start||''))];
     if(!it.length&&k!==todayK)continue;
     const mm=d.toLocaleDateString(LOC,{month:'long',year:'numeric'});if(mm!==lastM){out.push(`<div class="sc-m">${cap(mm)}</div>`);lastM=mm}
-    out.push(`<div class="sc-d${k===todayK?' today':''}"><button class="sc-n" data-day="${k}"><span>${d.toLocaleDateString(LOC,{weekday:'short'}).replace('.','')}</span><b>${d.getDate()}</b></button><div class="sc-l">${it.length?it.map(e=>e.hol?`<div class="sc-e hol">${esc(e.hol)}</div>`:`<button class="sc-e${e.kind==='task'?' task':''}${e.done?' done':''}" data-ev="${e.id}" style="${evCss({color:evColorOf(e)})}"><b>${e.kind==='task'?(e.done?'☑ ':'☐ '):''}${typeIc(e)}${esc(e.title)}</b><span>${e.allDay||!e.start?'Todo el día':e.start+(e.end?' – '+e.end:'')}${e.loc?' · '+esc(e.loc):''}</span></button>`).join(''):'<div class="sc-e empty">Nada planeado</div>'}</div></div>`)}
+    if(k===todayK){const nw=new Date(),nm=pad(nw.getHours())+':'+pad(nw.getMinutes());let at=it.findIndex(e=>!e.hol&&e.start&&!e.allDay&&(e.end||e.start)>nm&&e.start>nm);if(at<0)at=it.length;it.splice(at,0,{now:hm(nw)})}
+    out.push(`<div class="sc-d${k===todayK?' today':''}"><button class="sc-n" data-day="${k}"><span>${d.toLocaleDateString(LOC,{weekday:'short'}).replace('.','')}</span><b>${d.getDate()}</b></button><div class="sc-l">${it.some(e=>!e.now)||it.length>1?it.map(e=>e.now?`<div class="sc-now" aria-hidden="true"><i></i><span>${e.now}</span></div>`:e.hol?`<div class="sc-e hol">${esc(e.hol)}</div>`:`<button class="sc-e${e.kind==='task'?' task':''}${e.done?' done':''}" data-ev="${e.id}" style="${evCss({color:evColorOf(e)})}"><b>${e.kind==='task'?(e.done?'☑ ':'☐ '):''}${typeIc(e)}${esc(e.title)}</b><span>${e.allDay||!e.start?'Todo el día':e.start+(e.end?' – '+e.end:'')}${e.loc?' · '+esc(e.loc):''}</span></button>`).join(''):'<div class="sc-e empty">Nada planeado</div><div class="sc-now" aria-hidden="true"><i></i><span>'+hm(new Date())+'</span></div>'}</div></div>`)}
   return `<div class="sc">${out.join('')}<button class="btn tonal" id="sc-more" style="margin:12px auto;display:block">Ver más días</button></div>`}
 $('cal-alt').addEventListener('click',e=>{const t=e.target;
   const ev=t.closest('[data-ev]');if(ev){openEvent(ev.dataset.ev);return}
   const ap=t.closest('[data-apedit]');if(ap){openAppt(ap.dataset.apedit);return}
   const dy=t.closest('[data-day]');if(dy){openDay(dy.dataset.day);return}
-  const ym=t.closest('[data-ymonth]');if(ym){calMonth=new Date(calMonth.getFullYear(),+ym.dataset.ymonth,1);S.calView='month';save();renderCal();return}
+  const ym=t.closest('[data-ymonth]');if(ym){calSwap(()=>{calMonth=new Date(calMonth.getFullYear(),+ym.dataset.ymonth,1);S.calView='month';save();renderCal()},'month');return}
   if(t.closest('#sc-more')){schedDays+=45;renderCal();return}
   const col=t.closest('[data-wcol]');if(col){const r=col.getBoundingClientRect(),mins=Math.max(0,Math.min(1425,Math.floor((e.clientY-r.top)/WH*4)*15));openEvent(null,col.dataset.wcol,Math.floor(mins/60),mins%60)}});
 {let sx=null,sy=null;$('cal-alt').addEventListener('touchstart',e=>{if(e.touches.length===1){sx=e.touches[0].clientX;sy=e.touches[0].clientY}},{passive:true});
@@ -5591,6 +5644,11 @@ const ZOOMS=[60,120,240,480,900];let zi=0,HH=60;let dvDays=[],dvReady=false;
 const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return dk(d)};
 const toMin=t=>{const [h,m]=t.split(':').map(Number);return h*60+m};
 function openDay(k){goBlocksDay(k)}
+/* Rayo de la hora en las vistas del calendario: cada minuto se mueve; en Programación se redibuja cuando cambia de sitio */
+function calNowTick(){const nw=new Date(),m=nw.getHours()*60+nw.getMinutes(),f=m/1440;
+  document.querySelectorAll('#cal-alt .wk-laser').forEach(l=>{l.style.top=m/60*WH+'px';const sp=l.querySelector('span');if(sp)sp.textContent=hm(nw)});
+  document.querySelectorAll('#cal-alt .yr-now').forEach(l=>l.style.setProperty('--f',f.toFixed(3)));
+  if(!bkDrag&&$('ob-sheet').hidden&&(S.calView==='month'||S.calView==='sched'))renderCal()}
 function secHtml(k){
   const d=fromKey(k),todayK=dk(new Date()),isT=k===todayK,items=dayItems(k);
   const nEv=items.filter(i=>i.kind==='event').length,nT=items.filter(i=>i.kind==='task').length,nTd=items.filter(i=>i.kind==='task'&&i.done).length,nA=items.filter(i=>i.kind==='act').length;
@@ -7711,7 +7769,7 @@ setInterval(()=>{
     if(S.tick&&sec<=3&&sec>=1&&sec!==cTick&&S.aviso!=='none'&&S.aviso!=='duckOnly'){cTick=sec;tone(660,0,.09,'sine',.25)}
     if(l<=0)cGo(cIdx+1)}
   const s=new Date().getSeconds();
-  if(s!==lastSec){lastSec=s;if(view==='clock')renderClock();if((view==='blocks'||DESK.matches&&view==='cal')&&s===0&&$('bk-sheet').hidden&&!bkDrag)renderBlocks();if(s===0){renderCities();renderAlarms()}checkAlarms();checkReminders();
+  if(s!==lastSec){lastSec=s;if(view==='clock')renderClock();if((view==='blocks'||DESK.matches&&view==='cal')&&s===0&&$('bk-sheet').hidden&&!bkDrag)renderBlocks();if(s===0){renderCities();renderAlarms();if(view==='cal')calNowTick()}checkAlarms();checkReminders();
     if(s%30===0){if(view==='cal')renderCal();tickDay()}if(s===0)pushWidgets();
     document.title=running?fmt(tLeft())+' · '+S.name:'Temvra'}
 },200);
