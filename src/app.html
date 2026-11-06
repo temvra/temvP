@@ -2325,7 +2325,7 @@ body:not(.desk) .nav-set{position:relative;z-index:1}
   @keyframes lgPop{from{transform:scale(.35,.2);opacity:0}to{transform:none;opacity:1}}
   /* Pantallas de ajustes y listas: entran con un leve zoom de cristal */
   #settings:not([hidden]),#vault-mgr:not([hidden]),#vault-new:not([hidden]),#ob-prefs:not([hidden]),#ob-qs:not([hidden]),#searchview:not([hidden]),#tasksview:not([hidden]),#bm-form:not([hidden]){animation:lgPage var(--sp-soft-d,.42s) var(--sp-soft,cubic-bezier(.2,.9,.25,1))}
-  @keyframes lgPage{from{opacity:0;transform:scale(.94) translateY(14px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+  @keyframes lgPage{from{opacity:0;transform:scale(.96) translateY(14px)}to{opacity:1;transform:none}}
 }
 /* Hueco al arrastrar: lo que se aparta lo hace con un muelle */
 @media (max-width:899px){.scroll{overscroll-behavior-y:contain}}
@@ -7680,11 +7680,13 @@ function renderPreview(){
   $('pv-c-bar').style.width=(df*100)+'%';$('pv-c-left').textContent='Quedan '+leftTxt((1-df)*864e5)+' del día';
   $('pv-c-next').textContent=nx?nx.title:'Nada más por hoy';$('pv-c-next2').textContent=nx?'A las '+nx.time+' · '+nx.sub:'';$('pv-w-time').textContent=fmt(l);$('pv-w-ring').style.strokeDashoffset=WC*(1-frac);
 }
-function frame(){
+let lastPv=0;
+function frame(now){
   if(view==='timer')renderTimer();
   else if(view==='stop')renderSw();
   else if(view==='circ')renderCircRun();
-  if(!$('settings').hidden)renderPreview();
+  /* Las vistas previas de la notificación y los widgets solo cambian de segundo en segundo: redibujarlas 60 veces por segundo frenaba la apertura de Ajustes */
+  if(!$('settings').hidden&&!(now-lastPv<250)){lastPv=now||0;renderPreview()}
   requestAnimationFrame(frame);
 }
 let lastSec=-1;
@@ -8150,7 +8152,9 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
       root.querySelectorAll(itemSel).forEach(el=>{const m=vert?el.offsetTop+el.offsetHeight/2:el.offsetLeft+el.offsetWidth/2,d=m-c,li=Math.max(0,1-Math.abs(d)/(sz*2.6));el.style.setProperty('--li',(li*li*1.25).toFixed(3));el.style.setProperty('--lx',vert?'50%':d>0?'0%':'100%')})}
     function step(now){raf=0;if(!on()||!aim()){L.style.opacity='0';/* Oculta, su agujero no puede quedarse sobre la vista siguiente; al volver a verse se coloca sin viajar */
         if(hole){on()?hole.str(0):hole.kill();hole=null}if(!on())init=false;return}L.style.opacity='';
-      if(!init||RM.matches){o.x=tx;o.y=ty;o.w=tw;o.h=th;init=true;o.vx=o.vy=o.vw=o.vh=0;paint(1,1);last=now;if(hole&&!lift){hole.str(0);hole=null}if(!dg&&Date.now()>until)return;raf=requestAnimationFrame(step);return}
+      if(!init||RM.matches){o.x=tx;o.y=ty;o.w=tw;o.h=th;init=true;o.vx=o.vy=o.vw=o.vh=0;paint(1,1);last=now;if(hole&&!lift){hole.str(0);hole=null}
+        /* Recién colocada no tiene adónde ir: seguir midiendo cada fotograma solo fuerza a recalcular la página (las 16 gotas de Ajustes a la vez al abrirlo) */
+        if(!dg)return;raf=requestAnimationFrame(step);return}
       const dt=Math.min(.05,Math.max(.001,(now-last)/1000));last=now;const R=dg?(dg.moved?.06:.2):.42,D=dg?(dg.moved?1:.74):.68;spStep(o,'x',tx,R,D,dt);spStep(o,'y',ty,R,D,dt);spStep(o,'w',tw,R,.85,dt);spStep(o,'h',th,R,.85,dt);
       /* Se estira en la dirección en que corre y al pulsarla crece como una gota */
       /* Como en iOS 26: mientras viaja de una pestaña a otra se levanta como una gota (más grande y con refracción) y al llegar se posa.
@@ -8187,10 +8191,15 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
       /* La inercia solo cuenta si el dedo aún se movía al soltar: tras una pausa se queda donde está */
       if(d.moved&&drag&&e.type==='pointerup'){const k=Math.max(0,1-(performance.now()-d.lt)/120)*.05,t=itemAt(e.clientX+d.sx*k,e.clientY+d.sy*k);if(t&&t!==cur())t.click();swallow()}kick(800)};
     addEventListener('pointerup',end,true);addEventListener('pointercancel',end,true);
-    kick(800);return {kick}}
+    kick(800);return {kick,snap(){if(raf){cancelAnimationFrame(raf);raf=0}if(hole){hole.str(0);hole=null}init=false;until=0;L.classList.remove('lift','sph','drag');box.classList.remove('lg-drag');kick(1)}}}
   const nav=document.querySelector('.nav-in');
   /* En el móvil la rueda de Ajustes está fuera de las pestañas pero la gota también llega a ella */
-  const NL=lens(nav,'button[data-view],body:not(.desk) #nav-set',()=>nav.querySelector('button[aria-current="page"]'),el=>el,true,nav.parentElement);
+  /* Ajustes no es una pestaña: mientras está abierto la gota se queda en la rueda (antes volvía a la pestaña anterior justo mientras se abría, y se veía por delante y daba tirones) */
+  const setOpen=()=>!DESK.matches&&!$('settings').hidden;
+  const NL=lens(nav,'button[data-view],body:not(.desk) #nav-set',()=>setOpen()?$('nav-set'):nav.querySelector('button[aria-current="page"]'),el=>el,true,nav.parentElement);
+  /* Al cerrar Ajustes la gota aparece ya en la pestaña en la que estabas, sin cruzar la barra */
+  /* Al abrir Ajustes la barra queda tapada: la gota se posa ya en la rueda en vez de seguir animándose por debajo y quitarle fotogramas a la apertura */
+  if(NL)new MutationObserver(()=>NL.snap()).observe($('settings'),{attributes:true,attributeFilter:['hidden']});
   /* Pestañas de Tiempo: como la barra de abajo, solo iconos y la gota se arrastra */
   lens($('tabs'),'.tab',()=>$('tabs').querySelector('.tab[aria-selected="true"]'),el=>el,true);
   DESK.addEventListener('change',()=>NL&&NL.kick(600));
@@ -8291,7 +8300,10 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     const shape=(x,k)=>{const r=x.r,h=r.height+2*k,w=r.width+2*k;let rd=RAD.get(x.b);if(rd==null){rd=parseFloat(getComputedStyle(x.b).borderTopLeftRadius)||0;RAD.set(x.b,rd)}rd=Math.min(h/2,w/2,rd+k);
       if(cx.roundRect&&rd)cx.roundRect(r.left-k,r.top-k,w,h,rd);else cx.rect(r.left-k,r.top-k,w,h)};
     const draw=p=>{const a=Math.min(1,p.life/p.max*1.6),d=p.r*(2.2+a*1.6);cx.globalAlpha=Math.min(1,a*1.25);cx.drawImage(sprite(p.c),p.x-d,p.y-d,d*2,d*2)};
-    function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;cx.clearRect(0,0,W,H);cx.globalCompositeOperation='lighter';
+    function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;cx.clearRect(0,0,W,H);
+      /* Ajustes tapa la pantalla entera por encima de las partículas: seguir moviéndolas y midiendo las barras solo le quita fotogramas a su apertura */
+      if(!$('settings').hidden){ps=[];raf=0;return}
+      cx.globalCompositeOperation='lighter';
       ps=ps.filter(p=>{p.life-=dt;if(p.life<=0)return false;p.ph+=dt*p.w;p.vx+=Math.cos(p.ph)*p.wob*dt;p.vy+=Math.sin(p.ph*1.3)*p.wob*dt;p.vx*=Math.exp(-p.drag*dt);p.vy*=Math.exp(-p.drag*dt);p.x+=p.vx*dt;p.y+=p.vy*dt;return true});
       const bs=[...document.querySelectorAll(BARS)].map(b=>({b,r:b.getBoundingClientRect()})).filter(x=>x.r.width&&x.r.height&&x.r.bottom>0&&x.r.top<H);
       ps.forEach(p=>{if(!p.bar)draw(p)});if(bs.length){cx.globalCompositeOperation='destination-out';cx.globalAlpha=1;cx.beginPath();bs.forEach(x=>shape(x,0));cx.fill();cx.globalCompositeOperation='lighter'}
@@ -8385,7 +8397,7 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
   /* Deslizadores: el recorrido se ilumina hasta el pulgar */
   {const fill=r=>{const a=+r.min||0,b=r.max===''?100:+r.max,v=+r.value;r.style.setProperty('--p',(Math.max(0,Math.min(1,(v-a)/((b-a)||1)))*100).toFixed(1)+'%')};
     const all=()=>document.querySelectorAll('input[type=range]').forEach(fill);all();document.addEventListener('input',e=>{if(e.target.type==='range')fill(e.target)});
-    new MutationObserver(all).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['value','hidden']})}
+    let qa=0;new MutationObserver(()=>{if(!qa)qa=requestAnimationFrame(()=>{qa=0;all()})}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['value','hidden']})}
 
   /* Hojas y menús: nacen desde donde has tocado y vuelven ahí al cerrarse */
   let pd=null;document.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY,t:Date.now(),el:e.target}},true);
