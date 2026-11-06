@@ -741,7 +741,7 @@ body.desk ::-webkit-scrollbar-button{display:none}
 .scm-dot{position:absolute;top:1px;right:-2px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--accent);color:var(--on-accent);font:700 10.5px/17px var(--font);font-style:normal;text-align:center;pointer-events:none}
 .scm-dot[hidden]{display:none}
 #vn-menu[data-scm]{position:relative}#vn-menu[data-scm]::after{content:attr(data-scm);position:absolute;top:-3px;right:-4px;min-width:17px;height:17px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:var(--accent);color:var(--on-accent);font:700 10.5px/17px var(--font);text-align:center;pointer-events:none}
-body.nogit #ob-pmenu [data-panel="git"],body.nogit #vn-menu::after,body.desknotes #vn-menu::after{display:none}
+body.nogit #ob-pmenu [data-panel="git"],body.nogit #vn-menu::after,body.desknotes #vn-menu::after,body:not(.desk) #vn-menu::after{display:none}
 .scm-repo>div{flex:1}.scm-rmore{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ob-text);flex:none}.scm-rmore:active{background:var(--ob-sel)}body.desknotes .scm-rmore{display:none}
 .scm-log.err button{min-height:44px;padding:0 4px}.scm-log.err:has(.scm-fix){flex-wrap:wrap;align-items:center}.scm-log.err:has(.scm-fix) span{flex-basis:100%}.scm-log.err .scm-fix{text-decoration:none;align-self:center;padding:0 16px;border-radius:999px;background:var(--accent);color:var(--on-accent);font:600 14px var(--font)}
 @keyframes ghBusy{50%{opacity:.3;transform:translateY(-2px)}}
@@ -2264,6 +2264,18 @@ body.bkcols .bk-week.lg-host>button.vis:not(.on){background:color-mix(in srgb,va
 .is-light:not(.has-bg) .tabs.lg-host>.tab[aria-selected="true"]{color:var(--accent)}
 .is-light:not(.has-bg) .tabs.lg-host>.tab[aria-selected="true"] svg{filter:none}
 :root:not(.dark) .tabs.lg-host,body.light .tabs.lg-host{border-color:color-mix(in srgb,#000 8%,transparent)}
+/* Sincronizar con GitHub desde la cabecera de Notas: gira mientras sincroniza y lleva el contador de cambios por subir */
+.vn-head .ob-sync{position:relative;flex:none;margin-left:auto;display:grid;place-items:center}
+/* En el móvil la cabecera de Notas no se ve: el botón va en la barra de abajo, junto a ☰ y +; el contador de cambios pasa del ☰ a él */
+.cp-sync{position:relative}body.desk .cp-sync{display:none}
+.cp-sync .scm-dot{top:-3px;right:-4px}
+.vn-head .ob-sync+.ob-round{margin-left:0}
+.ob-sync .scm-dot{top:-2px;right:-4px}
+:is(.ob-sync,.cp-sync).off{color:var(--muted)}
+:is(.ob-sync,.cp-sync).spin svg{animation:obSpin 1s linear infinite}
+@keyframes obSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){:is(.ob-sync,.cp-sync).spin svg{animation:none;opacity:.55}}
+body.desknotes .vn-head .ob-sync{width:40px;height:40px}
 /* La rueda de Ajustes, encima de la gota cuando esta llega a ella */
 body:not(.desk) .nav-set{position:relative;z-index:1}
 @media (prefers-reduced-motion:no-preference){
@@ -2481,7 +2493,7 @@ body.desknotes .ne-tools,.ob-tools,.bk-zoom{background:color-mix(in srgb,var(--s
   -webkit-mask:linear-gradient(90deg,#000 calc(50% - var(--hw) / 2 - 2px),transparent calc(50% - var(--hw) / 2 + 8px),transparent calc(50% + var(--hw) / 2 - 8px),#000 calc(50% + var(--hw) / 2 + 2px));mask:linear-gradient(90deg,#000 calc(50% - var(--hw) / 2 - 2px),transparent calc(50% - var(--hw) / 2 + 8px),transparent calc(50% + var(--hw) / 2 - 8px),#000 calc(50% + var(--hw) / 2 + 2px))}
 .lg-hglow::before{content:'';position:absolute;inset:calc(var(--hR) * -.26);border-radius:calc(var(--hr) + var(--hR) * .26);padding:calc(var(--hR) * .16);
   background:conic-gradient(from var(--ha,0deg),#ff5d8f,#ffb15e,#fff46e,#7dff9e,#5fe3ff,#7d6cff,#ff6cf2,#ff5d8f);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;filter:blur(calc(var(--hR) * .09));opacity:.8}
-.lg-hring{opacity:0;margin:-1.5px;padding:1.5px;border-radius:calc(var(--hr) + 1.5px);box-sizing:content-box;border:1.5px solid rgba(255,255,255,.95);box-shadow:0 0 6px rgba(255,255,255,.85),inset 3px 0 4px -2px rgba(255,90,190,.7),inset -3px 0 4px -2px rgba(80,200,255,.75)}
+.lg-hring{opacity:0;margin:-3px;padding:1.5px;border-radius:calc(var(--hr) + 1.5px);box-sizing:content-box;border:1.5px solid rgba(255,255,255,.95);box-shadow:0 0 6px rgba(255,255,255,.85),inset 3px 0 4px -2px rgba(255,90,190,.7),inset -3px 0 4px -2px rgba(80,200,255,.75)}
 /* Destello de cámara donde el borde capta la luz: núcleo blanco, halo frío y cuatro rayos finos que giran despacio */
 .lg-hring::before{content:'';position:absolute;width:30px;height:30px;left:calc(var(--hr) * .29 - 15px);top:calc(var(--hr) * .29 - 15px);pointer-events:none;transform:rotate(calc(var(--ha,0deg) * .25));
   background:radial-gradient(circle,#fff 0 1.2px,rgba(255,255,255,.88) 2px,rgba(200,225,255,.35) 4.5px,transparent 8px),linear-gradient(90deg,transparent,rgba(255,255,255,.95) 50%,transparent) 50% 50%/100% 1.2px no-repeat,linear-gradient(transparent,rgba(255,255,255,.95) 50%,transparent) 50% 50%/1.2px 70% no-repeat}
@@ -2707,6 +2719,7 @@ body.desknotes .ne-tools,.ob-tools,.bk-zoom{background:color-mix(in srgb,var(--s
         <span class="vn-logo" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/><path d="M9 10h6M9 14h4"/></svg></span>
         <span class="vn-vtext"><span class="vn-vname"><span id="ob-vname-t">Notas</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span><span class="vn-vcount" id="ob-count"></span></span>
       </button>
+      <button class="ob-round ob-sync" id="ob-sync" aria-label="Sincronizar con GitHub" title="Sincronizar con GitHub"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.4 6.4L3 16M3 12a9 9 0 0 1 15.4-6.4L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></svg><i class="scm-dot" hidden></i></button>
       <button class="ob-round qc-btn" id="qc-n" aria-label="Captura rápida"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.9 5.4 5.6 1.9-5.6 1.9L12 17.1l-1.9-5.4-5.6-1.9 5.6-1.9zM18.5 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9zM5.5 15l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8L3 17.5l1.8-.7z"/></svg></button>
       <button class="ob-round" id="ob-settings" aria-label="Temas y ajustes"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
@@ -2720,7 +2733,7 @@ body.desknotes .ne-tools,.ob-tools,.bk-zoom{background:color-mix(in srgb,var(--s
 
   <div class="vn-list" id="vn-list"></div>
 
-  <div class="vn-compose" id="vn-compose" hidden><button class="cp-b" id="vn-menu" aria-label="Menú de notas"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h11"/></svg></button><button class="cp-b" id="vn-plus" aria-label="Elegir qué crear"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><textarea id="vn-in" rows="1" placeholder="Escribe una nota…" aria-label="Nota rápida"></textarea><button class="cp-s" id="vn-send" aria-label="Crear"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button></div>
+  <div class="vn-compose" id="vn-compose" hidden><button class="cp-b" id="vn-menu" aria-label="Menú de notas"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h11"/></svg></button><button class="cp-b" id="vn-plus" aria-label="Elegir qué crear"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><button class="cp-b cp-sync" id="vn-sync" aria-label="Sincronizar con GitHub"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.4 6.4L3 16M3 12a9 9 0 0 1 15.4-6.4L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></svg><i class="scm-dot" hidden></i></button><textarea id="vn-in" rows="1" placeholder="Escribe una nota…" aria-label="Nota rápida"></textarea><button class="cp-s" id="vn-send" aria-label="Crear"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button></div>
   <div class="vn-compose" id="rg-compose" hidden><button class="cp-b" id="rg-menu" aria-label="Menú de registros"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h11"/></svg></button><button class="cp-b" id="rg-plus" aria-label="Más opciones"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><textarea id="rg-in" rows="1" placeholder="Apunta algo…" aria-label="Apuntar"></textarea><button class="cp-s" id="rg-send" aria-label="Apuntar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button></div>
   <div class="scroll reg-view" id="v-reg" hidden></div>
 
@@ -3397,7 +3410,7 @@ const DEF={
   aviso:'duck',duck:20,dur:2,sound:'pitido',vol:150,soundOn:true,tts:{text:'¡Siguiente serie! ¡Vamos!',lang:'es-ES',pitch:1.5,rate:1.1},
   tick:true,vib:true,wake:true,notif:'always',hide:false,
   alarms:[],
-  cities:['Asia/Tokyo','America/New_York','America/Argentina/Buenos_Aires'],laps:[],
+  cities:[],laps:[],
   circuit:null,myCircuits:[],curMine:null,events:null,log:[],lists:[{id:'default',name:'Mis tareas'}],curList:'default',taskSort:'mine',showDone:false,lang:'auto',weekStart:'auto',snooze:5,notes:null,folders:[],ntFilter:'all',lastTime:'timer'
 };
 const S=Object.assign({},DEF,LS.get('state',{}));
@@ -4686,6 +4699,8 @@ function tabsEdge(){const tb=$('ne-tabsbar').querySelector('.dt-scroll');if(!tb)
 /* Una nota nueva que se cierra sin título ni texto no se queda como «Sin título N» */
 function dropBlank(id){const n=nget(id);if(!n||isCanvas(n)||openTabs.includes(id)||curNote===n||n.body.trim()||!/^Sin título( \d+)?$/.test(n.title||'Sin título')||Date.now()-(n.created||0)>864e5)return;S.notes=S.notes.filter(x=>x!==n);navH=navH.filter(x=>x!==id);navI=Math.min(navI,navH.length-1);if(S.obActive===id)S.obActive=null;save();renderNotes()}
 $('ne-tabsbar').addEventListener('scroll',tabsEdge,{capture:true,passive:true});
+/* Clic derecho en una pestaña: el menú completo de su nota, como en la lista */
+$('ne-tabsbar').addEventListener('contextmenu',e=>{const t=e.target.closest('[data-dtab]');if(!t)return;e.preventDefault();const n=nget(t.dataset.dtab);if(n)noteCtx(n)});
 $('ne-tabsbar').addEventListener('wheel',e=>{const tb=e.target.closest('.dt-scroll');if(tb&&Math.abs(e.deltaY)>Math.abs(e.deltaX)&&tb.scrollWidth>tb.clientWidth){tb.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
 $('ne-tabsbar').onclick=e=>{const nv=e.target.closest('[data-dnav]');if(nv){$(nv.dataset.dnav<0?'nb-back':'nb-fwd').click();return}const c=e.target.closest('[data-dclose]');if(c){e.stopPropagation();const id=c.dataset.dclose;openTabs=openTabs.filter(x=>x!==id);if(cvNote&&cvNote.id===id){closeCanvas();if(!curNote&&openTabs.length)openNote(openTabs[openTabs.length-1])}else if(curNote&&curNote.id===id){if(openTabs.length)openNote(openTabs[openTabs.length-1]);else closeNote()}dropBlank(id);renderDeskTabs();applyDesk();return}
   const t=e.target.closest('[data-dtab]');if(t){openNote(t.dataset.dtab);return}if(e.target.closest('[data-dnew]'))$('nb-new').click()};
@@ -4729,6 +4744,8 @@ const STEPS=[
   {em:'⏱',t:'Time',p:'Temporizador en bucle para descansos y series, circuitos, cronómetro, alarmas y reloj mundial.',sel:'.nav button[data-view="time"]'},
   {em:'📅',t:'Agenda',p:'Calendario con eventos y tareas. Desliza desde el borde derecho para ver tus bloques de trabajo del día.',pd:'Calendario con eventos y tareas. A la derecha tienes tus bloques de trabajo del día.',sel:'.nav button[data-view="cal"]'},
   {em:'📝',t:'Notas',p:'Notas en Markdown con carpetas, enlaces [[entre notas]], adjuntos y sincronización con GitHub.',sel:'.nav button[data-view="notes"]'},
+  {em:'🔄',t:'Sincroniza tus dispositivos',p:'Para tener las mismas notas en el móvil y en el ordenador: en Notas toca el botón 🔄, conecta tu cuenta de GitHub con un token (permiso «repo») y crea un repositorio privado.',sel:'.nav button[data-view="notes"]'},
+  {em:'📲',t:'En tus otros dispositivos',p:'Instala Temvra, toca 🔄 en Notas, conecta la misma cuenta y elige «Usar uno que ya tengo» con ese repositorio. Desde entonces se sincroniza sola al dejar de escribir, y con 🔄 cuando quieras.',sel:'.nav button[data-view="notes"]'},
   {em:'📋',t:'Registros',p:'Entrenamientos, trabajo, compra, cuentas o un diario: tablas por días que se acumulan solas.',sel:'.nav button[data-view="reg"]'},
   {em:'🎨',t:'Temas y ajustes',p:'Colores, fondo, avisos y música, notificaciones, widgets y copia de seguridad. Mantén pulsado casi cualquier elemento para ver sus opciones.',pd:'Colores, fondo, avisos y música, notificaciones y copia de seguridad. Haz clic derecho en casi cualquier elemento para ver sus opciones.',sel:'#nav-set'}];
 let el=null,i=0;
@@ -5402,7 +5419,7 @@ function aiSyncHTML(){const L=ghLink(),on=S.gh.token&&L,mode=(S.ob.sync.auto||'b
   <li><b>Crea el repositorio</b>: escribe <code>gh repo create mis-notas</code> (se crea privado). Si ya tienes uno, usa <code>gh repo link tu-usuario/mis-notas</code>. Después <code>git push</code> para subir todo por primera vez.</li>
   <li><b>En cada dispositivo</b> instala la app, abre Notas › terminal de GitHub, haz <code>gh auth login</code> con el mismo token y luego <code>git clone tu-usuario/mis-notas</code>: enlaza el repositorio y baja todas tus notas.</li></ol>
   <p>A partir de ahí no tienes que hacer nada: la app sube tus cambios y baja los de los otros dispositivos sola. Elige cuándo:</p>
-  <div class="ai-days ai-seg">${[['note','Al salir de la nota'],['app','Al salir de la app'],['both','Ambas'],['off','Manual']].map(([k,t])=>`<button data-sync="${k}" aria-pressed="${mode===k}">${t}</button>`).join('')}</div>
+  <div class="ai-days ai-seg">${[['note','Al escribir y salir de la nota'],['app','Al salir de la app'],['both','Ambas'],['off','Manual']].map(([k,t])=>`<button data-sync="${k}" aria-pressed="${mode===k}">${t}</button>`).join('')}</div>
   <p class="ai-note">${on?`✔ Vinculado a <b>${esc(L.repo)}</b>${S.gh.login?' como @'+esc(S.gh.login):''}.`:'Todavía no hay ninguna bóveda vinculada en este dispositivo.'} Si dos dispositivos cambian la misma nota a la vez, la app guarda las dos versiones para que no pierdas nada.</p>
   <div class="ai-links"><button data-aigo2="gh|">💻 Abrir terminal de GitHub</button>${on?'<button data-aigo2="ghsync|">🔄 Sincronizar ahora</button>':''}</div>`}
 function aiHelpHTML(){return `<p>Puedo hacer casi todo lo de la app escribiendo normal:</p><ul class="ai-ol">
@@ -5427,7 +5444,10 @@ function aiRun(i,act){const s=aiSess(),m=s.msgs[i],a=m.act,box=$('ai-thread').qu
   else if(a.type==='city'){if(act==='city'&&!S.cities.includes(a.z)){S.cities.push(a.z);save();renderCities()}if(act==='clock'){show('clock');return}out=`<p>✔ ${esc(a.n)} añadida al reloj mundial.</p><div class="ai-links"><button data-aigo2="view|clock">🌍 Ver reloj mundial</button></div>`}
   m.pending=false;m.html=out;s.kinds=Object.assign(s.kinds||{},{time:true});save();renderAI()}
 let ghQuiet=false;
-function autoSync(mode){const L=ghLink(),a=S.ob.sync.auto||'both';if(!S.gh.token||!L||a==='off'||ghBusy)return;
+function autoSync(mode){const L=ghLink(),a=S.ob.sync.auto||'both';if(!S.gh.token||!L||a==='off')return;
+  /* Al dejar de escribir unos segundos se sube la nota; si hay otra sincronización o la última fue hace muy poco, se vuelve a intentar después */
+  if(mode==='idle'){if(a!=='note'&&a!=='both')return;const w=ghBusy?5000:15000-(Date.now()-(window._lastAuto||0));if(w>0){clearTimeout(window._typT);window._typT=setTimeout(()=>autoSync('idle'),w);return}if(curNote&&neEdit)saveNote();mode='note'}
+  if(ghBusy)return;
   if(mode==='note'&&a!=='note'&&a!=='both')return;if((mode==='leave'||mode==='back')&&a!=='app'&&a!=='both')return;
   const now=Date.now();if(now-(window._lastAuto||0)<20000&&mode!=='note')return;window._lastAuto=now;ghQuiet=true;(mode==='back'?ghPull(L):ghPush(L)).finally(()=>ghQuiet=false)}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){window._hidAt=Date.now();autoSync('leave')}else if(Date.now()-(window._hidAt||0)>15000)autoSync('back')});
@@ -6157,7 +6177,7 @@ function renderNotes(){
   else if(P==='git')renderGitPanel();
   else renderBmPanel();
   $('vn-tabs').innerHTML=OB_PANELS.map(([k,t])=>`<button role="tab" data-vtab="${k}" aria-selected="${k===P}">${OB_IC[k].replace(/width="28" height="28"/,'width="20" height="20"')}<span>${t==='Explorador de archivos'?'Archivos':t==='Todas las propiedades'?'Propiedades':t==='Control de código'?'Git':t}</span></button>`).join('');
-  $('ob-tools').innerHTML=obTools();$('ob-tools').hidden=!$('ob-tools').innerHTML;scmBadge();if(S.gh&&S.gh.token)scmSoon();
+  $('ob-tools').innerHTML=obTools();$('ob-tools').hidden=!$('ob-tools').innerHTML;scmBadge();syncBtn();if(S.gh&&S.gh.token)scmSoon();
   $('ob-panel-ic').innerHTML=OB_IC[P];$('ob-panel-name').textContent=OB_PANELS.find(x=>x[0]===P)[1];
   $('ob-pmenu').innerHTML=OB_PANELS.map(([k,t])=>`<button data-panel="${k}" class="${k===P?'on':''}">${OB_IC[k]}<span>${t}</span></button>`).join('');
   $('ob-pwrap').classList.toggle('open',obPmenu);
@@ -6190,7 +6210,7 @@ $('ob-list').addEventListener('click',e=>{
   const t=e.target.closest('[data-tagrow]');if(t){if(e.target.closest('.ob-chev')){S.tagOpen[t.dataset.tagrow]=!S.tagOpen[t.dataset.tagrow];save();renderNotes();return}runSearchFor('tag:#'+t.dataset.tagrow);return}
   const pr=e.target.closest('[data-prop]');if(pr){runSearchFor('['+pr.dataset.prop+']');return}
 });
-const obCtx=e=>{const row=e.target.closest('[data-note],[data-folder],[data-att],[data-bm],[data-bmg]');if(!row)return;e.preventDefault();if(lastPT==='mouse'||!('ontouchstart' in window)){if(lp){clearTimeout(lp.t);lp=null}ctxMenu(row)}};
+const obCtx=e=>{const all=e.target.closest('[data-fall]');if(all){e.preventDefault();allCtx(all.dataset.fall);return}const row=e.target.closest('[data-note],[data-folder],[data-att],[data-bm],[data-bmg]');if(!row)return;e.preventDefault();if(lastPT==='mouse'||!('ontouchstart' in window)){if(lp){clearTimeout(lp.t);lp=null}ctxMenu(row)}};
 $('ob-list').addEventListener('contextmenu',obCtx);$('vn-list').addEventListener('contextmenu',obCtx);
 $('vn-list').addEventListener('click',e=>{if(obSuppress){e.preventDefault();return}
   if(e.target.closest('[data-vlnew]')){$('nb-new').click();return}
@@ -6373,6 +6393,12 @@ function folderCtx(p){const files=[...S.notes,...S.atts].filter(x=>(x.folder||''
     ['sep'],['Compartir',MI.share,()=>shareFolder(p)],
     ['sep'],['Renombrar',MI.rename,()=>{obRenaming='f:'+p;renderNotes()}],['Borrar',MI.trash,()=>{const cnt=[...S.notes,...S.atts].filter(x=>inFolder(x,p)).length;obConfirm(`¿Eliminar "${label}"${cnt?' y '+cnt+' archivos':''}?`,'Eliminar',()=>{S.notes.filter(x=>inFolder(x,p)).forEach(trashNote);S.atts=S.atts.filter(x=>!inFolder(x,p));S.folders=S.folders.filter(f=>f!==p&&!f.startsWith(p+'/'));save();renderNotes();toast('Eliminado')})},'',0,1]];
   ctxSheet(label,`${files} ${files===1?'archivo':'archivos'}, ${subs} ${subs===1?'carpeta':'carpetas'}`,A)}
+/* «Todas las notas» y «Sin carpeta» no se pueden renombrar ni borrar, pero también tienen menú: lo que se puede crear y ordenar en ellas */
+function allCtx(k){const tool=(t,at)=>{const b=$('ob-tools').querySelector(`[data-tool=${t}]`);if(!b)return;if(at!=null)b._at=at;b.click()},n=k==='*'?S.notes.length+S.atts.length:[...S.notes,...S.atts].filter(x=>!x.folder).length;
+  /* En «Sin carpeta» la nota va a la raíz; en «Todas las notas», donde se crean siempre */
+  const nn=()=>{if(k==='*'){tool('new');return}const x=newNote(uniqueTitle('Sin título'),'');save();obSel={type:'note',id:x.id};openNote(x.id,true);setTimeout(()=>{const t=$('ne-title');t.focus();t.select()},80)};
+  ctxSheet(k==='*'?T('Todas las notas'):T('Sin carpeta'),`${n} ${n===1?'archivo':'archivos'}`,[['Nueva nota',MI.newnote,nn],['Nueva carpeta',MI.newfolder,()=>tool('folder','')],['Nuevo lienzo',MI.canvas,()=>newCanvas('')],['Nueva base',MI.base,()=>newBase('')],
+    ['sep'],['Cambiar orden',MIC('<path d="M3 6h10M3 12h7M3 18h4"/><path d="M17 4v16M14 17l3 3 3-3"/>'),()=>tool('sort')],['Buscar en las notas',MI.findin,()=>runSearchFor('')]])}
 function attCtx(a){const g=gitTag('a',a.id),isB=S.bookmarks.some(b=>b.type==='file'&&b.ref===a.id);
   const A=[
     ['Abrir en pestaña nueva',MI.tab,()=>openAtt(a.id)],
@@ -6790,7 +6816,7 @@ async function ghPeek(L){const ref=await ghApi(`/repos/${L.repo}/git/ref/heads/$
 async function remoteTree(L){return (await ghHead(L)).rem}
 async function localMap(){const m={};for(const f of localFiles()){if(gitSkipRef(f.ref,f.kind==='n'))continue;m[f.path]={sha:await fileSha(f),f}}return m}
 let ghBusy=false;
-async function ghSync(L,mode,cmsg){if(ghBusy){ghPrint('Ya hay una sincronización en marcha…','dim');return}ghBusy=true;try{
+async function ghSync(L,mode,cmsg){if(ghBusy){ghPrint('Ya hay una sincronización en marcha…','dim');return}ghBusy=true;syncBtn();try{
   ghPrint(mode==='push'?'Leyendo el repositorio…':'Descargando cambios…','dim');
   let H=await ghHead(L);const base=L.base||{};
   const remoteChanged=Object.keys({...H.rem,...base}).some(p=>H.rem[p]!==base[p]);
@@ -6810,7 +6836,12 @@ async function ghSync(L,mode,cmsg){if(ghBusy){ghPrint('Ya hay una sincronizació
   await ghApi(`/repos/${L.repo}/git/refs/heads/${ghPath(L.branch||'main')}`,{method:'PATCH',body:{sha:cm.sha}});
   const nrem={...H.rem};entries.forEach(e=>{if(e.sha)nrem[e.path]=e.sha;else delete nrem[e.path]});L.base=nrem;L.at=Date.now();save();
   ghPrint(`✔ Push: 1 commit (${cm.sha.slice(0,7)}) · ${up} subidos${del?', '+del+' borrados':''}.`,'ok');toast('GitHub: '+[up?up+' subidos':'',del?del+' borrados':''].filter(Boolean).join(', '))
-}catch(e){ghErr(e)}finally{ghBusy=false;scmSoon(0)}}
+}catch(e){ghErr(e)}finally{ghBusy=false;syncBtn();scmSoon(0)}}
+/* Botón de sincronizar de Notas: sin GitHub vinculado lleva a conectarlo; con él, baja lo nuevo y sube lo tuyo */
+function syncBtn(){const L=ghLink(),on=!!(S.gh&&S.gh.token&&L),t=on?'Sincronizar con GitHub · '+L.repo:'Sincronizar entre dispositivos: conecta GitHub';
+  ['ob-sync','vn-sync'].forEach(i=>{const b=$(i);if(!b)return;b.classList.toggle('spin',ghBusy);b.classList.toggle('off',!on);b.title=t;b.setAttribute('aria-label',t)})}
+$('ob-sync').onclick=$('vn-sync').onclick=async()=>{const L=ghLink();if(!S.gh.token||!L){S.obPanel='git';save();$('ob-list').innerHTML='';renderNotes();toast('Conecta GitHub para sincronizar tus dispositivos');return}
+  if(ghBusy){toast('GitHub: ya hay una sincronización en marcha');return}if(curNote&&neEdit)saveNote();await scmDo('sync');toast(SCM.err?'GitHub: '+SCM.err.replace(/<[^>]+>/g,''):'✔ Sincronizado con GitHub')};
 /* Fusión de 3 vías: base = último estado sincronizado */
 async function ghMerge(L,rem,base){const loc=await localMap();let down=0,gone=0,conf=0;
   for(const [p,sha] of Object.entries(rem)){const l=loc[p];if(l&&l.sha===sha)continue;
@@ -6859,7 +6890,7 @@ function scmBadge(){/* Con el complemento Git apagado no se ve nada de Git: ni l
   const vm=$('vn-menu');if(vm){if(n||i)vm.dataset.scm=n?(n>99?'99+':n):'↓'+(i>99?'99+':i);else delete vm.dataset.scm}}
 function scmSoon(ms){clearTimeout(SCM.t);SCM.t=setTimeout(async()=>{await scmScan();scmBadge();if($('scm-box'))scmPaint()},ms==null?600:ms)}
 /* Al escribir en una nota no se repinta la lista: se vuelve a mirar qué ha cambiado poco después de guardar */
-['ne-text','ne-title'].forEach(id=>$(id)&&$(id).addEventListener('input',()=>{if(S.gh&&S.gh.token&&ghLink())scmSoon(1500)}));
+['ne-text','ne-title'].forEach(id=>$(id)&&$(id).addEventListener('input',()=>{if(S.gh&&S.gh.token&&ghLink()){scmSoon(1500);clearTimeout(window._typT);window._typT=setTimeout(()=>autoSync('idle'),6000)}}));
 /* «sincronizado hace …» avanza solo mientras el panel está abierto */
 setInterval(()=>{const w=$('scm-when'),L=ghLink();if(w&&L&&L.at&&!ghBusy&&!SCM.fetching&&!document.hidden)w.textContent=`⎇ ${L.branch||'main'} · sincronizado ${scmWhen(L.at)}`},30000);
 async function scmFetch(quiet){const L=ghLink();if(!L||!S.gh.token||SCM.fetching)return;SCM.fetching=true;scmPaint();
@@ -7478,7 +7509,7 @@ const PAGES={
   templates:{t:'Plantillas',items:[{k:'tpl.folder',type:'text',t:'Carpeta de plantillas',d:'Las notas de esta carpeta aparecen al insertar una plantilla.',ph:'Plantillas'},{k:'tpl.dateFmt',type:'text',t:'Formato de fecha',d:'Para {{date}}.',ph:'YYYY-MM-DD',preview:v=>fmtDate(new Date(),v||'YYYY-MM-DD')},{k:'tpl.timeFmt',type:'text',t:'Formato de hora',d:'Para {{time}}.',ph:'HH:mm',preview:v=>fmtDate(new Date(),v||'HH:mm')},{type:'button',t:'Crear carpeta de plantillas con un ejemplo',run:()=>{const f=S.ob.tpl.folder||'Plantillas';if(!S.folders.includes(f))S.folders.push(f);newNote(uniqueTitle('Reunión'),f,'# {{title}}\n\nFecha: {{date}} · {{time}}\n\n## Asistentes\n- \n\n## Acuerdos\n- [ ] \n');save();renderNotes();toast('Plantilla creada en '+f)}}]},
   recovery:{t:'Recuperación de archivos',items:[{k:'rec.mins',type:'select',t:'Intervalo de instantáneas',d:'Cada cuánto se guarda una versión mientras escribes.',opts:[[1,'1 minuto'],[5,'5 minutos'],[15,'15 minutos'],[60,'1 hora']]},{k:'rec.days',type:'select',t:'Duración del historial',opts:[[1,'1 día'],[7,'7 días'],[30,'30 días']]},{type:'button',t:'Abrir la papelera',run:()=>showTrash()},{type:'button',t:'Borrar todo el historial',run:()=>obConfirm('¿Borrar todas las versiones guardadas?','Borrar',()=>{S.snaps={};save();toast('Historial borrado')})}]},
   switcher:{t:'Selector rápido',items:[{type:'info',html:'<p>Toca la lupa de la barra inferior de una nota o pulsa Ctrl+O. Escribe parte del nombre; si no existe, crea la nota al pulsar Intro.</p>'}]},
-  sync:{t:'Sync (GitHub)',items:[{k:'sync.auto',type:'select',t:'Sincronización automática',d:'Con la bóveda vinculada a GitHub, sube tus cambios y baja los de tus otros dispositivos sin que hagas nada.',opts:[['both','Al salir de la nota y de la app'],['note','Al salir de una nota'],['app','Al salir y volver a la app'],['off','Solo manual']]},{k:'sync.pullOnOpen',type:'toggle',t:'Bajar cambios al abrir Notas',d:'Hace git pull automáticamente.'},{k:'sync.pushOnClose',type:'toggle',t:'Subir cambios al cerrar una nota',d:'Hace git push automáticamente.'},{type:'button',t:'Abrir terminal de GitHub',run:()=>openGh()}]},
+  sync:{t:'Sync (GitHub)',items:[{k:'sync.auto',type:'select',t:'Sincronización automática',d:'Con la bóveda vinculada a GitHub, sube tus cambios y baja los de tus otros dispositivos sin que hagas nada.',opts:[['both','Al dejar de escribir y al salir de la nota o de la app'],['note','Al dejar de escribir y al salir de una nota'],['app','Al salir y volver a la app'],['off','Solo manual']]},{k:'sync.pullOnOpen',type:'toggle',t:'Bajar cambios al abrir Notas',d:'Hace git pull automáticamente.'},{k:'sync.pushOnClose',type:'toggle',t:'Subir cambios al cerrar una nota',d:'Hace git push automáticamente.'},{type:'button',t:'Abrir terminal de GitHub',run:()=>openGh()}]},
   preview:{t:'Vista previa',items:[{type:'info',html:'<p>En modo lectura, mantén pulsado un enlace [[a otra nota]] para ver su contenido en una ventana flotante.</p>'}]},
   calendar:{t:'Calendario y notas',items:[{k:'cal.tasks',type:'toggle',t:'Tareas de las notas en el calendario',d:'Escribe «- [ ] Comprar 📅 2026-11-03 ⏰ 18:00». Al marcarla en la Agenda se marca en la nota.'},{k:'cal.agenda',type:'toggle',t:'Bloque de agenda',d:'Un bloque ```agenda``` muestra en la nota los eventos, tareas y actividad de su fecha.'},{k:'cal.eventNotes',type:'toggle',t:'Notas en los eventos',d:'Vincula o crea una nota desde cada evento; la nota muestra sus eventos.'}]},
   timer:{t:'Timer y notas',items:[{k:'timer.mins',type:'range',t:'Duración del enfoque',d:'Minutos de cada sesión iniciada desde una nota.',min:5,max:90,step:5},{k:'timer.appendLog',type:'toggle',t:'Anotar la sesión en la nota',d:'Al terminar añade «⏱ 25 min de enfoque» al final de la nota.'}]},
@@ -8254,24 +8285,32 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     const SPR=new Map();const sprite=c=>{let k=SPR.get(c);if(k)return k;const s=document.createElement('canvas');s.width=s.height=32;const g=s.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);
       const m=/^#(..)(..)(..)$/.exec(c),hal=m?`rgba(${parseInt(m[1],16)},${parseInt(m[2],16)},${parseInt(m[3],16)},.35)`:c;
       r.addColorStop(0,'#fff');r.addColorStop(.16,'#fff');r.addColorStop(.26,c);r.addColorStop(.42,hal);r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,32,32);SPR.set(c,s);return s};
+    /* Las barras van delante del contenido: lo que suelta el contenido pasa por detrás de ellas y lo que suelta una barra se queda dentro de ella */
+    const BARS='.nav,.tabs.lg-host,#bk-week.lg-host,.bk-headwrap',barOf=el=>el&&el.closest?el.closest(BARS):null,RAD=new WeakMap();
+    const shape=(x,k)=>{const r=x.r,h=r.height+2*k,w=r.width+2*k;let rd=RAD.get(x.b);if(rd==null){rd=parseFloat(getComputedStyle(x.b).borderTopLeftRadius)||0;RAD.set(x.b,rd)}rd=Math.min(h/2,w/2,rd+k);
+      if(cx.roundRect&&rd)cx.roundRect(r.left-k,r.top-k,w,h,rd);else cx.rect(r.left-k,r.top-k,w,h)};
+    const draw=p=>{const a=Math.min(1,p.life/p.max*1.6),d=p.r*(2.2+a*1.6);cx.globalAlpha=Math.min(1,a*1.25);cx.drawImage(sprite(p.c),p.x-d,p.y-d,d*2,d*2)};
     function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;cx.clearRect(0,0,W,H);cx.globalCompositeOperation='lighter';
-      ps=ps.filter(p=>{p.life-=dt;if(p.life<=0)return false;p.ph+=dt*p.w;p.vx+=Math.cos(p.ph)*p.wob*dt;p.vy+=Math.sin(p.ph*1.3)*p.wob*dt;p.vx*=Math.exp(-p.drag*dt);p.vy*=Math.exp(-p.drag*dt);p.x+=p.vx*dt;p.y+=p.vy*dt;const a=Math.min(1,p.life/p.max*1.6);
-        const d=p.r*(2.2+a*1.6);cx.globalAlpha=Math.min(1,a*1.25);cx.drawImage(sprite(p.c),p.x-d,p.y-d,d*2,d*2);return true});
+      ps=ps.filter(p=>{p.life-=dt;if(p.life<=0)return false;p.ph+=dt*p.w;p.vx+=Math.cos(p.ph)*p.wob*dt;p.vy+=Math.sin(p.ph*1.3)*p.wob*dt;p.vx*=Math.exp(-p.drag*dt);p.vy*=Math.exp(-p.drag*dt);p.x+=p.vx*dt;p.y+=p.vy*dt;return true});
+      const bs=[...document.querySelectorAll(BARS)].map(b=>({b,r:b.getBoundingClientRect()})).filter(x=>x.r.width&&x.r.height&&x.r.bottom>0&&x.r.top<H);
+      ps.forEach(p=>{if(!p.bar)draw(p)});if(bs.length){cx.globalCompositeOperation='destination-out';cx.globalAlpha=1;cx.beginPath();bs.forEach(x=>shape(x,0));cx.fill();cx.globalCompositeOperation='lighter'}
+      bs.forEach(x=>{const own=ps.filter(p=>p.bar===x.b);if(!own.length)return;cx.save();cx.beginPath();shape(x,4);cx.clip();own.forEach(draw);cx.restore()});
       cx.globalAlpha=1;if(ps.length)raf=requestAnimationFrame(tick);else{raf=0;cx.clearRect(0,0,W,H)}}
     /* n motas en (x,y) con color c; vx/vy base, apertura y gravedad (negativa: suben) */
     window.lgDust=(x,y,c,n,o={})=>{if(RM.matches||document.hidden)return;for(let i=0;i<n&&ps.length<90;i++){const a=(o.a||0)+(Math.random()-.5)*(o.spread||Math.PI*2),sp=(o.sp==null?60:o.sp)*(.4+Math.random()*.9);
-        ps.push({x:x+(Math.random()-.5)*(o.w||6),y:y+(Math.random()-.5)*(o.h||6),vx:Math.cos(a)*sp+(o.vx||0),vy:Math.sin(a)*sp+(o.vy||0),ph:Math.random()*6.3,w:2+Math.random()*3,wob:o.wob==null?60:o.wob,drag:o.drag||1.1,r:(o.r||1.6)*(.6+Math.random()*.8),c:c||'#c6c4f4',life:0,max:0})}
+        ps.push({x:x+(Math.random()-.5)*(o.w||6),y:y+(Math.random()-.5)*(o.h||6),vx:Math.cos(a)*sp+(o.vx||0),vy:Math.sin(a)*sp+(o.vy||0),ph:Math.random()*6.3,w:2+Math.random()*3,wob:o.wob==null?60:o.wob,drag:o.drag||1.1,r:(o.r||1.6)*(.6+Math.random()*.8),c:c||'#c6c4f4',bar:o.bar||null,life:0,max:0})}
       ps.slice(-n).forEach(p=>{p.max=p.life=(o.life||.9)*(.6+Math.random()*.8)});if(!raf){last=performance.now();raf=requestAnimationFrame(tick)}};
+    window.lgBarOf=barOf;
     /* Al pulsar: chispas desde el punto de contacto, del color del control */
-    document.addEventListener('pointerdown',e=>{if(e.button>0)return;const el=e.target.closest&&e.target.closest(LG_PRESS+',.nav-in button,.nav-set,.tab,#bk-week button');if(!el)return;window.lgDust(e.clientX,e.clientY,el.closest('.nav')?'#ffffff':colorOf(el),7,{sp:70,r:1.4,life:1.1})},{passive:true});
+    document.addEventListener('pointerdown',e=>{if(e.button>0)return;const el=e.target.closest&&e.target.closest(LG_PRESS+',.nav-in button,.nav-set,.tab,#bk-week button');if(!el)return;window.lgDust(e.clientX,e.clientY,el.closest('.nav')?'#ffffff':colorOf(el),7,{sp:70,r:1.4,life:1.1,bar:barOf(el)})},{passive:true});
     /* El rayo de la hora suelta motas que suben por la estela */
     setInterval(()=>{const n=document.querySelector('.bk-now');if(!n||!n.offsetParent||document.hidden)return;const r=n.getBoundingClientRect();if(r.top<0||r.top>H)return;const x=r.left+Math.random()*Math.min(r.width,W-r.left);window.lgDust(x,r.top,'#ff8a90',1,{a:-Math.PI/2,spread:.9,sp:18,vx:-10,r:1.2,life:2.4,drag:.5,wob:40})},260);}
   /* Las lentes sueltan motas al correr, cuanto más rápido más. La esfera las suelta desde su borde, girando con ella como si rodara */
   const DUSTC=['#ffffff','#cfe8ff','#ffd9f4','#fff3bf'];
   window.lgLensDust=(L,vx,vy,sph)=>{const sp=Math.hypot(vx,vy);if(sp<(sph?120:260)||!window.lgDust)return;const r=L.getBoundingClientRect();
     if(sph){const a=Math.random()*Math.PI*2,R=r.width/2,s=(Math.abs(vx)>=Math.abs(vy)?Math.sign(vx):Math.sign(vy))||1,t=Math.min(160,sp*.22);
-      window.lgDust(r.left+R+Math.cos(a)*R,r.top+r.height/2+Math.sin(a)*R,DUSTC[Math.floor(Math.random()*DUSTC.length)],sp>700?2:1,{a:0,spread:.01,sp:0,vx:-Math.sin(a)*t*s+vx*.15,vy:Math.cos(a)*t*s+vy*.15,r:1.6,life:1.1,w:2,h:2,wob:16});return}
-    const c=getComputedStyle(L).backgroundColor;window.lgDust(vx>0?r.left:r.right,r.top+r.height/2,c,sp>900?2:1,{a:Math.atan2(-vy,-vx),spread:1.2,sp:sp*.25,r:1.3,life:1.2,h:r.height*.8})};
+      window.lgDust(r.left+R+Math.cos(a)*R,r.top+r.height/2+Math.sin(a)*R,DUSTC[Math.floor(Math.random()*DUSTC.length)],sp>700?2:1,{a:0,spread:.01,sp:0,vx:-Math.sin(a)*t*s+vx*.15,vy:Math.cos(a)*t*s+vy*.15,r:1.6,life:1.1,w:2,h:2,wob:16,bar:window.lgBarOf(L)});return}
+    const c=getComputedStyle(L).backgroundColor;window.lgDust(vx>0?r.left:r.right,r.top+r.height/2,c,sp>900?2:1,{a:Math.atan2(-vy,-vx),spread:1.2,sp:sp*.25,r:1.3,life:1.2,h:r.height*.8,bar:window.lgBarOf(L)})};
   /* ---------- Agujero negro: al pulsar, la luz de lo que hay detrás se curva alrededor del control ----------
      Un velo con backdrop-filter y un mapa de desplazamiento: junto al borde se ve la luz de puntos más alejados, que además gira
      como un disco de acreción. La forma es la del control (redondo, cuadrado o píldora). Debajo va un halo de luz blanca con arcoíris
@@ -8295,7 +8334,7 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     window.lgHole=(w,h,rad,R,sph)=>{if(RM.matches)return null;const id='lgh'+(++uid),bg=document.documentElement.classList.contains('has-bg');
       const glow=document.createElement('i'),veil=document.createElement('i'),ring=document.createElement('i');glow.className='lg-hglow';veil.className='lg-hole';ring.className='lg-hring';
       [glow,veil,ring].forEach(e=>{e.setAttribute('aria-hidden','true');document.body.appendChild(e)});
-      let f=null,dm=null,M=null,cx=0,cy=0,sx=1,sy=1,raf=0,last=0,t0=performance.now(),dead=false,ck='',scl=0,trk=null;const st={v:0,vv:0,t:0};
+      let f=null,dm=null,M=null,cx=0,cy=0,sx=1,sy=1,raf=0,last=0,t0=performance.now(),dead=false,ck='',scl=0,trk=null,trkQ=null;const st={v:0,vv:0,t:0};
       const clr=()=>{const E=Math.max(w,h)/2+R+6,q=v=>Math.min(Math.ceil(E/6)*6,Math.max(0,Math.floor(v/6)*6));return [q(cy),q(innerWidth-cx),q(innerHeight-cy),q(cx)].join(',')};
       const shape=(W2,H2,r2,R2,s2)=>{w=W2;h=H2;rad=Math.min(r2,w/2,h/2);if(R2)R=R2;sph=!!s2;ring.classList.toggle('sph',sph);glow.classList.toggle('sph',sph);[glow,ring].forEach(e=>{e.style.width=w+'px';e.style.height=h+'px';e.style.setProperty('--hr',rad+'px');e.style.setProperty('--hR',R+'px');e.style.setProperty('--hw',w+'px')});
         if(cx||cy)remap()};
@@ -8311,20 +8350,28 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
         const v=Math.min(1.25,st.v);if(dm)dm.setAttribute('scale',scl=(Math.min(1.05,v)*R*2).toFixed(1));glow.style.opacity=(Math.min(1,v)*(bg?.8:1)).toFixed(3);ring.style.opacity=Math.min(1,v*1.3).toFixed(3);
         const ha=((now-t0)*.24%360).toFixed(1)+'deg';glow.style.setProperty('--ha',ha);ring.style.setProperty('--ha',ha);
         /* Pegado a su control: si el gel lo mueve o lo agranda, o la lista se desplaza, la burbuja lo sigue rodeando */
+        /* Si la lista o la barra se vuelve a pintar, el control es otro elemento igual: se busca para seguir rodeándolo; si ya no está, se apaga */
+        if(trk&&!trk.isConnected){const n=trkQ&&document.querySelector(trkQ);trk=n&&n.offsetWidth?n:null;if(!trk)st.t=0}
         if(trk&&trk.isConnected){const r=trk.getBoundingClientRect();if(r.width){cx=r.left+r.width/2;cy=r.top+r.height/2;sx=r.width/w;sy=r.height/h;if(M&&clr()!==ck)remap()}}put();
         if(!st.t&&st.v<.01&&Math.abs(st.vv)<.05){kill();return}raf=requestAnimationFrame(tick)};
       shape(w,h,rad,R,sph);
       return {at(x,y,a=1,b=1){cx=x;cy=y;sx=a;sy=b;if(!M||clr()!==ck)remap();put();return this},str(t){st.t=t;if(!raf&&!dead){last=performance.now();raf=requestAnimationFrame(tick)}return this},
         /* La esfera cambia de tamaño al crecer: se rehace con poco margen para que el anillo tape la costura del velo */
         resize(W2,H2,r2,R2,s2){const g=sph||s2?2:8;if(Math.abs(W2-w)>g||Math.abs(H2-h)>g||!!s2!==sph||(R2&&Math.abs(R2-R)>2))shape(W2,H2,r2,R2,s2);return this},
-        rot(a){ring.style.setProperty('--hrot',a+'deg');return this},track(el){trk=el;return this},kill}};
+        rot(a){ring.style.setProperty('--hrot',a+'deg');return this},track(el){trk=el;trkQ=holeSel(el);return this},kill}};
+    /* Selector para volver a encontrar un control repintado: su id o su primer data-*, dentro del contenedor con id más cercano */
+    const holeSel=el=>{const a=[...el.attributes].find(x=>x.name.startsWith('data-')&&x.value&&x.value.length<80),own=el.id?'#'+CSS.escape(el.id):a?`${el.tagName.toLowerCase()}[${a.name}="${CSS.escape(a.value)}"]`:null,box=el.parentElement&&el.parentElement.closest('[id]');
+      return !own?null:el.id||!box?own:'#'+CSS.escape(box.id)+' '+own};
     /* En cada pulsación: los controles pequeños curvan la luz con su propia forma; en el resto, un agujero pequeño donde está el dedo */
     const HOLE_SKIP='input,textarea,select,[contenteditable="true"],canvas,.lg-host,body:not(.desk) .nav-set,.tp-dial,.ne-text,#ne-text,.cm-editor';
     let hp=null;const hpEnd=()=>{if(!hp)return;clearTimeout(hp.tm);if(hp.H)hp.H.str(0);hp=null};
     document.addEventListener('pointerdown',e=>{hpEnd();if(RM.matches||(e.pointerType==='mouse'&&e.button>2)||!e.target.closest)return;if(e.target.closest(HOLE_SKIP))return;
       const el=e.target.closest(LG_PRESS+',button,[role=button],a,.chip,.mchip,.bk-b,.wk-ev'),r=el&&el.getBoundingClientRect();
-      if(el&&r.width&&r.width<=240&&r.height<=130){const rad=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0,R=Math.max(16,Math.min(40,Math.min(r.width,r.height)*.3+10));
-        const H=window.lgHole(r.width,r.height,rad,R);if(H)hp={H:H.at(r.left+r.width/2,r.top+r.height/2).track(el).str(1),x:e.clientX,y:e.clientY,id:e.pointerId,el};return}
+      /* Los controles, también los anchos (filas, botones de toda la anchura), curvan la luz con su forma y centrados en ellos */
+      if(el&&r.width&&r.width<=720&&r.height<=130){const mk=()=>{const q=el.getBoundingClientRect();if(!q.width)return null;const rad=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0,R=Math.max(16,Math.min(40,Math.min(q.width,q.height)*.3+10)),H=window.lgHole(q.width,q.height,rad,R);return H&&H.at(q.left+q.width/2,q.top+q.height/2).track(el).str(1)};
+        const x=e.clientX,y=e.clientY;if(r.width<=240){const H=mk();if(H)hp={H,x,y,id:e.pointerId,el};return}
+        /* Los anchos esperan un instante, como las superficies: si el dedo se pone a desplazar la lista, no aparece */
+        hp={x,y,id:e.pointerId,el,tm:setTimeout(()=>{if(!hp||hp.H)return;hp.H=mk();if(!hp.H)hp=null},70)};return}
       /* En superficies grandes espera un instante: si el dedo se pone a desplazar, no aparece */
       const x=e.clientX,y=e.clientY;hp={x,y,id:e.pointerId,tm:setTimeout(()=>{if(!hp||hp.H)return;hp.H=window.lgHole(30,30,15,44);if(hp.H)hp.H.at(hp.x,hp.y).str(1)},70)}},true);
     /* Si el dedo arrastra lo pulsado (una tarjeta, un bloque, una fila), la burbuja deja el sitio donde se pulsó y va con el dedo */
