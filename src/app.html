@@ -2229,8 +2229,8 @@ body:not(.desk) .nav-in>button:not([aria-current="page"]),body:not(.desk) .nav-s
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.4),inset 5px 0 7px -4px rgba(255,80,190,.7),inset -5px 0 7px -4px rgba(70,200,255,.75),0 12px 26px rgba(0,0,0,.3)!important;backdrop-filter:blur(1px) saturate(180%) brightness(1.12)!important;-webkit-backdrop-filter:blur(1px) saturate(180%) brightness(1.12)!important}
 .lg-refr:not(.lg-lite) .lg-lens.sph{background:transparent!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 .lg-refr:not(.lg-lite) .lg-lens.sph::before,.lg-refr:not(.lg-lite) .lg-lens.sph::after{display:none}
-/* Al mantener pulsado para sacar la esfera, Android no debe seleccionar el texto de las pestañas ni de los días */
-.nav,.bk-week{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+/* Al mantener pulsado un botón (o la barra para sacar la esfera), Android no debe seleccionar su texto */
+button,[role=button],.nav,.bk-week{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 /* Días de Bloques igual que la barra: una cápsula de cristal con los días planos */
 .bk-week.lg-host{gap:0;padding:4px;border-radius:26px;background:linear-gradient(180deg,color-mix(in srgb,var(--surface-2) 42%,transparent),color-mix(in srgb,var(--surface-2) 30%,transparent));border:1px solid color-mix(in srgb,#fff 12%,transparent);
   backdrop-filter:var(--lg-ref,) blur(10px) saturate(185%);-webkit-backdrop-filter:blur(10px) saturate(185%);box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 16%,transparent),0 6px 18px rgba(0,0,0,.22)}
@@ -4814,7 +4814,11 @@ function lgStamp(x,y){const ok=bkDrag?bkStamp(x,y):drag?obStamp():tmDrag?tmStamp
 {let rb=false,t0=0,px=0,py=0;const act=()=>!!(bkDrag||drag||tmDrag||LG_SORT);
   document.addEventListener('pointermove',e=>{if(e.isPrimary){px=e.clientX;py=e.clientY}if(e.pointerType!=='mouse')return;const r=!!(e.buttons&2);if(r&&!rb&&(e.buttons&1)&&act()){t0=Date.now();lgStamp(e.clientX,e.clientY)}rb=r},true);
   document.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!e.isPrimary&&act()){e.stopImmediatePropagation();t0=Date.now();lgStamp(px,py)}},true);
-  document.addEventListener('contextmenu',e=>{if(act()||Date.now()-t0<900){e.preventDefault();e.stopImmediatePropagation()}},true)}
+  /* Con ratón solo cuenta como arrastre si el botón izquierdo sigue pulsado: un arrastre que se quedó a medias no debe dejar sin menú todo el clic derecho */
+  document.addEventListener('contextmenu',e=>{if((act()&&(e.pointerType!=='mouse'||e.buttons&1))||Date.now()-t0<900){e.preventDefault();e.stopImmediatePropagation();return}
+    /* Con un menú abierto, el clic derecho cae en su fondo: se cierra y se abre el menú de lo que hay debajo, como en el escritorio */
+    const b=e.target;if(!e.isTrusted||!b.classList||!b.classList.contains('sheet-back'))return;e.preventDefault();e.stopImmediatePropagation();b.hidden=true;
+    const t=document.elementFromPoint(e.clientX,e.clientY);if(t&&t!==b&&!t.closest('.sheet-back'))t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:e.clientX,clientY:e.clientY,button:2,buttons:e.buttons}))},true)}
 /* Hacer hueco como en iPhone: mientras arrastras, los demás elementos de la lista se apartan con un muelle */
 function roomMake(el,items,sc,unit){items=items.filter(x=>x.offsetParent!==null);const i0=items.indexOf(el);if(i0<0||items.length<2)return null;const s0=sc?sc.scrollTop:0;unit=unit||(x=>[x]);
   const U=items.map(unit),R=U.map(us=>{const rs=us.map(u=>u.getBoundingClientRect()),t=Math.min(...rs.map(r=>r.top)),b=Math.max(...rs.map(r=>r.bottom));return {top:t+s0,h:b-t,l:rs[0].left,w:rs[0].width}});
@@ -8091,7 +8095,7 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     function step(now){raf=0;if(!on()||!aim()){L.style.opacity='0';/* Oculta, su agujero no puede quedarse sobre la vista siguiente; al volver a verse se coloca sin viajar */
         if(hole){on()?hole.str(0):hole.kill();hole=null}if(!on())init=false;return}L.style.opacity='';
       if(!init||RM.matches){o.x=tx;o.y=ty;o.w=tw;o.h=th;init=true;o.vx=o.vy=o.vw=o.vh=0;paint(1,1);last=now;if(hole&&!lift){hole.str(0);hole=null}if(!dg&&Date.now()>until)return;raf=requestAnimationFrame(step);return}
-      const dt=Math.min(.05,Math.max(.001,(now-last)/1000));last=now;const R=dg?.2:.42,D=dg?.74:.68;spStep(o,'x',tx,R,D,dt);spStep(o,'y',ty,R,D,dt);spStep(o,'w',tw,R,.85,dt);spStep(o,'h',th,R,.85,dt);
+      const dt=Math.min(.05,Math.max(.001,(now-last)/1000));last=now;const R=dg?(dg.moved?.06:.2):.42,D=dg?(dg.moved?1:.74):.68;spStep(o,'x',tx,R,D,dt);spStep(o,'y',ty,R,D,dt);spStep(o,'w',tw,R,.85,dt);spStep(o,'h',th,R,.85,dt);
       /* Se estira en la dirección en que corre y al pulsarla crece como una gota */
       /* Como en iOS 26: mientras viaja de una pestaña a otra se levanta como una gota (más grande y con refracción) y al llegar se posa.
          Arrastrada con el dedo crece todavía más y aumenta lo que tiene debajo */
@@ -8216,10 +8220,13 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     const size=()=>{const d=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)};size();addEventListener('resize',size);
     const colorOf=el=>{const c=getComputedStyle(el||document.body).getPropertyValue('--container').trim()||'#c6c4f4';cx.fillStyle=c;return cx.fillStyle};
     /* Cada color tiene su sprite: un disco difuso dibujado una vez, sin sombras por fotograma */
-    const SPR=new Map();const sprite=c=>{let k=SPR.get(c);if(k)return k;const s=document.createElement('canvas');s.width=s.height=32;const g=s.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);r.addColorStop(0,'#fff');r.addColorStop(.25,c);r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,32,32);SPR.set(c,s);return s};
-    function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;cx.clearRect(0,0,W,H);
+    /* Núcleo blanco nítido, anillo del color y un halo corto: se ven como chispas definidas y no como manchas */
+    const SPR=new Map();const sprite=c=>{let k=SPR.get(c);if(k)return k;const s=document.createElement('canvas');s.width=s.height=32;const g=s.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);
+      const m=/^#(..)(..)(..)$/.exec(c),hal=m?`rgba(${parseInt(m[1],16)},${parseInt(m[2],16)},${parseInt(m[3],16)},.35)`:c;
+      r.addColorStop(0,'#fff');r.addColorStop(.16,'#fff');r.addColorStop(.26,c);r.addColorStop(.42,hal);r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,32,32);SPR.set(c,s);return s};
+    function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;cx.clearRect(0,0,W,H);cx.globalCompositeOperation='lighter';
       ps=ps.filter(p=>{p.life-=dt;if(p.life<=0)return false;p.ph+=dt*p.w;p.vx+=Math.cos(p.ph)*p.wob*dt;p.vy+=Math.sin(p.ph*1.3)*p.wob*dt;p.vx*=Math.exp(-p.drag*dt);p.vy*=Math.exp(-p.drag*dt);p.x+=p.vx*dt;p.y+=p.vy*dt;const a=Math.min(1,p.life/p.max*1.6);
-        const d=p.r*(2.6+a*2);cx.globalAlpha=a;cx.drawImage(sprite(p.c),p.x-d,p.y-d,d*2,d*2);return true});
+        const d=p.r*(2.2+a*1.6);cx.globalAlpha=Math.min(1,a*1.25);cx.drawImage(sprite(p.c),p.x-d,p.y-d,d*2,d*2);return true});
       cx.globalAlpha=1;if(ps.length)raf=requestAnimationFrame(tick);else{raf=0;cx.clearRect(0,0,W,H)}}
     /* n motas en (x,y) con color c; vx/vy base, apertura y gravedad (negativa: suben) */
     window.lgDust=(x,y,c,n,o={})=>{if(RM.matches||document.hidden)return;for(let i=0;i<n&&ps.length<90;i++){const a=(o.a||0)+(Math.random()-.5)*(o.spread||Math.PI*2),sp=(o.sp==null?60:o.sp)*(.4+Math.random()*.9);
@@ -8230,9 +8237,10 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     /* El rayo de la hora suelta motas que suben por la estela */
     setInterval(()=>{const n=document.querySelector('.bk-now');if(!n||!n.offsetParent||document.hidden)return;const r=n.getBoundingClientRect();if(r.top<0||r.top>H)return;const x=r.left+Math.random()*Math.min(r.width,W-r.left);window.lgDust(x,r.top,'#ff8a90',1,{a:-Math.PI/2,spread:.9,sp:18,vx:-10,r:1.2,life:2.4,drag:.5,wob:40})},260);}
   /* Las lentes sueltan motas al correr, cuanto más rápido más. La esfera las suelta desde su borde, girando con ella como si rodara */
+  const DUSTC=['#ffffff','#cfe8ff','#ffd9f4','#fff3bf'];
   window.lgLensDust=(L,vx,vy,sph)=>{const sp=Math.hypot(vx,vy);if(sp<(sph?120:260)||!window.lgDust)return;const r=L.getBoundingClientRect();
     if(sph){const a=Math.random()*Math.PI*2,R=r.width/2,s=(Math.abs(vx)>=Math.abs(vy)?Math.sign(vx):Math.sign(vy))||1,t=Math.min(160,sp*.22);
-      window.lgDust(r.left+R+Math.cos(a)*R,r.top+r.height/2+Math.sin(a)*R,'#ffffff',sp>700?2:1,{a:0,spread:.01,sp:0,vx:-Math.sin(a)*t*s+vx*.15,vy:Math.cos(a)*t*s+vy*.15,r:1.2,life:.9,w:2,h:2,wob:20});return}
+      window.lgDust(r.left+R+Math.cos(a)*R,r.top+r.height/2+Math.sin(a)*R,DUSTC[Math.floor(Math.random()*DUSTC.length)],sp>700?2:1,{a:0,spread:.01,sp:0,vx:-Math.sin(a)*t*s+vx*.15,vy:Math.cos(a)*t*s+vy*.15,r:1.6,life:1.1,w:2,h:2,wob:16});return}
     const c=getComputedStyle(L).backgroundColor;window.lgDust(vx>0?r.left:r.right,r.top+r.height/2,c,sp>900?2:1,{a:Math.atan2(-vy,-vx),spread:1.2,sp:sp*.25,r:1.3,life:1.2,h:r.height*.8})};
   /* ---------- Agujero negro: al pulsar, la luz de lo que hay detrás se curva alrededor del control ----------
      Un velo con backdrop-filter y un mapa de desplazamiento: junto al borde se ve la luz de puntos más alejados, que además gira
@@ -8257,7 +8265,7 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     window.lgHole=(w,h,rad,R,sph)=>{if(RM.matches)return null;const id='lgh'+(++uid),bg=document.documentElement.classList.contains('has-bg');
       const glow=document.createElement('i'),veil=document.createElement('i'),ring=document.createElement('i');glow.className='lg-hglow';veil.className='lg-hole';ring.className='lg-hring';
       [glow,veil,ring].forEach(e=>{e.setAttribute('aria-hidden','true');document.body.appendChild(e)});
-      let f=null,dm=null,M=null,cx=0,cy=0,sx=1,sy=1,raf=0,last=0,t0=performance.now(),dead=false,ck='',scl=0;const st={v:0,vv:0,t:0};
+      let f=null,dm=null,M=null,cx=0,cy=0,sx=1,sy=1,raf=0,last=0,t0=performance.now(),dead=false,ck='',scl=0,trk=null;const st={v:0,vv:0,t:0};
       const clr=()=>{const E=Math.max(w,h)/2+R+6,q=v=>Math.min(Math.ceil(E/6)*6,Math.max(0,Math.floor(v/6)*6));return [q(cy),q(innerWidth-cx),q(innerHeight-cy),q(cx)].join(',')};
       const shape=(W2,H2,r2,R2,s2)=>{w=W2;h=H2;rad=Math.min(r2,w/2,h/2);if(R2)R=R2;sph=!!s2;ring.classList.toggle('sph',sph);glow.classList.toggle('sph',sph);[glow,ring].forEach(e=>{e.style.width=w+'px';e.style.height=h+'px';e.style.setProperty('--hr',rad+'px');e.style.setProperty('--hR',R+'px');e.style.setProperty('--hw',w+'px')});
         if(cx||cy)remap()};
@@ -8271,20 +8279,22 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
       const kill=()=>{if(dead)return;dead=true;cancelAnimationFrame(raf);[glow,veil,ring].forEach(e=>e.remove());if(f)f.remove()};
       const tick=now=>{raf=0;if(dead)return;const dt=Math.min(.05,Math.max(.001,(now-last)/1000));last=now;spStep(st,'v',st.t,st.t?.2:.34,st.t?.62:.9,dt);if(st.v<0)st.v=0;
         const v=Math.min(1.25,st.v);if(dm)dm.setAttribute('scale',scl=(Math.min(1.05,v)*R*2).toFixed(1));glow.style.opacity=(Math.min(1,v)*(bg?.8:1)).toFixed(3);ring.style.opacity=Math.min(1,v*1.3).toFixed(3);
-        const ha=((now-t0)*.24%360).toFixed(1)+'deg';glow.style.setProperty('--ha',ha);ring.style.setProperty('--ha',ha);put();
+        const ha=((now-t0)*.24%360).toFixed(1)+'deg';glow.style.setProperty('--ha',ha);ring.style.setProperty('--ha',ha);
+        /* Pegado a su control: si el gel lo mueve o lo agranda, o la lista se desplaza, la burbuja lo sigue rodeando */
+        if(trk&&trk.isConnected){const r=trk.getBoundingClientRect();if(r.width){cx=r.left+r.width/2;cy=r.top+r.height/2;sx=r.width/w;sy=r.height/h;if(M&&clr()!==ck)remap()}}put();
         if(!st.t&&st.v<.01&&Math.abs(st.vv)<.05){kill();return}raf=requestAnimationFrame(tick)};
       shape(w,h,rad,R,sph);
       return {at(x,y,a=1,b=1){cx=x;cy=y;sx=a;sy=b;if(!M||clr()!==ck)remap();put();return this},str(t){st.t=t;if(!raf&&!dead){last=performance.now();raf=requestAnimationFrame(tick)}return this},
         /* La esfera cambia de tamaño al crecer: se rehace con poco margen para que el anillo tape la costura del velo */
         resize(W2,H2,r2,R2,s2){const g=sph||s2?2:8;if(Math.abs(W2-w)>g||Math.abs(H2-h)>g||!!s2!==sph||(R2&&Math.abs(R2-R)>2))shape(W2,H2,r2,R2,s2);return this},
-        rot(a){ring.style.setProperty('--hrot',a+'deg');return this},kill}};
+        rot(a){ring.style.setProperty('--hrot',a+'deg');return this},track(el){trk=el;return this},kill}};
     /* En cada pulsación: los controles pequeños curvan la luz con su propia forma; en el resto, un agujero pequeño donde está el dedo */
     const HOLE_SKIP='input,textarea,select,[contenteditable="true"],canvas,.lg-host,.tp-dial,.ne-text,#ne-text,.cm-editor';
     let hp=null;const hpEnd=()=>{if(!hp)return;clearTimeout(hp.tm);if(hp.H)hp.H.str(0);hp=null};
     document.addEventListener('pointerdown',e=>{hpEnd();if(RM.matches||(e.pointerType==='mouse'&&e.button>2)||!e.target.closest)return;if(e.target.closest(HOLE_SKIP))return;
       const el=e.target.closest(LG_PRESS+',button,[role=button],a,.chip,.mchip,.bk-b,.wk-ev'),r=el&&el.getBoundingClientRect();
       if(el&&r.width&&r.width<=240&&r.height<=130){const rad=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0,R=Math.max(16,Math.min(40,Math.min(r.width,r.height)*.3+10));
-        const H=window.lgHole(r.width,r.height,rad,R);if(H)hp={H:H.at(r.left+r.width/2,r.top+r.height/2).str(1)};return}
+        const H=window.lgHole(r.width,r.height,rad,R);if(H)hp={H:H.at(r.left+r.width/2,r.top+r.height/2).track(el).str(1)};return}
       /* En superficies grandes espera un instante: si el dedo se pone a desplazar, no aparece */
       const x=e.clientX,y=e.clientY;hp={x,y,id:e.pointerId,tm:setTimeout(()=>{if(!hp||hp.H)return;hp.H=window.lgHole(30,30,15,44);if(hp.H)hp.H.at(hp.x,hp.y).str(1)},70)}},true);
     document.addEventListener('pointermove',e=>{if(hp&&!hp.H&&hp.id===e.pointerId&&Math.hypot(e.clientX-hp.x,e.clientY-hp.y)>8){clearTimeout(hp.tm);hp=null}},{passive:true});
