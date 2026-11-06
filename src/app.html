@@ -2172,8 +2172,8 @@ body.desk:not(.desknotes) #noteview{display:none!important}
 /* La lente emite luz: su color baña a los vecinos por el lado que la mira, más cuanto más cerca; al moverse, el halo se estira */
 .lg-lens{background:color-mix(in srgb,var(--container) 82%,#fff);box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 40%,transparent),0 2px 10px color-mix(in srgb,var(--container) 60%,transparent),0 0 calc(14px + var(--lv,0)*28px) color-mix(in srgb,var(--container) calc(70% + var(--lv,0)*30%),transparent)}
 /* La barra inferior: lente de luz blanca */
-.nav-in .lg-lens,.bk-week .lg-lens{background:color-mix(in srgb,#fff 17%,transparent);border-color:rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 1px rgba(255,255,255,.08),0 0 calc(10px + var(--lv,0)*26px) rgba(255,255,255,calc(.1 + var(--lv,0)*.3))}
-.nav-in .lg-lens.lift,.bk-week .lg-lens.lift{background:color-mix(in srgb,#fff 24%,transparent)}
+.nav-in .lg-lens,.bk-week .lg-lens,.tabs .lg-lens{background:color-mix(in srgb,#fff 17%,transparent);border-color:rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 1px rgba(255,255,255,.08),0 0 calc(10px + var(--lv,0)*26px) rgba(255,255,255,calc(.1 + var(--lv,0)*.3))}
+.nav-in .lg-lens.lift,.bk-week .lg-lens.lift,.tabs .lg-lens.lift{background:color-mix(in srgb,#fff 24%,transparent)}
 .nav-in>button{--container:#ffffff}
 body:not(.desk) .nav button[aria-current="page"]{color:#fff}
 body:not(.desk) .nav button[aria-current="page"] .ic{filter:drop-shadow(0 0 6px rgba(255,255,255,.7))}
@@ -2202,8 +2202,8 @@ body:not(.desk) .nav{touch-action:none;overflow:visible}
 /* En la barra lateral (tableta, móvil en horizontal) el dedo arrastra la gota: sin esto el navegador lo toma como desplazamiento y cancela el gesto */
 body.desk .nav-in{touch-action:none}
 /* Tema claro sin foto: la gota blanca no se distinguía de la barra y el nombre elegido, en blanco, no se leía */
-.is-light:not(.has-bg) .nav-in .lg-lens{background:color-mix(in srgb,var(--accent) 15%,rgba(255,255,255,.72));border-color:color-mix(in srgb,var(--accent) 36%,transparent);box-shadow:inset 0 1px 1px #fff,0 3px 12px color-mix(in srgb,var(--accent) 22%,transparent),0 0 calc(8px + var(--lv,0)*20px) color-mix(in srgb,var(--accent) calc(16% + var(--lv,0)*30%),transparent)}
-.is-light:not(.has-bg) .nav-in .lg-lens.lift{background:color-mix(in srgb,var(--accent) 9%,rgba(255,255,255,.45))}
+.is-light:not(.has-bg) .nav-in .lg-lens,.is-light:not(.has-bg) .tabs .lg-lens{background:color-mix(in srgb,var(--accent) 15%,rgba(255,255,255,.72));border-color:color-mix(in srgb,var(--accent) 36%,transparent);box-shadow:inset 0 1px 1px #fff,0 3px 12px color-mix(in srgb,var(--accent) 22%,transparent),0 0 calc(8px + var(--lv,0)*20px) color-mix(in srgb,var(--accent) calc(16% + var(--lv,0)*30%),transparent)}
+.is-light:not(.has-bg) .nav-in .lg-lens.lift,.is-light:not(.has-bg) .tabs .lg-lens.lift{background:color-mix(in srgb,var(--accent) 9%,rgba(255,255,255,.45))}
 .is-light:not(.has-bg) .nav button[aria-current="page"]{color:var(--accent)!important}
 .is-light:not(.has-bg) .nav button[aria-current="page"] .ic{filter:none!important;color:var(--accent)!important}
 /* Tema claro con foto, en la cápsula lateral: más opaca para que los nombres se lean sobre cualquier imagen, y la gota y el nombre elegidos en acento */
@@ -2243,6 +2243,30 @@ body.bkcols .bk-week.lg-host>button.vis:not(.on){background:color-mix(in srgb,va
 .is-light:not(.has-bg) .bk-week.lg-host{background:color-mix(in srgb,var(--surface-2) 80%,transparent);border-color:color-mix(in srgb,#000 7%,transparent)}
 .is-light:not(.has-bg) .bk-week .lg-lens{background:color-mix(in srgb,var(--accent) 15%,rgba(255,255,255,.72));border-color:color-mix(in srgb,var(--accent) 36%,transparent);box-shadow:inset 0 1px 1px #fff,0 3px 12px color-mix(in srgb,var(--accent) 22%,transparent)}
 .is-light:not(.has-bg) .bk-week.lg-host button.on{color:var(--accent);text-shadow:none}
+/* Días de Bloques con el mismo cristal que la barra de abajo: cápsula, días planos en blanco y el elegido con brillo blanco */
+.bk-week.lg-host{padding:5px;border-radius:999px;background:linear-gradient(180deg,color-mix(in srgb,var(--surface-2) 42%,transparent),color-mix(in srgb,var(--surface-2) 30%,transparent));border:1px solid color-mix(in srgb,#fff 14%,transparent);
+  backdrop-filter:var(--lg-ref,) blur(8px) saturate(190%);-webkit-backdrop-filter:blur(10px) saturate(190%);box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 1px 0 color-mix(in srgb,#fff 18%,transparent),inset 0 -1px 0 rgba(0,0,0,.15)}
+.bk-week.lg-host>button{border-radius:999px;color:color-mix(in srgb,var(--fg) 88%,transparent)}
+.compact .bk-week.lg-host{padding:5px}
+.compact .bk-week.lg-host>button{height:44px}
+.compact .bk-week.lg-host b{font-size:15px}
+.bk-week.lg-host>button.on,.bk-week.lg-host>button.on span{color:#fff;text-shadow:0 0 6px rgba(255,255,255,.7)}
+:root:not(.dark) .bk-week.lg-host,body.light .bk-week.lg-host{border-color:color-mix(in srgb,#000 8%,transparent)}
+/* Pestañas de Tiempo como la barra de abajo: solo iconos repartidos por igual en una cápsula de cristal y la gota que se arrastra entre ellos */
+.tabs.lg-host,body.desk .tabs.lg-host{width:min(390px,calc(100% - 24px));max-width:none;flex:none;margin:6px auto 2px;padding:5px;gap:0;overflow:visible;border-radius:999px;touch-action:none;-webkit-mask-image:none!important;mask-image:none!important;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--surface-2) 42%,transparent),color-mix(in srgb,var(--surface-2) 30%,transparent));border:1px solid color-mix(in srgb,#fff 14%,transparent);
+  backdrop-filter:var(--lg-ref,) blur(8px) saturate(190%);-webkit-backdrop-filter:blur(10px) saturate(190%);box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 1px 0 color-mix(in srgb,#fff 18%,transparent),inset 0 -1px 0 rgba(0,0,0,.15)}
+.tabs.lg-host>.tab{flex:1 1 0;min-width:0;height:50px;padding:0;border-radius:999px;display:grid;place-items:center;color:color-mix(in srgb,var(--fg) 88%,transparent);font-weight:400}
+.tabs.lg-host>.tab>span{display:grid;place-items:center;height:auto;min-width:0;padding:0!important;color:inherit!important;background:none!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;text-shadow:none!important}
+.tabs.lg-host .tl{display:none!important}
+.tabs.lg-host>.tab::after{display:none}
+.tabs.lg-host>.tab[aria-selected="true"]{color:#fff}
+.tabs.lg-host>.tab[aria-selected="true"] svg{filter:drop-shadow(0 0 6px rgba(255,255,255,.7))}
+.is-light:not(.has-bg) .tabs.lg-host>.tab[aria-selected="true"]{color:var(--accent)}
+.is-light:not(.has-bg) .tabs.lg-host>.tab[aria-selected="true"] svg{filter:none}
+:root:not(.dark) .tabs.lg-host,body.light .tabs.lg-host{border-color:color-mix(in srgb,#000 8%,transparent)}
+/* La rueda de Ajustes, encima de la gota cuando esta llega a ella */
+body:not(.desk) .nav-set{position:relative;z-index:1}
 @media (prefers-reduced-motion:no-preference){
   .nav button:active{transform:none}
   /* Botones: al tocarlos crecen y se iluminan; al soltar vuelven con un pequeño rebote */
@@ -6221,7 +6245,7 @@ function obSheet(title,items,onPick,sub){
     h+=`<button data-i="${i}" class="${it.danger?'danger':''}">${it.ic?`<span class="obg-ic">${it.ic}</span>`:''}<span class="obg-t">${esc(it.t)}${it.s?`<small>${esc(it.s)}</small>`:''}</span>${it.more?'<span class="obg-more">›</span>':''}${it.on?`<span class="obg-ck">${OB_IC.check}</span>`:''}${it.x?`<span class="obg-x" data-x="${i}" aria-label="Cerrar">✕</span>`:''}</button>`});
   $('obs-body').innerHTML=h+'</div>';
   $('obs-body').onclick=e=>{const x=e.target.closest('[data-x]');if(x){onPick(+x.dataset.x,'close');return}const b=e.target.closest('[data-i]');if(b){$('ob-sheet').hidden=true;onPick(+b.dataset.i,null,items[+b.dataset.i])}};
-  const was=!$('ob-sheet').hidden;$('ob-sheet').hidden=false;if(window.popRefit)popRefit($('ob-sheet'),was)}
+  const was=!$('ob-sheet').hidden;$('ob-sheet').hidden=false;if(!was)$('ob-sheet').querySelector('.sheet').scrollTop=0;if(window.popRefit)popRefit($('ob-sheet'),was)}
 $('ob-sheet').addEventListener('click',e=>{if(e.target===$('ob-sheet'))$('ob-sheet').hidden=true});
 function closeTopSheet(){const s=[...document.querySelectorAll('.sheet-back:not([hidden])')].sort((a,b)=>(+getComputedStyle(b).zIndex||0)-(+getComputedStyle(a).zIndex||0))[0];if(s)s.hidden=true;return !!s}
 /* PC: Escape cierra la hoja o la pantalla completa de arriba (sin cambiar de sección), salvo mientras escribes en un campo con texto; el botón atrás del ratón y Alt+← hacen lo mismo que el atrás de Android */
@@ -7943,7 +7967,7 @@ function regBlock(r,d,start,end){r.sess=r.sess||{};let e=r.sess[d]?realEv(r.sess
 function regSessionAsk(r,s0,e0){const n=new Date(),end=e0||hm(n);if(n.getHours())n.setHours(n.getHours()-1);else n.setMinutes(0);const start=s0||hm(n),d=today();obSheet('Pasar a la línea de tiempo',[{t:'Hora de empezar: '+start,s:'Toca para cambiarla'},{t:'Hora de terminar: '+end,s:'Toca para cambiarla'},{t:'Añadir bloque ahora',sep:true}],function pick(i){if(i===2&&end<=start){toast('La hora de terminar debe ser posterior a la de empezar');regSessionAsk(r,start,end);return}if(i===2){regBlock(r,d,start,end);toast('Bloque añadido a hoy');renderRegs();return}
     const ask=v0=>askName(i?'Hora de terminar (HH:MM)':'Hora de empezar (HH:MM)',v0,v=>{if(!/^([01]?\d|2[0-3]):[0-5]\d$/.test(v)){toast('Escribe la hora como 18:30');ask(v);return}v=v.padStart(5,'0');regSessionAsk(r,i?start:v,i?v:end)});ask(i?end:start)})}
 function regPublic(){return S.regs.map(r=>{const rows=r.kind==='diary'?Object.keys(r.days||{}).sort().reverse().slice(0,30).map(d=>({d:regDayTxt(d)+(d===today()?' · hoy':''),t:(r.days[d].text||'—').slice(0,200)})):(r.rows||[]).slice().reverse().slice(0,60).filter(x=>!rowEmpty(x)||x.d===today()).map(x=>({d:regDayTxt(x.d)+(x.d===today()?' · hoy':'')+(x.t?' · '+x.t:''),t:x.c.filter(Boolean).join(' · ')||'Sin apuntar'}));return {id:r.id,name:r.name,tag:r.tag||'',color:r.color||'',rows}})}
-function tableHTML(t,ctx){const tot=regTotals(t),byDay=!!ctx.byDay;return `<div class="reg-wrap" style="--rc:${t.color||'var(--accent)'}"><table class="reg-t" data-ctx="${ctx.key}"><thead><tr>${byDay?'<th class="dc">Día</th>':''}${t.cols.map((c,j)=>`<th><div class="thw"><input data-col="${j}" value="${esc(c)}" aria-label="Columna">${t.cols.length>2?`<button data-delcol="${j}" aria-label="Quitar columna">×</button>`:''}</div></th>`).join('')}<th class="ctl"><button data-addcol aria-label="Añadir columna">＋</button></th></tr></thead>
+function tableHTML(t,ctx){const tot=regTotals(t),byDay=!!ctx.byDay;return `<div class="reg-wrap" style="--rc:${t.color||'var(--accent)'}"><table class="reg-t" data-ctx="${ctx.key}"><thead><tr>${byDay?'<th class="dc">Día</th>':''}${t.cols.map((c,j)=>`<th><div class="thw"><input data-col="${j}" value="${esc(c)}" aria-label="Columna">${t.cols.length>2&&j?`<button data-delcol="${j}" aria-label="Quitar columna">×</button>`:''}</div></th>`).join('')}<th class="ctl"><button data-addcol aria-label="Añadir columna">＋</button></th></tr></thead>
   <tbody>${t.rows.map((x,i)=>`<tr class="${x.d===today()?'today':''}" data-i="${i}">${byDay?`<td class="dc">${regDayTxt(x.d)}${x.t?`<br>${esc(x.t)}`:''}</td>`:''}${t.cols.map((c,j)=>{const v=x.c[j]==null?'':String(x.c[j]);return /^(hecho|comprado)$/i.test(c.trim())?`<td class="ck"><input type="checkbox" data-c="${j}"${/^(|no|0)$/i.test(v.trim())?'':' checked'} aria-label="${esc(c)}"></td>`:`<td><input data-c="${j}" value="${esc(v)}"${v.length>14?` title="${esc(v)}"`:''} inputmode="text"></td>`}).join('')}<td class="ctl">${byDay?'':'<button class="rg-grip" data-rgrip aria-label="Mover fila" title="Arrastra para mover">⠿</button>'}<button data-delrow aria-label="Quitar fila">×</button></td></tr>`).join('')}</tbody>
   ${tot.some(v=>v!=='')?`<tfoot><tr>${byDay?'<td class="dc">Total</td>':''}${tot.map((v,j)=>`<td>${!byDay&&!j?'Total':v}</td>`).join('')}<td></td></tr></tfoot>`:''}</table></div>`}
 function regPh(r){return r?(r.kind==='diary'?'Escribe en el diario de hoy…':'Apunta en '+(r.name.length>20?r.name.slice(0,19).trim():r.name)+'…'):'Crea un registro con +'}
@@ -8079,7 +8103,7 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
 /* ===================== Liquid Glass ===================== */
 (()=>{const RM=matchMedia('(prefers-reduced-motion:reduce)');
   /* Lente que sigue al elemento elegido con un muelle: se estira al moverse y, en la barra, se puede arrastrar de una pestaña a otra */
-  function lens(box,itemSel,cur,tgt,drag){if(!box)return;const L=document.createElement('i');L.className='lg-lens';L.setAttribute('aria-hidden','true');box.prepend(L);box.classList.add('lg-host');
+  function lens(box,itemSel,cur,tgt,drag,root){if(!box)return;root=root||box;const L=document.createElement('i');L.className='lg-lens';L.setAttribute('aria-hidden','true');box.prepend(L);box.classList.add('lg-host');
     const o={x:0,y:0,w:0,h:0,vx:0,vy:0,vw:0,vh:0};let tx=0,ty=0,tw=0,th=0,lift=false,raf=0,init=false,until=0,dg=null,last=0,hole=null;
     /* Vertical solo por la forma de la caja: la propia lente, al crecer, desborda y cambiaría scrollWidth en mitad del arrastre */
     const on=()=>box.offsetParent!==null,V=()=>DESK.matches&&box.clientHeight>box.clientWidth*1.4;
@@ -8092,7 +8116,7 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
       tw=sp?D:r.width;th=sp?D:r.height;L.style.borderRadius=sp?'999px':getComputedStyle(tgt(c)).borderRadius;return true}
     function paint(sx,sy){L.style.width=o.w+'px';L.style.height=o.h+'px';L.style.transform=`translate3d(${o.x}px,${o.y}px,0) scale(${sx},${sy})`;
       const vert=V(),c=vert?o.y+o.h/2:o.x+o.w/2,sz=vert?o.h:o.w,sp=Math.min(1,Math.hypot(o.vx,o.vy)/1400);L.style.setProperty('--lv',sp.toFixed(2));
-      box.querySelectorAll(itemSel).forEach(el=>{const m=vert?el.offsetTop+el.offsetHeight/2:el.offsetLeft+el.offsetWidth/2,d=m-c,li=Math.max(0,1-Math.abs(d)/(sz*2.6));el.style.setProperty('--li',(li*li*1.25).toFixed(3));el.style.setProperty('--lx',vert?'50%':d>0?'0%':'100%')})}
+      root.querySelectorAll(itemSel).forEach(el=>{const m=vert?el.offsetTop+el.offsetHeight/2:el.offsetLeft+el.offsetWidth/2,d=m-c,li=Math.max(0,1-Math.abs(d)/(sz*2.6));el.style.setProperty('--li',(li*li*1.25).toFixed(3));el.style.setProperty('--lx',vert?'50%':d>0?'0%':'100%')})}
     function step(now){raf=0;if(!on()||!aim()){L.style.opacity='0';/* Oculta, su agujero no puede quedarse sobre la vista siguiente; al volver a verse se coloca sin viajar */
         if(hole){on()?hole.str(0):hole.kill();hole=null}if(!on())init=false;return}L.style.opacity='';
       if(!init||RM.matches){o.x=tx;o.y=ty;o.w=tw;o.h=th;init=true;o.vx=o.vy=o.vw=o.vh=0;paint(1,1);last=now;if(hole&&!lift){hole.str(0);hole=null}if(!dg&&Date.now()>until)return;raf=requestAnimationFrame(step);return}
@@ -8117,21 +8141,27 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     addEventListener('resize',()=>{init=false;kick(300)});/* La vista o la hoja que la contiene pasa de oculta a visible: el tamaño de la caja cambia */
     if(window.ResizeObserver)new ResizeObserver(()=>kick(300)).observe(box);if(box.scrollWidth>box.clientWidth)box.addEventListener('scroll',()=>kick(100),{passive:true});
     /* Tiene en cuenta la inercia del gesto: un lanzamiento rápido llega a la pestaña hacia la que iba */
-    const itemAt=(cx,cy)=>{let best=null,bd=1e9;box.querySelectorAll(itemSel).forEach(el=>{if(el.hidden||!el.offsetWidth)return;const r=el.getBoundingClientRect(),m=V()?Math.abs(cy-(r.top+r.height/2)):Math.abs(cx-(r.left+r.width/2));if(m<bd){bd=m;best=el}});return best};
-    box.addEventListener('pointerdown',e=>{if(e.button>0||!on())return;const it=e.target.closest(itemSel);if(!it)return;lift=true;
+    const itemAt=(cx,cy)=>{let best=null,bd=1e9;root.querySelectorAll(itemSel).forEach(el=>{if(el.hidden||!el.offsetWidth)return;const r=el.getBoundingClientRect(),m=V()?Math.abs(cy-(r.top+r.height/2)):Math.abs(cx-(r.left+r.width/2));if(m<bd){bd=m;best=el}});return best};
+    /* El dedo lleva el centro de la gota del centro de la primera opción al de la última, aunque alguna (Ajustes) quede fuera de la caja */
+    const ends=vert=>{let lo=1e9,hi=-1e9;root.querySelectorAll(itemSel).forEach(el=>{if(el.hidden||!el.offsetWidth)return;const r=el.getBoundingClientRect(),c=vert?r.top+r.height/2:r.left+r.width/2;if(c<lo)lo=c;if(c>hi)hi=c});return [lo,hi]};
+    root.addEventListener('pointerdown',e=>{if(e.button>0||!on())return;const it=e.target.closest(itemSel);if(!it||!root.contains(it))return;lift=true;
       dg={id:e.pointerId,x0:e.clientX,y0:e.clientY,it,moved:false,lx:e.clientX,ly:e.clientY,lt:performance.now(),sx:0,sy:0};kick(400)});
     /* Movimiento y fin en la ventana: con ratón no hay captura implícita y se puede soltar fuera de la barra */
     addEventListener('pointermove',e=>{if(!dg||e.pointerId!==dg.id||!drag)return;const vert=V();if(!dg.moved&&Math.abs(vert?e.clientY-dg.y0:e.clientX-dg.x0)<8)return;dg.moved=true;
       const n=performance.now(),ldt=Math.max(1,n-dg.lt);dg.sx=(e.clientX-dg.lx)/ldt*1000;dg.sy=(e.clientY-dg.ly)/ldt*1000;dg.lx=e.clientX;dg.ly=e.clientY;dg.lt=n;
-      const b=box.getBoundingClientRect();if(vert){const p=e.clientY-b.top-th/2,m=b.height-th;ty=p<0?rubber(p,80):p>m?m+rubber(p-m,80):p}else{const p=e.clientX-b.left-tw/2,m=b.width-tw;tx=p<0?rubber(p,80):p>m?m+rubber(p-m,80):p}kick(200)});
+      const b=box.getBoundingClientRect(),[lo,hi]=ends(vert),q=vert?e.clientY:e.clientX,c=q<lo?lo+rubber(q-lo,80):q>hi?hi+rubber(q-hi,80):q;
+      if(vert)ty=c-b.top-box.clientTop+box.scrollTop-th/2;else tx=c-b.left-box.clientLeft+box.scrollLeft-tw/2;kick(200)});
     const end=e=>{if(!dg||e.pointerId!==dg.id)return;const d=dg;dg=null;lift=false;
       /* Tocar sin mover: el clic normal. Arrastrar: se elige la pestaña donde se suelta y se descarta el clic de la original */
-      if(d.moved&&drag&&e.type==='pointerup'){const t=itemAt(e.clientX+d.sx*.05,e.clientY+d.sy*.05);if(t&&t!==cur())t.click();swallow()}kick(800)};
+      /* La inercia solo cuenta si el dedo aún se movía al soltar: tras una pausa se queda donde está */
+      if(d.moved&&drag&&e.type==='pointerup'){const k=Math.max(0,1-(performance.now()-d.lt)/120)*.05,t=itemAt(e.clientX+d.sx*k,e.clientY+d.sy*k);if(t&&t!==cur())t.click();swallow()}kick(800)};
     addEventListener('pointerup',end,true);addEventListener('pointercancel',end,true);
     kick(800);return {kick}}
   const nav=document.querySelector('.nav-in');
-  const NL=lens(nav,'button[data-view]',()=>nav.querySelector('button[aria-current="page"]'),el=>el,true);
-  lens($('tabs'),'.tab',()=>$('tabs').querySelector('.tab[aria-selected="true"]'),el=>el.querySelector('span')||el,false);
+  /* En el móvil la rueda de Ajustes está fuera de las pestañas pero la gota también llega a ella */
+  const NL=lens(nav,'button[data-view],body:not(.desk) #nav-set',()=>nav.querySelector('button[aria-current="page"]'),el=>el,true,nav.parentElement);
+  /* Pestañas de Tiempo: como la barra de abajo, solo iconos y la gota se arrastra */
+  lens($('tabs'),'.tab',()=>$('tabs').querySelector('.tab[aria-selected="true"]'),el=>el,true);
   DESK.addEventListener('change',()=>NL&&NL.kick(600));
   /* En los menús: vistas del menú de la Agenda y pestañas del panel de Notas */
   lens($('cdr-body'),'[data-cview]',()=>$('cdr-body').querySelector('[data-cview][aria-pressed="true"]'),el=>el,false);
@@ -8290,15 +8320,19 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
         resize(W2,H2,r2,R2,s2){const g=sph||s2?2:8;if(Math.abs(W2-w)>g||Math.abs(H2-h)>g||!!s2!==sph||(R2&&Math.abs(R2-R)>2))shape(W2,H2,r2,R2,s2);return this},
         rot(a){ring.style.setProperty('--hrot',a+'deg');return this},track(el){trk=el;return this},kill}};
     /* En cada pulsación: los controles pequeños curvan la luz con su propia forma; en el resto, un agujero pequeño donde está el dedo */
-    const HOLE_SKIP='input,textarea,select,[contenteditable="true"],canvas,.lg-host,.tp-dial,.ne-text,#ne-text,.cm-editor';
+    const HOLE_SKIP='input,textarea,select,[contenteditable="true"],canvas,.lg-host,body:not(.desk) .nav-set,.tp-dial,.ne-text,#ne-text,.cm-editor';
     let hp=null;const hpEnd=()=>{if(!hp)return;clearTimeout(hp.tm);if(hp.H)hp.H.str(0);hp=null};
     document.addEventListener('pointerdown',e=>{hpEnd();if(RM.matches||(e.pointerType==='mouse'&&e.button>2)||!e.target.closest)return;if(e.target.closest(HOLE_SKIP))return;
       const el=e.target.closest(LG_PRESS+',button,[role=button],a,.chip,.mchip,.bk-b,.wk-ev'),r=el&&el.getBoundingClientRect();
       if(el&&r.width&&r.width<=240&&r.height<=130){const rad=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0,R=Math.max(16,Math.min(40,Math.min(r.width,r.height)*.3+10));
-        const H=window.lgHole(r.width,r.height,rad,R);if(H)hp={H:H.at(r.left+r.width/2,r.top+r.height/2).track(el).str(1)};return}
+        const H=window.lgHole(r.width,r.height,rad,R);if(H)hp={H:H.at(r.left+r.width/2,r.top+r.height/2).track(el).str(1),x:e.clientX,y:e.clientY,id:e.pointerId,el};return}
       /* En superficies grandes espera un instante: si el dedo se pone a desplazar, no aparece */
       const x=e.clientX,y=e.clientY;hp={x,y,id:e.pointerId,tm:setTimeout(()=>{if(!hp||hp.H)return;hp.H=window.lgHole(30,30,15,44);if(hp.H)hp.H.at(hp.x,hp.y).str(1)},70)}},true);
-    document.addEventListener('pointermove',e=>{if(hp&&!hp.H&&hp.id===e.pointerId&&Math.hypot(e.clientX-hp.x,e.clientY-hp.y)>8){clearTimeout(hp.tm);hp=null}},{passive:true});
+    /* Si el dedo arrastra lo pulsado (una tarjeta, un bloque, una fila), la burbuja deja el sitio donde se pulsó y va con el dedo */
+    addEventListener('pointermove',e=>{if(!hp||hp.id!==e.pointerId)return;const d=Math.hypot(e.clientX-hp.x,e.clientY-hp.y);
+      if(!hp.H){if(d>8){clearTimeout(hp.tm);hp=null}return}
+      if(!hp.fl){if(d<14)return;hp.fl=true;if(hp.el){hp.H.str(0);hp.H=window.lgHole(30,30,15,44);if(!hp.H){hp=null;return}hp.H.str(1)}}
+      hp.H.at(e.clientX,e.clientY)},{capture:true,passive:true});
     document.addEventListener('pointerup',hpEnd,true);document.addEventListener('pointercancel',hpEnd,true);}
 
   /* Deslizadores: el recorrido se ilumina hasta el pulgar */
@@ -8321,7 +8355,9 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
     let x=A.x+A.w/2>innerWidth/2?A.x+A.w-W:A.x,y;x=Math.max(l0,Math.min(r0-W,x));
     /* Botón arriba: el menú lo cubre y crece hacia abajo; botón abajo: crece hacia arriba. Desde el dedo: justo debajo o encima */
     if(A.el)y=A.y+A.h/2<innerHeight*.55?A.y:A.y+A.h-H;else y=A.y+A.h/2<innerHeight*.55?A.y+A.h/2:A.y+A.h/2-H;
-    y=Math.max(t0,Math.min(b0-H,y));sh.style.left=x+'px';sh.style.top=y+'px';return {x,y,w:W,h:H,r:26}}
+    y=Math.max(t0,Math.min(b0-H,y));sh.style.left=x+'px';sh.style.top=y+'px';
+    /* Se decide al colocarlo: el navegador fija touch-action al empezar el toque y cambiarlo en pointerdown solo valdría para el siguiente */
+    sh.style.touchAction=sh.scrollHeight>H+1?'pan-y':'none';return {x,y,w:W,h:H,r:26}}
   /* Un muelle para el centro y otro, algo más lento y con rebote, para el tamaño: la forma va por detrás de la posición y se alarga como una gota */
   function popMorph(st,sh,from,to,open,done){if(st.raf)cancelAnimationFrame(st.raf);const F=st.F,o=st.o||(st.o={x:from.x+from.w/2,y:from.y+from.h/2,w:from.w,h:from.h,vx:0,vy:0,vw:0,vh:0});
     const T={x:to.x+to.w/2,y:to.y+to.h/2,w:to.w,h:to.h},small=Math.min(from.h,to.h),rs=Math.min(from.r,to.r);let last=performance.now();const t0=last;sh.classList.add('morph');
@@ -8372,7 +8408,8 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
   const setO=(el,O)=>{el.style.setProperty('--lgx',O.x);el.style.setProperty('--lgy',O.y);el.style.setProperty('--lgs',O.s)};
   const ST=new WeakMap();
   function opened(b){const sh=b.querySelector(':scope>.sheet,:scope>.cdr,:scope>.vcard');if(!sh)return;
-    if(b.id==='ob-sheet'){const A=popAnchor();if(A&&popOpen(b,A))return;b.classList.remove('pop');['left','top','width','maxHeight','clipPath','transform'].forEach(k=>sh.style[k]='')}
+    /* touch-action también: el menú pequeño que salía del botón lo deja en none y la hoja larga que reutiliza el elemento no se podía desplazar */
+    if(b.id==='ob-sheet'){const A=popAnchor();if(A&&popOpen(b,A))return;b.classList.remove('pop');['left','top','width','maxHeight','clipPath','transform','touchAction'].forEach(k=>sh.style[k]='')}
     if(RM.matches)return;const o=pd&&Date.now()-pd.t<1500&&pd.y<innerHeight-40?{x:pd.x,y:pd.y}:null;
     const O=origin(sh,o);setO(b,O);ST.set(b,{O,top:0});/* La clase se queda hasta que se cierre: si se quitara al acabar, volvería a correr la animación de siempre */
     b.classList.remove('lg-in');void b.offsetWidth;b.classList.add('lg-in');sh.addEventListener('scroll',()=>{const st=ST.get(b);if(st)st.top=sh.scrollTop},{passive:true})}
