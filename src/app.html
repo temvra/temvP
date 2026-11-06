@@ -2278,6 +2278,19 @@ body.bkcols .bk-week.lg-host>button.vis:not(.on){background:color-mix(in srgb,va
 body.desknotes .vn-head .ob-sync{width:40px;height:40px}
 /* La rueda de Ajustes, encima de la gota cuando esta llega a ella */
 body:not(.desk) .nav-set{position:relative;z-index:1}
+/* ===== Móvil: Ajustes es una pestaña más =====
+   La barra queda por encima con la gota y el indicador en la rueda; la hoja es opaca desde el primer fotograma
+   (antes entraba con un fundido que dejaba ver la pantalla anterior a través: el parpadeo) y solo su contenido entra como al cambiar de pestaña */
+/* .app (z-index 1) encierra a la barra en su propia capa: mientras Ajustes está abierto se suelta para que la barra suba por encima (el resto de .app sigue por debajo: fabs 5, barra del asistente 6) */
+body.set-open:not(.desk) .app{z-index:auto}
+body.set-open:not(.desk) .nav{z-index:16}
+body.set-open:not(.desk) #settings{animation:none!important}
+body.set-open:not(.desk) #settings>.scroll{animation:lgView var(--sp-soft-d,.38s) var(--sp-soft,cubic-bezier(.2,.9,.25,1));padding-bottom:calc(var(--sab,env(safe-area-inset-bottom,0px)) + 110px)}
+body.set-open:not(.desk) .nav-in>button[aria-current="page"]{color:color-mix(in srgb,var(--fg) 88%,transparent)!important}
+body.set-open:not(.desk) .nav-set{color:#fff}
+.is-light:not(.has-bg) body.set-open:not(.desk) .nav-set{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){body.set-open:not(.desk) #settings>.scroll{animation:none}}
+
 @media (prefers-reduced-motion:no-preference){
   .nav button:active{transform:none}
   /* Botones: al tocarlos crecen y se iluminan; al soltar vuelven con un pequeño rebote */
@@ -8197,8 +8210,12 @@ trObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
   const setOpen=()=>!DESK.matches&&!$('settings').hidden;
   const NL=lens(nav,'button[data-view],body:not(.desk) #nav-set',()=>setOpen()?$('nav-set'):nav.querySelector('button[aria-current="page"]'),el=>el,true,nav.parentElement);
   /* Al cerrar Ajustes la gota aparece ya en la pestaña en la que estabas, sin cruzar la barra */
-  /* Al abrir Ajustes la barra queda tapada: la gota se posa ya en la rueda en vez de seguir animándose por debajo y quitarle fotogramas a la apertura */
-  if(NL)new MutationObserver(()=>NL.snap()).observe($('settings'),{attributes:true,attributeFilter:['hidden']});
+  /* Ajustes es una pestaña más en el móvil: la barra sigue visible encima, la gota y el indicador se quedan en la rueda
+     y al salir (Volver o tocando otra pestaña) la gota viaja como en cualquier cambio de pestaña */
+  const setMark=()=>{document.body.classList.toggle('set-open',!$('settings').hidden);if(NL)NL.kick(700)};
+  new MutationObserver(setMark).observe($('settings'),{attributes:true,attributeFilter:['hidden']});setMark();
+  /* Con Ajustes abierto, tocar cualquier pestaña (también la que ya estaba activa) sale de Ajustes a esa pestaña */
+  nav.addEventListener('click',e=>{const b=e.target.closest('button[data-view]');if(b&&!$('settings').hidden)$('settings').hidden=true},true);
   /* Pestañas de Tiempo: como la barra de abajo, solo iconos y la gota se arrastra */
   lens($('tabs'),'.tab',()=>$('tabs').querySelector('.tab[aria-selected="true"]'),el=>el,true);
   DESK.addEventListener('change',()=>NL&&NL.kick(600));
