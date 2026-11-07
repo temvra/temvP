@@ -5,6 +5,7 @@
 <style>
 /* Layout: app de reloj Material oscura a una pantalla — barra superior en píldora, tarjetas en lista, FABs apilados, barra inferior de 4 secciones y hojas inferiores */
 :root{
+  --lz:255 59 67; --lz2:255 107 112; --lz3:255 217 219; --lzd:229 72 77;
   --bg:#000; --surface:#111113; --surface-2:#1b1b1f; --surface-3:#29292e;
   --fg:#f4f4f6; --muted:#a0a0a8; --outline:#2e2e34;
   --accent:#c6c4f4; --on-accent:#2b2a5c; --container:#3e3d6e; --on-container:#e2dfff;
@@ -145,6 +146,13 @@ button.digits:hover{background:var(--surface-2)}
 .sw b{width:55%;height:55%;border-radius:50%}
 .sw.rainbow b{background:conic-gradient(red,#ff0,lime,cyan,blue,#f0f,red)}
 .sw input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.lz-sw b{box-shadow:0 0 0 2px #fff inset,0 0 10px currentColor}
+#fps-m{white-space:nowrap;position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;transform:translateX(-50%);z-index:2147483000;display:flex;align-items:center;gap:8px;padding:4px 10px 4px 8px;border-radius:999px;font:600 11px/1.2 ui-monospace,monospace;color:#fff;background:rgba(0,0,0,.72);box-shadow:0 0 0 1px rgba(255,255,255,.14);font-variant-numeric:tabular-nums;cursor:pointer;-webkit-user-select:none;user-select:none}
+#fps-m canvas{width:60px;height:18px;display:block}
+#fps-m b{min-width:52px}
+.lz-prev{position:relative;height:30px;margin:12px 2px 0;border-radius:12px;background:var(--surface-2);overflow:hidden}
+.lz-prev b{position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:linear-gradient(90deg,transparent,rgb(var(--lz) / .5) 18%,rgb(var(--lz)) 40%,rgb(var(--lz3)) 48%,#fff 50%,rgb(var(--lz3)) 52%,rgb(var(--lz)) 60%,rgb(var(--lz) / .5) 82%,transparent);box-shadow:0 0 6px rgb(var(--lz2) / .8),0 0 16px rgb(var(--lz) / .45)}
+.lz-prev i{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff,0 0 10px rgb(var(--lz)),0 0 22px rgb(var(--lz) / .65)}
 .field{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
 .field label{font-size:14px;color:var(--muted);min-width:90px}
 .field input[type=color]{width:52px;height:40px;border:0;border-radius:12px;background:none;padding:0}
@@ -2186,7 +2194,15 @@ body:not(.desk) .nav button[aria-current="page"] .ic{filter:drop-shadow(0 0 6px 
 .lg-host.lg-drag>button .ic,.lg-host.lg-drag>.tab>span{transform:scale(calc(1 + min(var(--li,0),1) * .16))}
 /* Arrastrada por la barra, la lente dispersa la luz: un arcoíris en los bordes que crece con la velocidad */
 .lg-lens.drag{backdrop-filter:var(--lg-ref,) blur(.6px) saturate(200%) brightness(1.18);-webkit-backdrop-filter:blur(1px) saturate(200%) brightness(1.18)}
-.lg-lens.drag::before,.lg-lens.drag::after{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;opacity:calc(.35 + var(--lv,0)*.65)}
+.lg-lens.drag::before,/* Al viajar entre opciones (sin dedo) la gota también separa la luz: el arcoíris del borde crece con la velocidad y gira con el recorrido */
+.lg-lens.lift:not(.sph)::before{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;opacity:calc(var(--lv,0)*1.4);background:conic-gradient(from calc(var(--la,0)*1deg),#ff3b6b,#ffb02e,#ffe95c,#3ddc84,#2ec5ff,#8f6bff,#ff3b6b);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;padding:calc(1px + var(--lv,0)*2px);filter:saturate(1.5)}
+/* Destello de refracción al pulsar */
+lg-glint{display:block;position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;z-index:3;mix-blend-mode:screen;contain:strict}
+lg-glint lg-r{display:block;position:absolute;border-radius:50%;background:radial-gradient(closest-side,transparent 58%,rgba(255,59,107,.55) 66%,rgba(255,176,46,.5) 71%,rgba(255,233,92,.55) 76%,rgba(61,220,132,.5) 81%,rgba(46,197,255,.55) 87%,rgba(143,107,255,.45) 93%,transparent 99%);will-change:transform,opacity;transform:scale(.08)}
+lg-glint lg-b{display:block;position:absolute;left:0;background:linear-gradient(90deg,rgba(255,59,107,0),rgba(255,59,107,.35) 18%,rgba(255,176,46,.4) 32%,rgba(255,240,170,.75) 46%,rgba(255,255,255,.9) 50%,rgba(160,255,210,.6) 55%,rgba(46,197,255,.45) 70%,rgba(143,107,255,.35) 84%,rgba(143,107,255,0));will-change:transform,opacity;opacity:0}
+.app-light lg-glint{mix-blend-mode:multiply;opacity:.75}
+.app-light lg-glint lg-b{background:linear-gradient(90deg,rgba(255,59,107,0),rgba(255,59,107,.35) 18%,rgba(255,176,46,.4) 34%,rgba(230,200,40,.45) 46%,rgba(61,220,132,.4) 56%,rgba(46,160,255,.45) 70%,rgba(143,107,255,.35) 84%,rgba(143,107,255,0))}
+.lg-lens.drag::after{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;opacity:calc(.35 + var(--lv,0)*.65)}
 .lg-lens.drag::before{background:conic-gradient(from calc(var(--la,0)*1deg),#ff3b6b,#ffb02e,#ffe95c,#3ddc84,#2ec5ff,#8f6bff,#ff3b6b);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;padding:calc(1.5px + var(--lv,0)*2.5px);filter:blur(calc(.5px + var(--lv,0)*1.5px)) saturate(1.6)}
 .lg-lens.drag::after{box-shadow:inset calc(var(--lv,0)*-7px) 0 10px -4px rgba(255,60,120,.7),inset calc(var(--lv,0)*7px) 0 10px -4px rgba(60,200,255,.75),0 0 calc(10px + var(--lv,0)*22px) rgba(255,255,255,.18);filter:blur(.4px)}
 /* Al pulsar se levanta: cristal transparente que aumenta un poco lo de debajo, con el borde irisado */
@@ -2423,16 +2439,18 @@ body.set-open:not(.desk) .nav-set{color:#fff}
 @keyframes prismSpin{to{filter:blur(1px) saturate(1.5) hue-rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.bk-b.dragging::after,.wk-ev.dragging::after,#drag-chip::after{animation:none}}
 /* El rayo sale del reloj y sigue hasta perderse: cruza las columnas y se desvanece a lo lejos */
-.bk-now{left:-64px;right:-100vw;height:2px;background:linear-gradient(90deg,#fff 0,#ffd9db 3%,#ff6b70 14%,#ff3b43 34%,rgba(255,59,67,.55) 60%,rgba(255,59,67,.18) 85%,transparent);box-shadow:0 0 2px #fff,0 0 7px rgba(255,120,124,.8),0 0 18px rgba(255,59,67,.45),0 0 36px rgba(229,72,77,.2);border-radius:2px;overflow:visible;filter:saturate(1.2)}
+.bk-now{left:-64px;right:-100vw;height:2px;background:linear-gradient(90deg,#fff 0,rgb(var(--lz3)) 3%,rgb(var(--lz2)) 14%,rgb(var(--lz)) 34%,rgb(var(--lz) / .55) 60%,rgb(var(--lz) / .18) 85%,transparent);box-shadow:0 0 2px #fff,0 0 7px rgb(var(--lz2) / .8),0 0 18px rgb(var(--lz) / .45),0 0 36px rgb(var(--lzd) / .2);border-radius:2px;overflow:visible;filter:saturate(1.2)}
 /* Como un láser: núcleo blanco, halo rojo y una neblina de luz por encima y por debajo que se curva hacia atrás */
-.bk-now::before{content:"";position:absolute;left:0;right:0;bottom:1px;height:64px;background:linear-gradient(180deg,transparent 0,rgba(255,80,88,.06) 35%,rgba(255,100,106,.18) 70%,rgba(255,140,146,.38) 92%,rgba(255,190,194,.55));filter:blur(2px);transform:skewX(-18deg);transform-origin:100% 100%;-webkit-mask:linear-gradient(90deg,transparent,#000 24%,#000 70%,transparent);mask:linear-gradient(90deg,transparent,#000 24%,#000 70%,transparent);pointer-events:none}
+.bk-now::before{content:"";position:absolute;left:0;right:0;bottom:1px;height:64px;background:linear-gradient(180deg,transparent 0,rgb(var(--lz2) / .06) 35%,rgb(var(--lz2) / .18) 70%,rgb(var(--lz2) / .38) 92%,rgb(var(--lz3) / .55));filter:blur(2px);transform:skewX(-18deg);transform-origin:100% 100%;-webkit-mask:linear-gradient(90deg,transparent,#000 24%,#000 70%,transparent);mask:linear-gradient(90deg,transparent,#000 24%,#000 70%,transparent);pointer-events:none}
 /* La estela se propaga como la luz: ondas que nacen en el rayo y se alejan por donde ya ha pasado, apagándose */
-.bk-now i{position:absolute;left:0;right:0;bottom:2px;height:76px;background:repeating-linear-gradient(180deg,transparent 0,rgba(255,120,126,.26) 5px,rgba(255,170,174,.12) 9px,transparent 16px);background-size:100% 16px;-webkit-mask:linear-gradient(180deg,transparent,rgba(0,0,0,.7) 70%,#000),linear-gradient(90deg,transparent,#000 22%,#000 75%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(180deg,transparent,rgba(0,0,0,.7) 70%,#000),linear-gradient(90deg,transparent,#000 22%,#000 75%,transparent);mask-composite:intersect;filter:blur(.6px);transform:skewX(-18deg);transform-origin:100% 100%;pointer-events:none}
-@media (prefers-reduced-motion:no-preference){.bk-now i{animation:nowWave 2.4s linear infinite}@keyframes nowWave{from{background-position:0 0}to{background-position:0 -32px}}}
-.bk-now::after{content:"";position:absolute;top:-4px;left:0;width:170px;height:10px;border-radius:50%;background:linear-gradient(90deg,transparent,rgba(255,110,116,.25) 45%,rgba(255,170,174,.6) 80%,#fff 93%,transparent);filter:blur(1px);mix-blend-mode:screen;opacity:0}
+.bk-now i{position:absolute;left:0;right:0;bottom:2px;height:76px;-webkit-mask:linear-gradient(180deg,transparent,rgba(0,0,0,.7) 70%,#000),linear-gradient(90deg,transparent,#000 22%,#000 75%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(180deg,transparent,rgba(0,0,0,.7) 70%,#000),linear-gradient(90deg,transparent,#000 22%,#000 75%,transparent);mask-composite:intersect;filter:blur(.6px);transform:skewX(-18deg);transform-origin:100% 100%;pointer-events:none}
+/* Las ondas se mueven con transform (la GPU las desplaza sin volver a pintarlas) dentro de la máscara fija del rayo */
+.bk-now i::before{content:"";position:absolute;left:0;right:0;top:0;bottom:-32px;background:repeating-linear-gradient(180deg,transparent 0,rgb(var(--lz2) / .26) 5px,rgb(var(--lz3) / .12) 9px,transparent 16px);background-size:100% 16px}
+@media (prefers-reduced-motion:no-preference){.bk-now i::before{will-change:transform;animation:nowWave 2.4s linear infinite}@keyframes nowWave{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,-32px,0)}}}
+.bk-now::after{content:"";position:absolute;top:-4px;left:0;width:170px;height:10px;border-radius:50%;background:linear-gradient(90deg,transparent,rgb(var(--lz2) / .25) 45%,rgb(var(--lz3) / .6) 80%,#fff 93%,transparent);filter:blur(1px);mix-blend-mode:screen;opacity:0}
 @media (prefers-reduced-motion:no-preference){.bk-now::after{left:0;will-change:transform,opacity;animation:nowGlide 4.5s cubic-bezier(.45,0,.55,1) infinite}@keyframes nowGlide{0%{transform:translateX(-120px);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateX(100vw);opacity:0}}
-  .bk-now{animation:nowBreath 3.2s ease-in-out infinite}@keyframes nowBreath{0%,100%{filter:saturate(1.2) brightness(1)}50%{filter:saturate(1.35) brightness(1.18)}}}
-.bk-now span{background:rgba(229,72,77,.9);text-shadow:0 0 6px #fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 10px rgba(229,72,77,.55);border-radius:8px}
+  .bk-now{animation:nowBreath 3.2s ease-in-out infinite}@keyframes nowBreath{0%,100%{opacity:.8}50%{opacity:1}}}
+.bk-now span{background:rgb(var(--lzd) / .9);text-shadow:0 0 6px #fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 10px rgb(var(--lzd) / .55);border-radius:8px}
 /* Cristal en todas las secciones: tarjetas, filas, pastillas, segmentos y botones flotantes */
 .card,.row,.reg-card,.reg-day,.reg-wrap,.reg-head,.vl-row,.rcard,.nd-row,.ob-note .ne-pill{background:color-mix(in srgb,var(--card) 74%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low),0 4px 16px rgba(0,0,0,.12);backdrop-filter:blur(8px) saturate(150%);-webkit-backdrop-filter:blur(8px) saturate(150%)}
 .row{box-shadow:inset 0 1px 0 var(--lg-rim)}
@@ -2581,24 +2599,24 @@ body.desknotes .ne-tools,.ob-tools,.bk-zoom{background:color-mix(in srgb,var(--s
 /* ===== Rayo de la hora en todas las vistas del calendario ===== */
 .wk-body{position:relative;overflow-x:clip}
 .bk-now.wk-laser{left:44px;right:0;z-index:4;pointer-events:none;
-  background:linear-gradient(90deg,transparent 0,rgba(255,59,67,.18) calc(var(--p) - 46%),rgba(255,59,67,.5) calc(var(--p) - 22%),#ff3b43 calc(var(--p) - 7%),#ffd9db calc(var(--p) - 2%),#fff var(--p),#ffd9db calc(var(--p) + 2%),#ff3b43 calc(var(--p) + 8%),rgba(255,59,67,.5) calc(var(--p) + 24%),rgba(255,59,67,.18) calc(var(--p) + 46%),transparent 100%)}
+  background:linear-gradient(90deg,transparent 0,rgb(var(--lz) / .18) calc(var(--p) - 46%),rgb(var(--lz) / .5) calc(var(--p) - 22%),rgb(var(--lz)) calc(var(--p) - 7%),rgb(var(--lz3)) calc(var(--p) - 2%),#fff var(--p),rgb(var(--lz3)) calc(var(--p) + 2%),rgb(var(--lz)) calc(var(--p) + 8%),rgb(var(--lz) / .5) calc(var(--p) + 24%),rgb(var(--lz) / .18) calc(var(--p) + 46%),transparent 100%)}
 .bk-now.wk-laser span{left:-44px;width:40px;text-align:center;padding:1px 0;font-size:10.5px;top:-9px}
-.wk-laser .wk-dot{position:absolute;top:-4px;left:var(--c0);width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff,0 0 10px #ff3b43,0 0 22px rgba(255,59,67,.65)}
+.wk-laser .wk-dot{position:absolute;top:-4px;left:var(--c0);width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff,0 0 10px rgb(var(--lz)),0 0 22px rgb(var(--lz) / .65)}
 /* Mes: en el día de hoy, el avance del día es un rayo vertical que deja su luz por donde ya ha pasado */
-.mcell .nowbar{width:2px;margin-left:-1px;background:linear-gradient(180deg,transparent,#ff6b70 14%,#ffd9db 40%,#fff 50%,#ffd9db 60%,#ff6b70 86%,transparent);box-shadow:0 0 2px #fff,0 0 7px rgba(255,120,124,.85),0 0 16px rgba(255,59,67,.5);border-radius:2px}
-.mcell .nowbar::before{content:"";position:absolute;top:8%;bottom:8%;right:2px;width:26px;background:linear-gradient(270deg,rgba(255,140,146,.32),rgba(255,90,96,.1) 60%,transparent);filter:blur(1.5px);pointer-events:none}
-.mcell.today .fill{background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 10%,transparent),color-mix(in srgb,#ff3b43 14%,transparent))}
+.mcell .nowbar{width:2px;margin-left:-1px;background:linear-gradient(180deg,transparent,rgb(var(--lz2)) 14%,rgb(var(--lz3)) 40%,#fff 50%,rgb(var(--lz3)) 60%,rgb(var(--lz2)) 86%,transparent);box-shadow:0 0 2px #fff,0 0 7px rgb(var(--lz2) / .85),0 0 16px rgb(var(--lz) / .5);border-radius:2px}
+.mcell .nowbar::before{content:"";position:absolute;top:8%;bottom:8%;right:2px;width:26px;background:linear-gradient(270deg,rgb(var(--lz2) / .32),rgb(var(--lz2) / .1) 60%,transparent);filter:blur(1.5px);pointer-events:none}
+.mcell.today .fill{background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 10%,transparent),color-mix(in srgb,rgb(var(--lz)) 14%,transparent))}
 /* Año: una línea de luz bajo el día de hoy que avanza con las horas */
-.yr-now{position:absolute;left:18%;bottom:12%;height:2px;width:calc(64% * var(--f));border-radius:2px;background:linear-gradient(90deg,#ff6b70,#fff);box-shadow:0 0 4px #fff,0 0 8px rgba(255,59,67,.8);pointer-events:none}
+.yr-now{position:absolute;left:18%;bottom:12%;height:2px;width:calc(64% * var(--f));border-radius:2px;background:linear-gradient(90deg,rgb(var(--lz2)),#fff);box-shadow:0 0 4px #fff,0 0 8px rgb(var(--lz) / .8);pointer-events:none}
 .yr-g button.today.has::after{display:none}
 /* Programación: el rayo separa lo que ya ha pasado de lo que queda hoy */
-.sc-now{position:relative;height:2px;margin:7px 0 7px 4px;border-radius:2px;background:linear-gradient(90deg,#fff 0,#ffd9db 3%,#ff6b70 12%,#ff3b43 30%,rgba(255,59,67,.55) 60%,rgba(255,59,67,.15) 88%,transparent);box-shadow:0 0 2px #fff,0 0 7px rgba(255,120,124,.8),0 0 18px rgba(255,59,67,.4)}
-.sc-now::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff,0 0 10px #ff3b43,0 0 22px rgba(255,59,67,.6)}
-.sc-now i{position:absolute;left:0;right:0;bottom:2px;height:26px;background:linear-gradient(180deg,transparent,rgba(255,110,116,.14));-webkit-mask:linear-gradient(90deg,#000,transparent 85%);mask:linear-gradient(90deg,#000,transparent 85%);pointer-events:none}
-.sc-now span{position:absolute;right:0;top:-10px;font-size:10.5px;font-weight:700;color:#fff;padding:1px 6px;border-radius:8px;background:rgba(229,72,77,.9);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 10px rgba(229,72,77,.5)}
+.sc-now{position:relative;height:2px;margin:7px 0 7px 4px;border-radius:2px;background:linear-gradient(90deg,#fff 0,rgb(var(--lz3)) 3%,rgb(var(--lz2)) 12%,rgb(var(--lz)) 30%,rgb(var(--lz) / .55) 60%,rgb(var(--lz) / .15) 88%,transparent);box-shadow:0 0 2px #fff,0 0 7px rgb(var(--lz2) / .8),0 0 18px rgb(var(--lz) / .4)}
+.sc-now::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff,0 0 10px rgb(var(--lz)),0 0 22px rgb(var(--lz) / .6)}
+.sc-now i{position:absolute;left:0;right:0;bottom:2px;height:26px;background:linear-gradient(180deg,transparent,rgb(var(--lz2) / .14));-webkit-mask:linear-gradient(90deg,#000,transparent 85%);mask:linear-gradient(90deg,#000,transparent 85%);pointer-events:none}
+.sc-now span{position:absolute;right:0;top:-10px;font-size:10.5px;font-weight:700;color:#fff;padding:1px 6px;border-radius:8px;background:rgb(var(--lzd) / .9);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 10px rgb(var(--lzd) / .5)}
 @media (prefers-reduced-motion:no-preference){
   .mcell .nowbar,.sc-now,.yr-now{animation:nowBreath 3.2s ease-in-out infinite}
-  .sc-now::after{content:"";position:absolute;top:-4px;left:0;width:120px;height:10px;border-radius:50%;background:linear-gradient(90deg,transparent,rgba(255,170,174,.6) 80%,#fff 93%,transparent);filter:blur(1px);mix-blend-mode:screen;opacity:0;animation:nowGlide 4.5s cubic-bezier(.45,0,.55,1) infinite}
+  .sc-now::after{content:"";position:absolute;top:-4px;left:0;width:120px;height:10px;border-radius:50%;background:linear-gradient(90deg,transparent,rgb(var(--lz3) / .6) 80%,#fff 93%,transparent);filter:blur(1px);mix-blend-mode:screen;opacity:0;animation:nowGlide 4.5s cubic-bezier(.45,0,.55,1) infinite}
   .sc-l{overflow-x:clip}
 }
 /* ===== Cambio de vista del calendario ===== */
@@ -2707,7 +2725,7 @@ body.desk #v-blocks.bkwk{--gut:52px}
 .bkw-gut,.bkw-tv{position:relative;z-index:1;min-width:0}
 .bkw-gi{position:relative;margin-top:var(--gt,0px)}
 .bkw-gi span{position:absolute;right:5px;margin-top:-7px;font-size:10.5px;line-height:14px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
-.bkw-nowl{position:absolute;right:2px;margin-top:-8px;z-index:2;font-size:10px;line-height:16px;font-weight:700;color:#fff;padding:0 4px;border-radius:8px;background:rgba(229,72,77,.92);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 10px rgba(229,72,77,.55);font-variant-numeric:tabular-nums;transition:opacity .15s}
+.bkw-nowl{position:absolute;right:2px;margin-top:-8px;z-index:2;font-size:10px;line-height:16px;font-weight:700;color:#fff;padding:0 4px;border-radius:8px;background:rgb(var(--lzd) / .92);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 10px rgb(var(--lzd) / .55);font-variant-numeric:tabular-nums;transition:opacity .15s}
 body.bkw-sliding .bkw-nowl{opacity:0}
 .bkw-tv{overflow:hidden;touch-action:pan-y;border-radius:0 22px 22px 0}
 .bkw-trk{position:relative;display:grid;grid-template-columns:repeat(calc(var(--n) * 3),minmax(0,1fr));width:300%;transform:translate3d(-33.3333%,0,0);will-change:transform}
@@ -2751,9 +2769,11 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
 #bk-week.bkw-hide>button>*{visibility:hidden}
 /* ===== El rayo de la línea de tiempo también en Mes y Año ===== */
 #cal-grid{position:relative}
-#cal-grid .m-laser,body:not(.desk) #cal-grid>.m-laser{position:absolute;left:0;right:0;grid-column:1/-1;height:2px;min-height:0!important;overflow:visible;margin-top:-1px;z-index:3;clip-path:inset(-90px 0 -12px 0)}
-#cal-grid .m-laser::before{height:48px}
-#cal-grid .m-laser i{height:52px}
+#cal-grid>.m-lzw,body:not(.desk) #cal-grid>.m-lzw{position:absolute;inset:0;height:auto;min-height:0!important;overflow:hidden;border-radius:12px;pointer-events:none;z-index:3;contain:paint}
+#cal-grid .m-laser{position:absolute;left:0;right:0;height:2px;margin-top:-1px;overflow:visible}
+#cal-grid .m-laser::before{height:40px}
+#cal-grid .m-laser i{height:44px}
+#cal-grid .m-laser::after{width:44px;animation-name:nowGlideC}@keyframes nowGlideC{0%{transform:translateX(-100%);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:translateX(420%);opacity:0}}
 .yr-g{position:relative}
 .yr-g .yr-laser{position:absolute;left:0;right:0;grid-column:1/-1;height:1.5px;margin-top:-1px;z-index:2;clip-path:inset(-16px 0 -6px 0)}
 .yr-g .yr-laser::before{height:12px}
@@ -3035,6 +3055,13 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
       <div><div class="t1">Modo</div><p class="sub">Claro, oscuro o como el sistema.</p></div>
       <div class="seg" id="mode-seg"><button data-mode="auto">Auto</button><button data-mode="dark">Oscuro</button><button data-mode="light">Claro</button></div>
     </div>
+    <div class="gap"></div>
+    <div class="card" id="lz-card">
+      <div class="t1">Rayo de la hora</div>
+      <p class="sub">El color de la línea que marca ahora en la agenda, el widget y el escritorio.</p>
+      <div class="lz-prev" aria-hidden="true"><b></b><i></i></div>
+      <div class="swatches" id="lz-sw"></div>
+    </div>
 
     <div class="label">Fondo</div>
     <div class="card">
@@ -3177,6 +3204,11 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
       <div class="t1">Tour de bienvenida</div>
       <p class="sub">Un repaso rápido de las cuatro secciones de la app.</p>
       <div class="field" style="margin-top:10px"><button class="btn tonal" id="tour-again">Ver el tour otra vez</button></div>
+    </div>
+    <div class="label">Rendimiento</div>
+    <div class="card">
+      <div class="row-sw"><span class="t1">Medidor de fps</span><button class="switch" role="switch" id="sw-fps" aria-label="Medidor de fps"></button></div>
+      <p class="sub">Muestra arriba los fotogramas por segundo reales y el fotograma más lento de los últimos 2 segundos. Toca el medidor para copiar un informe por vistas.</p>
     </div>
   </div>
 </div>
@@ -3712,7 +3744,7 @@ function trTree(root){
   ATTRS.forEach(a=>{trAttr(root,a);root.querySelectorAll('['+a+']').forEach(el=>trAttr(el,a))});
 }
 let trBusy=false;
-const trObs=new MutationObserver(ms=>{if(trBusy)return;trBusy=true;try{ms.forEach(m=>{
+const trObs=new MutationObserver(ms=>{if(trBusy||lbase()==='es')return;trBusy=true;try{ms.forEach(m=>{
   if(m.type==='childList')m.addedNodes.forEach(trTree);else if(m.type==='characterData')trText(m.target);else if(m.type==='attributes')trAttr(m.target,m.attributeName)})}finally{trBusy=false}});
 function applyLang(){
   LOC=pickLoc();document.documentElement.lang=LOC;trTree(document.body);
@@ -3760,6 +3792,7 @@ function applyTheme(){
   document.querySelectorAll('.sw[data-seed]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.seed===S.seed));
   const custom=!SEEDS.some(x=>x[1]===S.seed);$('sw-custom').setAttribute('aria-pressed',custom);
   $('seed-pick').value=S.seed;$('seed-hex').value=S.seed.toUpperCase();
+  if(S.lzc==='accent'&&typeof applyLaser==='function')applyLaser();
 }
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
@@ -3769,6 +3802,35 @@ $('swatches').innerHTML=SEEDS.map(([n,c])=>`<button class="sw" data-seed="${c}" 
 $('swatches').addEventListener('click',e=>{const b=e.target.closest('[data-seed]');if(b)setSeed(b.dataset.seed)});
 $('sw-custom-in').addEventListener('input',e=>setSeed(e.target.value));
 $('seed-pick').addEventListener('input',e=>setSeed(e.target.value));
+/* Color del rayo de la hora: un solo color del que salen el núcleo, el halo, la neblina, la etiqueta y las motas de todas las vistas */
+const LZ_SEEDS=[['Rojo','#ff3b43'],['Naranja','#ff8a1f'],['Ámbar','#ffc21a'],['Verde','#2ee07a'],['Cian','#22d3ff'],['Azul','#3d7bff'],['Violeta','#9b5cff'],['Rosa','#ff4fb8'],['Blanco','#dfe6ff'],['Color de la app','accent']];
+function lzHex(){const c=S.lzc||'#ff3b43';if(c!=='accent')return c;const a=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();try{const x=(lzHex.c||(lzHex.c=document.createElement('canvas').getContext('2d')));x.fillStyle='#ff3b43';x.fillStyle=a;return /^#[0-9a-f]{6}$/i.test(x.fillStyle)?x.fillStyle:'#ff3b43'}catch(e){return '#ff3b43'}}
+function applyLaser(){const h=lzHex().replace('#',''),r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16),mx=(k)=>[r,g,b].map(v=>Math.round(v+(255-v)*k)),st=document.documentElement.style;
+  st.setProperty('--lz',`${r} ${g} ${b}`);st.setProperty('--lz2',mx(.3).join(' '));st.setProperty('--lz3',mx(.82).join(' '));st.setProperty('--lzd',[r,g,b].map(v=>Math.round(v*.88)).join(' '));
+  window.LZ_MOTE='#'+mx(.42).map(v=>v.toString(16).padStart(2,'0')).join('');
+  document.querySelectorAll('#lz-sw [data-lz]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.lz===(S.lzc||'#ff3b43')));const cu=$('lz-custom');if(cu)cu.setAttribute('aria-pressed',!LZ_SEEDS.some(x=>x[1]===(S.lzc||'#ff3b43')))}
+function setLaser(c){if(c!=='accent'&&!validHex(c))return;S.lzc=c==='accent'?c:('#'+c.replace('#','')).toLowerCase();save();applyLaser()}
+$('lz-sw').innerHTML=LZ_SEEDS.map(([n,c])=>`<button class="sw lz-sw" data-lz="${c}" aria-label="${n}" style="background:var(--surface-3);color:${c==='accent'?'var(--accent)':c}"><b style="background:${c==='accent'?'var(--accent)':c}"></b></button>`).join('')+
+  `<label class="sw rainbow" id="lz-custom" aria-label="Color personalizado del rayo" style="background:var(--surface-3)"><b></b><input type="color" id="lz-custom-in" aria-label="Elegir color del rayo"></label>`;
+$('lz-sw').addEventListener('click',e=>{const b=e.target.closest('[data-lz]');if(b)setLaser(b.dataset.lz)});
+$('lz-custom-in').addEventListener('input',e=>setLaser(e.target.value));
+applyLaser();
+/* Medidor de fps: mide en el propio dispositivo (el móvil, la tableta o el PC) los fotogramas reales y anota los tirones por vista */
+{let el=null,raf=0,fr=[],lastT=0,hist=[],log={},u=0;
+  const vw=()=>{const v=typeof view!=='undefined'?view:'?';return v==='cal'||v==='blocks'?v+':'+(S.calView||''):v};
+  const loop=t=>{raf=requestAnimationFrame(loop);if(lastT&&!document.hidden){const d=t-lastT;fr.push([t,d]);const k=vw(),L=log[k]||(log[k]={n:0,sum:0,j:0,worst:0});if(d<1000){L.n++;L.sum+=d;if(d>20)L.j++;if(d>L.worst)L.worst=d}}lastT=t;
+    while(fr.length&&t-fr[0][0]>2000)fr.shift();if(!el||(++u)%12)return;
+    const sh=fr.filter(x=>t-x[0]<500),fps=sh.length?1000*sh.length/sh.reduce((a,x)=>a+x[1],0):0,worst=fr.reduce((a,x)=>Math.max(a,x[1]),0);
+    hist.push(fps);if(hist.length>40)hist.shift();const b=el.querySelector('b');b.textContent=Math.round(fps)+' fps';el.querySelector('span').textContent='peor '+Math.round(worst)+' ms';
+    b.style.color=fps>=55?'#5cff9d':fps>=40?'#ffd84a':'#ff6b6b';
+    const c=el.querySelector('canvas'),g=c.getContext('2d'),mx=Math.max(60,...hist);g.clearRect(0,0,c.width,c.height);g.strokeStyle='#8fd3ff';g.lineWidth=2;g.beginPath();hist.forEach((v,i)=>{const x=i/39*c.width,y=c.height-v/mx*(c.height-4)-2;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke()};
+  const report=()=>{const lines=['Temvra · informe de fps','Pantalla: '+innerWidth+'×'+innerHeight+' @'+(devicePixelRatio||1)+'x','Dispositivo: '+navigator.userAgent,''];
+    Object.entries(log).sort((a,b)=>b[1].n-a[1].n).forEach(([k,L])=>{if(L.n)lines.push(`${k}: media ${Math.round(1000*L.n/L.sum)} fps · tirones (>20 ms) ${L.j} de ${L.n} · peor ${Math.round(L.worst)} ms`)});return lines.join('\n')};
+  window.fpsMeter=on=>{S.fpsMeter=!!on;save();$('sw-fps').setAttribute('aria-checked',String(!!on));
+    if(on&&!el){el=document.createElement('div');el.id='fps-m';el.setAttribute('role','button');el.setAttribute('aria-label','Medidor de fps: toca para copiar el informe');el.innerHTML='<canvas width="120" height="36"></canvas><b>-- fps</b><span></span>';document.body.appendChild(el);
+      el.onclick=()=>{const r=report();(navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(r):Promise.reject()).then(()=>toast('Informe de fps copiado'),()=>{prompt('Informe de fps',r)})};log={};lastT=0;fr=[];hist=[];if(!raf)raf=requestAnimationFrame(loop)}
+    if(!on&&el){el.remove();el=null;cancelAnimationFrame(raf);raf=0}};
+  $('sw-fps').onclick=()=>fpsMeter(!S.fpsMeter);$('sw-fps').setAttribute('aria-checked',String(!!S.fpsMeter));if(S.fpsMeter)fpsMeter(true)}
 $('seed-hex').addEventListener('change',e=>{if(validHex(e.target.value))setSeed(e.target.value);else{e.target.value=S.seed.toUpperCase();toast('Escribe un código como #7B78D8')}});
 /* Elegir claro u oscuro deja el fondo liso, blanco o negro; si había foto, color o degradado, antes se pregunta */
 document.querySelectorAll('#mode-seg button').forEach(b=>b.onclick=()=>{S.mode=b.dataset.mode;save();applyTheme();applyBg();
@@ -3914,10 +3976,12 @@ const ICON_PAUSE='<svg width="38" height="38" viewBox="0 0 24 24" fill="currentC
 const ICON_RESET='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v5h5"/></svg>';
 const ICON_FLAG='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>';
 const ICON_PLUS='<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+/* Escribe un texto solo si cambia (lo que se escribió, no lo que quedó tras traducirlo): reescribirlo en cada fotograma rehacía estilos y traducciones */
+const TXW=new WeakMap(),setTx=(el,t)=>{if(el&&TXW.get(el)!==t){TXW.set(el,t);el.textContent=t}};
 function renderTimer(){
   const l=tLeft(),P=S.period*1000,frac=Math.max(0,Math.min(1,l/P));
-  $('digits').textContent=fmt(l);$('ring').style.strokeDashoffset=RC*(1-frac);
-  $('state').textContent=running?'En marcha':(remain<P?'En pausa':'Listo');$('lapline').textContent='Vuelta '+lap;$('lapline').style.visibility=S.loop||lap>1?'':'hidden';
+  setTx($('digits'),fmt(l));$('ring').style.strokeDashoffset=RC*(1-frac);
+  setTx($('state'),running?'En marcha':(remain<P?'En pausa':'Listo'));setTx($('lapline'),'Vuelta '+lap);$('lapline').style.visibility=S.loop||lap>1?'':'hidden';
 }
 /* Fin de vuelta. Si la app estuvo parada (pantalla apagada, ventana minimizada) se recuperan todas las vueltas que pasaron, al mismo compás:
    antes solo se contaba una y la siguiente volvía a empezar desde cero, así que la cuenta se repetía y se quedaba atrás.
@@ -3993,7 +4057,7 @@ setTimeout(()=>{const r=runWas;if(!r)return;if(Array.isArray(r.sw)&&r.sw.length=
     else if(r.remain>0&&r.remain<P){remain=r.remain;lap=r.lap||1}}
   renderFabs();runSave()},0);
 function fmtSw(ms){const cs=Math.floor(ms/10)%100,s=Math.floor(ms/1000)%60,m=Math.floor(ms/60000)%60,h=Math.floor(ms/3600000);return (h?h+':':'')+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'<small>.'+String(cs).padStart(2,'0')+'</small>'}
-function renderSw(){$('sw-big').innerHTML=fmtSw(swNow());$('sw-state').textContent=swRun?'En marcha':(swNow()?'En pausa':'Pulsa el botón grande para empezar')}
+function renderSw(){const h=fmtSw(swNow()),b=$('sw-big');if(TXW.get(b)!==h){TXW.set(b,h);b.innerHTML=h}setTx($('sw-state'),swRun?'En marcha':(swNow()?'En pausa':'Pulsa el botón grande para empezar'))}
 function renderSwLaps(){
   $('sw-count').textContent=swLaps.length?swLaps.length+(swLaps.length===1?' vuelta':' vueltas'):'';
   if(!swLaps.length){$('sw-laps').innerHTML='<div class="row last"><div class="txt empty">Pulsa la bandera mientras corre para marcar una vuelta.</div></div>';return}
@@ -4223,9 +4287,9 @@ function renderCircRun(){
   if(!cActive())return;
   const st=cSeq[cIdx],l=cLeft(),frac=Math.max(0,Math.min(1,l/(st.sec*1000))),nx=cSeq[cIdx+1];
   const work=st.type==='work';
-  $('c-type').textContent=work?'EJERCICIO':'DESCANSO';
+  setTx($('c-type'),work?'EJERCICIO':'DESCANSO');
   $('c-type').style.background=work?'var(--accent)':'var(--rest-c)';$('c-type').style.color=work?'var(--on-accent)':'var(--on-rest)';
-  $('c-name').textContent=st.name;$('c-time').textContent=fmt(l);
+  setTx($('c-name'),st.name);setTx($('c-time'),fmt(l));
   $('c-ring').classList.toggle('rest',!work);$('c-ring').style.strokeDashoffset=RC*(1-frac);
   $('c-next').innerHTML=nx?`Siguiente: <b>${esc(nx.name)}</b> · ${mmss(nx.sec)}`:'<b>Último paso</b>';
   $('c-prog').textContent=`Ronda ${st.round} de ${C_().rounds}${cRun?'':' · En pausa'}`;
@@ -5996,9 +6060,8 @@ function renderCal(){if(S.calView==='3d'&&!DESK.matches){S.calView='week';save()
       (isT?`<span class="left">${(1-frac)*24<1?Math.max(1,Math.round((1-frac)*1440))+' min':Math.ceil((1-frac)*24)+'h'}</span>`:'')+
       `<span class="mnum">${d.getDate()}</span>${S.weekNum&&i%7===0?`<span class="mwk">S${weekNo(d)}</span>`:''}${shown}</button>`;
   }
-  /* El rayo de la línea de tiempo, el mismo de Día y Semana: cruza la semana de hoy a la altura de la hora (arriba las 0:00, abajo las 24:00)
-     y brilla más sobre el día de hoy. Antes el mes solo tenía una raya pequeña dentro de la casilla */
-  if(ti>=0){const r=Math.floor(ti/7),c=ti%7;html+=`<div class="bk-now wk-laser m-laser" aria-hidden="true" style="grid-row:${r+2}/${r+3};top:${(frac*100).toFixed(2)}%;--p:${((c+.5)/7*100).toFixed(2)}%;--c0:${(c/7*100).toFixed(2)}%"><i></i><b class="wk-dot"></b></div>`}
+  /* El rayo de la línea de tiempo, el mismo de Día y Semana, solo dentro de la casilla de hoy y a la altura de la hora (arriba las 0:00, abajo las 24:00) */
+  if(ti>=0){const r=Math.floor(ti/7),c=ti%7;html+=`<div class="m-lzw" aria-hidden="true" style="grid-row:${r+2}/${r+3};grid-column:${c+1}/${c+2}"><div class="bk-now wk-laser m-laser" style="top:${(frac*100).toFixed(2)}%;--p:38%;--c0:7px"><i></i><b class="wk-dot"></b></div></div>`}
   grid.innerHTML=html;renderCalAlt();
   // Próximos 7 días
   const up=[];for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()+i);const k=dk(d);
@@ -8638,17 +8701,21 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
     /* Mientras se pulsa, la gota va a la opción pulsada (como en iOS 26), no se levanta en la que ya estaba */
     /* Escala con la que se ve la caja: mientras una hoja o un menú se abre creciendo, sus medidas en pantalla son más pequeñas que las reales.
        Sin corregirlo la gota se colocaba encogida y luego corría y se estiraba hasta su sitio, separada de su opción */
-    const scl=b=>[b.width/(box.offsetWidth||b.width)||1,b.height/(box.offsetHeight||b.height)||1];
+    const scl=b=>[b.width/(box.offsetWidth||b.width)||1,b.height/(box.offsetHeight||b.height)||1];let BR=new WeakMap();addEventListener('resize',()=>{BR=new WeakMap()});
     function aim(){const c=dg&&dg.it.isConnected&&dg.it.offsetWidth?dg.it:cur();if(!c)return false;const r0=tgt(c).getBoundingClientRect(),b=box.getBoundingClientRect();if(!r0.width)return false;const cx=box.clientLeft,cy=box.clientTop;
       const [kx,ky]=scl(b),r={left:b.left+(r0.left-b.left)/kx,top:b.top+(r0.top-b.top)/ky,width:r0.width/kx,height:r0.height/ky};
       /* Mientras se arrastra, el eje del gesto lo marca el dedo (lo fija pointermove); el otro eje sigue a la pestaña */
       const dr=!!(dg&&dg.moved),vt=V(),sp=drag&&lift,D=sp?Math.max(r.width,r.height)*1.12:0;
       /* En las barras que se arrastran, al pulsar la gota se vuelve una esfera algo mayor que la pestaña, centrada en ella */
       if(!dr||vt)tx=r.left-b.left-cx+(vt?0:box.scrollLeft)+(sp?(r.width-D)/2:0);if(!dr||!vt)ty=r.top-b.top-cy+box.scrollTop+(sp?(r.height-D)/2:0);
-      tw=sp?D:r.width;th=sp?D:r.height;L.style.borderRadius=sp?'999px':getComputedStyle(tgt(c)).borderRadius;return true}
-    function paint(sx,sy){L.style.width=o.w+'px';L.style.height=o.h+'px';L.style.transform=`translate3d(${o.x}px,${o.y}px,0) scale(${sx},${sy})`;
-      const vert=V(),c=vert?o.y+o.h/2:o.x+o.w/2,sz=vert?o.h:o.w,sp=Math.min(1,Math.hypot(o.vx,o.vy)/1400);L.style.setProperty('--lv',sp.toFixed(2));
-      root.querySelectorAll(itemSel).forEach(el=>{const m=vert?el.offsetTop+el.offsetHeight/2:el.offsetLeft+el.offsetWidth/2,d=m-c,li=Math.max(0,1-Math.abs(d)/(sz*2.6));el.style.setProperty('--li',(li*li*1.25).toFixed(3));el.style.setProperty('--lx',vert?'50%':d>0?'0%':'100%')})}
+      tw=sp?D:r.width;th=sp?D:r.height;const tg=tgt(c);let br=sp?'999px':BR.get(tg);if(br==null){br=getComputedStyle(tg).borderRadius;BR.set(tg,br)}put(L,'border-radius',br);return true}
+    /* Primero se mide y luego se escribe, y solo lo que cambia: escribir el tamaño de la gota y después leer la posición de las opciones
+       obligaba a recalcular la maquetación en cada fotograma, y reescribir --li en todas las opciones rehacía sus estilos aunque no cambiara */
+    const PW=new WeakMap(),put=(el,k,v)=>{let m=PW.get(el);if(!m){m={};PW.set(el,m)}if(m[k]!==v){m[k]=v;el.style.setProperty(k,v)}};
+    function paint(sx,sy){const vert=V(),c=vert?o.y+o.h/2:o.x+o.w/2,sz=vert?o.h:o.w,sp=Math.min(1,Math.hypot(o.vx,o.vy)/1400);
+      const its=[...root.querySelectorAll(itemSel)].map(el=>[el,vert?el.offsetTop+el.offsetHeight/2:el.offsetLeft+el.offsetWidth/2]);
+      put(L,'width',o.w.toFixed(1)+'px');put(L,'height',o.h.toFixed(1)+'px');L.style.transform=`translate3d(${o.x.toFixed(2)}px,${o.y.toFixed(2)}px,0) scale(${sx.toFixed(4)},${sy.toFixed(4)})`;put(L,'--lv',sp.toFixed(2));
+      its.forEach(([el,m])=>{const d=m-c,li=Math.max(0,1-Math.abs(d)/(sz*2.6));put(el,'--li',(li*li*1.25).toFixed(2));put(el,'--lx',vert?'50%':d>0?'0%':'100%')})}
     function step(now){raf=0;if(!on()||!aim()){L.style.opacity='0';/* Oculta, su agujero no puede quedarse sobre la vista siguiente; al volver a verse se coloca sin viajar */
         if(hole){on()?hole.str(0):hole.kill();hole=null}if(!on())init=false;return}L.style.opacity='';
       if(!init||RM.matches){o.x=tx;o.y=ty;o.w=tw;o.h=th;init=true;o.vx=o.vy=o.vw=o.vh=0;paint(1,1);last=now;if(hole&&!lift){hole.str(0);hole=null}
@@ -8668,8 +8735,8 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
         if(!hole){hole=window.lgHole(o.w,o.h,rad,R,sp);if(hole)hole.track(L)}if(hole)hole.resize(o.w,o.h,rad,R,sp).at(c.x,c.y,px,py).rot(rot).str(sp?(dr?1:.85):lift?.7:Math.min(.7,tv))}
       else if(hole){hole.str(0);hole=null}
       const lf=lift||tv>.3;if(L.classList.contains('lift')!==lf){L.classList.toggle('lift',lf);if(lf&&!sp&&window.lgRefract)window.lgRefract(L,true)}
-      if(L.classList.contains('sph')!==sp)L.classList.toggle('sph',sp);L.style.setProperty('--hrot',rot+'deg');if(window.lgLensDust&&Math.random()<.5)window.lgLensDust(L,o.vx,o.vy,sp);
-      if(L.classList.contains('drag')!==dr){L.classList.toggle('drag',dr);box.classList.toggle('lg-drag',dr)}if(dr)L.style.setProperty('--la',((o.x+o.y)*2.4%360).toFixed(1));
+      if(L.classList.contains('sph')!==sp)L.classList.toggle('sph',sp);L.style.setProperty('--hrot',rot+'deg');
+      if(L.classList.contains('drag')!==dr){L.classList.toggle('drag',dr);box.classList.toggle('lg-drag',dr)}if(dr||lf)L.style.setProperty('--la',((o.x+o.y)*2.4%360).toFixed(1));
       if(dg||Math.abs(tx-o.x)>.25||Math.abs(ty-o.y)>.25||Math.abs(tw-o.w)>.25||Math.abs(o.vx)>4||Math.abs(o.vy)>4||Date.now()<until)raf=requestAnimationFrame(step);else{o.x=tx;o.y=ty;o.w=tw;o.h=th;o.vx=o.vy=0;paint(1,1)}}
     const kick=ms=>{until=Math.max(until,Date.now()+(ms||600));if(!raf){last=performance.now();raf=requestAnimationFrame(step)}};
     new MutationObserver(()=>{if(!L.isConnected)box.prepend(L);kick(700)}).observe(box,{subtree:true,childList:true,attributes:true,attributeFilter:['aria-current','aria-selected','aria-pressed','hidden']});
@@ -8796,7 +8863,7 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
     document.addEventListener('pointerdown',e=>{const i=e.target.closest&&e.target.closest('input[type=time]');if(i&&e.pointerType!=='mouse')e.preventDefault()},true)}
 
   /* ---------- Partículas de luz: motas que saltan de la lente al moverse, del gel al pulsar y del rayo de la hora ---------- */
-  {const cv=document.createElement('canvas');cv.id='lg-dust';cv.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9;mix-blend-mode:screen';document.body.appendChild(cv);const cx=cv.getContext('2d');let ps=[],raf=0,last=0,W=0,H=0;
+  {const cv=document.createElement('canvas');cv.id='lg-dust';cv.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9;mix-blend-mode:screen';document.body.appendChild(cv);const cx=cv.getContext('2d');let ps=[],raf=0,last=0,W=0,H=0,bEl=null,bAt=0;
     const size=()=>{const d=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)};size();addEventListener('resize',size);
     const colorOf=el=>{const c=getComputedStyle(el||document.body).getPropertyValue('--container').trim()||'#c6c4f4';cx.fillStyle=c;return cx.fillStyle};
     /* Cada color tiene su sprite: un disco difuso dibujado una vez, sin sombras por fotograma */
@@ -8812,35 +8879,42 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
     const shape=(x,k)=>{const r=x.r,h=r.height+2*k,w=r.width+2*k;let rd=RAD.get(x.b);if(rd==null){rd=parseFloat(getComputedStyle(x.b).borderTopLeftRadius)||0;RAD.set(x.b,rd)}rd=Math.min(h/2,w/2,rd+k);
       if(cx.roundRect&&rd)cx.roundRect(r.left-k,r.top-k,w,h,rd);else cx.rect(r.left-k,r.top-k,w,h)};
     const draw=p=>{const a=Math.min(1,p.life/p.max*1.6),d=p.r*(2.2+a*1.6);cx.globalAlpha=Math.min(1,a*1.25);cx.drawImage(sprite(p.c),p.x-d,p.y-d,d*2,d*2)};
-    function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;cx.clearRect(0,0,W,H);
+    /* Con solo motas lentas (las del rayo) basta con 30 fotogramas por segundo: se mueven pocos píxeles y así el lienzo cuesta la mitad */
+    function tick(now){if(now-last<31&&ps.every(p=>p.slow)){raf=requestAnimationFrame(tick);return}const dt=Math.min(.05,(now-last)/1000);last=now;cx.clearRect(0,0,W,H);
       /* Ajustes tapa la pantalla entera por encima de las partículas: seguir moviéndolas y midiendo las barras solo le quita fotogramas a su apertura */
       if(!$('settings').hidden){ps=[];raf=0;return}
       cx.globalCompositeOperation='lighter';
       ps=ps.filter(p=>{p.life-=dt;if(p.life<=0)return false;p.ph+=dt*p.w;p.vx+=Math.cos(p.ph)*p.wob*dt;p.vy+=Math.sin(p.ph*1.3)*p.wob*dt;p.vx*=Math.exp(-p.drag*dt);p.vy*=Math.exp(-p.drag*dt);p.x+=p.vx*dt;p.y+=p.vy*dt;return true});
-      const bs=[...document.querySelectorAll(BARS)].map(b=>({b,r:b.getBoundingClientRect()})).filter(x=>x.r.width&&x.r.height&&x.r.bottom>0&&x.r.top<H);
+      if(!bEl||now-bAt>250){bEl=[...document.querySelectorAll(BARS)];bAt=now}const bs=bEl.filter(b=>b.isConnected).map(b=>({b,r:b.getBoundingClientRect()})).filter(x=>x.r.width&&x.r.height&&x.r.bottom>0&&x.r.top<H);
       const menu=bs.some(x=>x.b.matches(SHEETP)),z=menu?'45':'9';if(cv.style.zIndex!==z)cv.style.zIndex=z;
       if(!menu)ps.forEach(p=>{if(!p.bar)draw(p)});if(bs.length){cx.globalCompositeOperation='destination-out';cx.globalAlpha=1;cx.beginPath();bs.forEach(x=>shape(x,0));cx.fill();cx.globalCompositeOperation='lighter'}
       bs.forEach(x=>{if(menu&&!x.b.matches(SHEETP))return;const own=ps.filter(p=>p.bar===x.b);if(!own.length)return;cx.save();cx.beginPath();shape(x,4);cx.clip();own.forEach(draw);cx.restore()});
       cx.globalAlpha=1;if(ps.length)raf=requestAnimationFrame(tick);else{raf=0;cx.clearRect(0,0,W,H)}}
     /* n motas en (x,y) con color c; vx/vy base, apertura y gravedad (negativa: suben) */
     window.lgDust=(x,y,c,n,o={})=>{if(RM.matches||document.hidden)return;for(let i=0;i<n&&ps.length<90;i++){const a=(o.a||0)+(Math.random()-.5)*(o.spread||Math.PI*2),sp=(o.sp==null?60:o.sp)*(.4+Math.random()*.9);
-        ps.push({x:x+(Math.random()-.5)*(o.w||6),y:y+(Math.random()-.5)*(o.h||6),vx:Math.cos(a)*sp+(o.vx||0),vy:Math.sin(a)*sp+(o.vy||0),ph:Math.random()*6.3,w:2+Math.random()*3,wob:o.wob==null?60:o.wob,drag:o.drag||1.1,r:(o.r||1.6)*(.6+Math.random()*.8),c:c||'#c6c4f4',bar:o.bar||null,life:0,max:0})}
+        ps.push({x:x+(Math.random()-.5)*(o.w||6),y:y+(Math.random()-.5)*(o.h||6),vx:Math.cos(a)*sp+(o.vx||0),vy:Math.sin(a)*sp+(o.vy||0),ph:Math.random()*6.3,w:2+Math.random()*3,wob:o.wob==null?60:o.wob,drag:o.drag||1.1,r:(o.r||1.6)*(.6+Math.random()*.8),c:c||'#c6c4f4',bar:o.bar||null,slow:!!o.slow,life:0,max:0})}
       ps.slice(-n).forEach(p=>{p.max=p.life=(o.life||.9)*(.6+Math.random()*.8)});if(!raf){last=performance.now();raf=requestAnimationFrame(tick)}};
     window.lgBarOf=barOf;
     /* Las motas que suelta el contenido (el rayo, las tarjetas) se desplazan con él: al hacer scroll no se quedan flotando donde ya no hay nada */
     {let ly=0;const sc=$('v-blocks');sc.addEventListener('scroll',()=>{const y=sc.scrollTop,d=y-ly;ly=y;if(d&&ps.length)ps.forEach(p=>{if(!p.bar)p.y-=d})},{passive:true})}
     window.lgDustClear=(b,rc)=>{ps.forEach(p=>{if(rc?!p.bar&&p.x>=rc.left&&p.x<=rc.right&&p.y>=rc.top-80&&p.y<=rc.bottom:p.bar===b)p.life=Math.min(p.life,.15)})};
-    /* Al pulsar: chispas desde el punto de contacto, del color del control */
-    document.addEventListener('pointerdown',e=>{if(e.button>0)return;const el=e.target.closest&&e.target.closest(LG_PRESS+',.nav-in button,.nav-set,.tab,#bk-week button');if(!el)return;const wk=el.closest('#bk-week');window.lgDust(e.clientX,e.clientY,el.closest('.nav')?'#ffffff':colorOf(el),wk?4:7,wk?{sp:38,r:1.2,life:.55,bar:barOf(el)}:{sp:70,r:1.4,life:1.1,bar:barOf(el)})},{passive:true});
     /* El rayo de la hora suelta motas que suben por la estela */
-    setInterval(()=>{if(document.hidden||document.body.classList.contains('bkw-sliding'))return;let r=null;const n=[...document.querySelectorAll('.bk-now:not(.yr-laser),.sc-now')].find(x=>{if(!x.offsetParent)return false;const q=x.getBoundingClientRect();if(!q.width||q.top<0||q.top>H||q.right<0||q.left>W)return false;r=q;return true});if(!n)return;const x=r.left+Math.random()*Math.min(r.width,W-r.left);window.lgDust(x,r.top,'#ff8a90',1,{a:-Math.PI/2,spread:.9,sp:18,vx:-10,r:1.2,life:2.4,drag:.5,wob:40})},260);}
-  /* Las lentes sueltan motas al correr, cuanto más rápido más. La esfera las suelta desde su borde, girando con ella como si rodara */
-  const DUSTC=['#ffffff','#cfe8ff','#ffd9f4','#fff3bf'];
-  /* En la tira de días son pocas, cortas y no se alejan de la gota: se apagan antes de que llegue al día elegido */
-  window.lgLensDust=(L,vx,vy,sph)=>{const sp=Math.hypot(vx,vy),wk=!!(L.parentNode&&L.parentNode.id==='bk-week');if(sp<(wk?(sph?260:420):(sph?120:260))||!window.lgDust||wk&&Math.random()<.5)return;const r=L.getBoundingClientRect();
-    if(sph){const a=Math.random()*Math.PI*2,R=r.width/2,s=(Math.abs(vx)>=Math.abs(vy)?Math.sign(vx):Math.sign(vy))||1,t=Math.min(wk?70:160,sp*(wk?.12:.22));
-      window.lgDust(r.left+R+Math.cos(a)*R,r.top+r.height/2+Math.sin(a)*R,DUSTC[Math.floor(Math.random()*DUSTC.length)],!wk&&sp>700?2:1,{a:0,spread:.01,sp:0,vx:-Math.sin(a)*t*s+vx*(wk?.08:.15),vy:Math.cos(a)*t*s+vy*(wk?.08:.15),r:1.6,life:wk?.5:1.1,w:2,h:2,wob:16,bar:window.lgBarOf(L)});return}
-    const c=getComputedStyle(L).backgroundColor;window.lgDust(vx>0?r.left:r.right,r.top+r.height/2,c,!wk&&sp>900?2:1,{a:Math.atan2(-vy,-vx),spread:wk?.7:1.2,sp:sp*(wk?.12:.25),r:1.3,life:wk?.45:1.2,h:r.height*(wk?.5:.8),bar:window.lgBarOf(L)})};
+    setInterval(()=>{if(document.hidden||document.body.classList.contains('bkw-sliding'))return;let r=null;const n=[...document.querySelectorAll('.bk-now:not(.yr-laser),.sc-now')].find(x=>{if(!x.offsetParent)return false;const q=x.getBoundingClientRect();if(!q.width||q.top<0||q.top>H||q.right<0||q.left>W)return false;r=q;return true});if(!n)return;const x=r.left+Math.random()*Math.min(r.width,W-r.left);window.lgDust(x,r.top,window.LZ_MOTE||'#ff8a90',1,{a:-Math.PI/2,spread:.9,sp:18,vx:-10,r:1.2,life:2.4,drag:.5,wob:40,slow:1})},340);}
+  /* ---------- Destellos de refracción: en lugar de chispas, al pulsar la luz se separa en sus colores dentro del control ----------
+     Un anillo de espectro que se abre desde el dedo y una banda irisada que cruza el cristal. Solo transform y opacity: van por la GPU sin
+     recalcular la página, y cada control tiene un único destello vivo */
+  {const GLINT_SEL=LG_PRESS+',.nav-in button,.nav-set,.tab,#bk-week button,.lg-host>button,.sheet button,.cdr button,[role=menuitem],[role=option]',LIVE=new WeakMap();
+    const SPEC='rgba(255,59,107,.0) 0,rgba(255,59,107,.55) 14%,rgba(255,176,46,.55) 28%,rgba(255,233,92,.6) 42%,rgba(61,220,132,.55) 56%,rgba(46,197,255,.6) 70%,rgba(143,107,255,.5) 84%,rgba(143,107,255,0) 100%';
+    window.lgGlint=(el,x,y)=>{if(RM.matches||!el||!el.isConnected)return;const r=el.getBoundingClientRect();if(!r.width||!r.height)return;
+      const old=LIVE.get(el);if(old)old.remove();if(getComputedStyle(el).position==='static')el.style.position='relative';
+      const g=document.createElement('lg-glint');g.setAttribute('aria-hidden','true');const big=Math.hypot(r.width,r.height)*1.15,px=(x==null?r.width/2:x-r.left),py=(y==null?r.height/2:y-r.top);
+      g.innerHTML=`<lg-r style="width:${big*2}px;height:${big*2}px;left:${px-big}px;top:${py-big}px"></lg-r><lg-b style="height:${r.height*2.4}px;top:${-r.height*.7}px"></lg-b>`;el.appendChild(g);LIVE.set(el,g);
+      const ring=g.firstChild,band=g.lastChild,w=Math.max(40,r.width),bw=Math.min(160,Math.max(46,w*.55));band.style.width=bw+'px';
+      const a1=ring.animate([{transform:'scale(.08)',opacity:1},{transform:'scale(.7)',opacity:.85,offset:.45},{transform:'scale(1)',opacity:0}],{duration:620,easing:'cubic-bezier(.2,.8,.3,1)'});
+      band.animate([{transform:`translate3d(${-bw}px,0,0) rotate(18deg)`,opacity:0},{opacity:1,offset:.25},{opacity:.9,offset:.7},{transform:`translate3d(${w+bw*.2}px,0,0) rotate(18deg)`,opacity:0}],{duration:560,delay:40,easing:'cubic-bezier(.3,.6,.25,1)',fill:'backwards'});
+      a1.onfinish=()=>setTimeout(()=>{if(LIVE.get(el)===g){LIVE.delete(el)}g.remove()},120)};
+    document.addEventListener('pointerdown',e=>{if(e.button>0)return;const el=e.target.closest&&e.target.closest(GLINT_SEL);if(!el||el.disabled||el.matches('input,textarea,select'))return;window.lgGlint(el,e.clientX,e.clientY)},{passive:true});
+    window.LG_SPEC=SPEC}
   /* ---------- Agujero negro: al pulsar, la luz de lo que hay detrás se curva alrededor del control ----------
      Un velo con backdrop-filter y un mapa de desplazamiento: junto al borde se ve la luz de puntos más alejados, que además gira
      como un disco de acreción. La forma es la del control (redondo, cuadrado o píldora). Debajo va un halo de luz blanca con arcoíris
@@ -8912,9 +8986,11 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
     document.addEventListener('pointerup',hpEnd,true);document.addEventListener('pointercancel',hpEnd,true);}
 
   /* Deslizadores: el recorrido se ilumina hasta el pulgar */
-  {const fill=r=>{const a=+r.min||0,b=r.max===''?100:+r.max,v=+r.value;r.style.setProperty('--p',(Math.max(0,Math.min(1,(v-a)/((b-a)||1)))*100).toFixed(1)+'%')};
+  /* Solo se recalcula cuando aparece un deslizador o cambia su valor: antes cualquier cambio de la página (el reloj, el temporizador) lo recorría todo en cada fotograma */
+  {const PV=new WeakMap(),fill=r=>{const a=+r.min||0,b=r.max===''?100:+r.max,v=+r.value,t=(Math.max(0,Math.min(1,(v-a)/((b-a)||1)))*100).toFixed(1)+'%';if(PV.get(r)!==t){PV.set(r,t);r.style.setProperty('--p',t)}};
     const all=()=>document.querySelectorAll('input[type=range]').forEach(fill);all();document.addEventListener('input',e=>{if(e.target.type==='range')fill(e.target)});
-    let qa=0;new MutationObserver(()=>{if(!qa)qa=requestAnimationFrame(()=>{qa=0;all()})}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['value','hidden']})}
+    const hasR=n=>n.nodeType===1&&(n.tagName==='INPUT'?n.type==='range':!!n.querySelector('input[type=range]'));
+    let qa=0;new MutationObserver(ms=>{if(qa)return;if(ms.some(m=>m.type==='attributes'?(m.attributeName==='hidden'?hasR(m.target):m.target.type==='range'):[...m.addedNodes].some(hasR)))qa=requestAnimationFrame(()=>{qa=0;all()})}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['value','hidden']})}
 
   /* Hojas y menús: nacen desde donde has tocado y vuelven ahí al cerrarse */
   let pd=null;document.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY,t:Date.now(),el:e.target}},true);
