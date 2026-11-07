@@ -129,9 +129,11 @@ ipcMain.handle('upd-install',async(e,file)=>{
 let wwin=null,wdata=null;const WCFG=()=>path.join(app.getPath('userData'),'widget.json');
 const wcfg=()=>{try{return JSON.parse(fs.readFileSync(WCFG(),'utf8'))}catch(e){return {}}},wsave=o=>{try{fs.writeFileSync(WCFG(),JSON.stringify(Object.assign(wcfg(),o)))}catch(e){}};
 function widgetOpen(){if(wwin){wwin.showInactive();return}const c=wcfg();
-  wwin=new BrowserWindow({width:c.w||370,height:c.h||262,x:c.x,y:c.y,minWidth:260,minHeight:120,frame:false,transparent:true,resizable:true,skipTaskbar:true,alwaysOnTop:c.top!==false,hasShadow:false,show:false,backgroundColor:'#00000000',icon:ICON,
+  wwin=new BrowserWindow({width:c.w||370,height:c.h||262,x:c.x,y:c.y,minWidth:260,minHeight:120,frame:false,transparent:true,resizable:false,skipTaskbar:true,alwaysOnTop:c.top!==false,hasShadow:false,show:false,backgroundColor:'#00000000',icon:ICON,
     webPreferences:{preload:path.join(__dirname,'preload-widget.cjs'),backgroundThrottling:false}});
-  wwin.once('ready-to-show',()=>wwin&&wwin.showInactive());
+  // Nace con tamaño fijo para que los gestores en mosaico (Hyprland, Sway, i3) la dejen flotando; ya colocada, se puede redimensionar.
+  // Si naciera redimensionable, Hyprland la metería en el mosaico ocupando media pantalla
+  wwin.once('ready-to-show',()=>{if(!wwin)return;wwin.showInactive();setTimeout(()=>{if(wwin)wwin.setResizable(true)},400)});
   wwin.webContents.on('did-finish-load',()=>{if(wdata&&wwin)wwin.webContents.send('widget-data',wdata)});
   wwin.webContents.setWindowOpenHandler(()=>({action:'deny'}));wwin.webContents.on('will-navigate',e=>e.preventDefault());
   const keep=()=>{if(!wwin)return;const b=wwin.getBounds();wsave({x:b.x,y:b.y,w:b.width,h:b.height})};wwin.on('moved',keep);wwin.on('resized',keep);wwin.on('closed',()=>{wwin=null});

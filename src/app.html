@@ -2782,7 +2782,8 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
 #cal-grid .m-laser i{height:44px}
 #cal-grid .m-laser::after{width:44px;animation-name:nowGlideC}@keyframes nowGlideC{0%{transform:translateX(-100%);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:translateX(420%);opacity:0}}
 .yr-g{position:relative}
-.yr-g .yr-laser{position:absolute;left:0;right:0;grid-column:1/-1;height:1.5px;margin-top:-1px;z-index:2;clip-path:inset(-16px 0 -6px 0)}
+/* Como en Mes: en cada mes del año el rayo solo cruza la casilla de hoy */
+.yr-g .yr-laser{position:absolute;left:0;right:0;height:1.5px;margin-top:-1px;z-index:2;clip-path:inset(-16px 0 -6px 0)}
 .yr-g .yr-laser::before{height:12px}
 .yr-g .yr-laser i{height:13px}
 .yr-g .yr-laser::after{width:56px;height:6px;top:-2px}
@@ -4756,7 +4757,7 @@ function yearCard(y){const todayK=dk(new Date()),CE=calEvents(),has=new Set(CE.f
   const nd=(y%4===0&&y%100!==0)||y%400===0?366:365;
   return `<div class="yr-card"><div class="yr-h"><b>${y}</b><span>${nd} ${T('días')}</span></div><div class="yr">${[...Array(12)].map((_,m)=>{const first=new Date(y,m,1),off=(first.getDay()-fd+7)%7,nd=new Date(y,m+1,0).getDate();let c='';
     for(let i=0;i<off;i++)c+='<i></i>';let li='';for(let dd=1;dd<=nd;dd++){const k=dk(new Date(y,m,dd));c+=`<button data-day="${k}" class="${k===todayK?'today':''}${holOn(k).length?' hol':''}${has.has(k)?' has':''}">${dd}</button>`;
-      if(k===todayK){const ix=off+dd-1,f=(new Date().getHours()*60+new Date().getMinutes())/1440;li=`<b class="bk-now wk-laser yr-laser" aria-hidden="true" style="grid-row:${Math.floor(ix/7)+1}/${Math.floor(ix/7)+2};top:${(f*100).toFixed(2)}%;--p:${((ix%7+.5)/7*100).toFixed(2)}%;--c0:${(ix%7/7*100).toFixed(2)}%"><i></i><b class="wk-dot"></b></b>`}}c+=li;
+      if(k===todayK){const ix=off+dd-1,f=(new Date().getHours()*60+new Date().getMinutes())/1440;li=`<b class="bk-now wk-laser yr-laser" aria-hidden="true" style="grid-row:${Math.floor(ix/7)+1}/${Math.floor(ix/7)+2};grid-column:${ix%7+1}/${ix%7+2};top:${(f*100).toFixed(2)}%;--p:50%;--c0:50%"><i></i><b class="wk-dot"></b></b>`}}c+=li;
     return `<div class="yr-m"><button class="yr-t" data-ymonth="${m}" data-yy="${y}">${cap(first.toLocaleDateString(LOC,{month:'long'}))}</button><div class="yr-wd">${dayOrder().map(x=>`<i>${DAYN[x]}</i>`).join('')}</div><div class="yr-g">${c}</div></div>`}).join('')}</div></div>`}
 let schedDays=45;
 function renderSched(){const out=[],todayK=dk(new Date()),CE=calEvents();let lastM='';
@@ -7439,8 +7440,9 @@ const APF=[['agenda/calendarios.json',()=>({agendas:S.agendas,cals:S.cals,subs:(
       if(o.subs){const old=new Map((S.subs||[]).map(x=>[x.id,x]));S.subs=o.subs.map(x=>Object.assign({},x,{events:(old.get(x.id)||{}).events||[]}));S.subs.forEach(x=>{if(!old.has(x.id)&&x.url&&typeof subFetch==='function')subFetch(x)})}
       if(S.curAgenda!=='*'&&S.agendas&&S.agendas.length&&!S.agendas.some(a=>a.id===S.curAgenda))S.curAgenda=S.agendas[0].id}],
   ['tiempo/relojes.json',()=>({cities:S.cities||[]}),o=>{S.cities=o.cities||[]}]];
-/* Lo que es de cada dispositivo (si ya avisó de un evento) no viaja */
-const AP_LOCAL=['notified'];
+/* Lo que es de cada dispositivo no viaja: si ya avisó de un evento (también de cada repetición), si está pospuesto y la marca de imagen
+   (las imágenes se quedan en el dispositivo). Si «avisado» viajara, el aviso que salta en el PC apagaría el del móvil */
+const AP_LOCAL=['notified','notif','snoozeUntil','img'];
 const apStable=v=>JSON.stringify(v,(k,x)=>x&&typeof x==='object'&&!Array.isArray(x)?Object.keys(x).sort().reduce((o,q)=>{if(x[q]!==undefined)o[q]=x[q];return o},{}):x);
 const apFnv=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return (h>>>0).toString(36)+s.length.toString(36)};
 const apId=id=>String(id).replace(/[^\w.-]/g,'_');
