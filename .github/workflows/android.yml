@@ -3,6 +3,9 @@ name: Compilar APK
 on:
   push:
     branches: [main]
+    # Los documentos (.md) no cambian la app: no hace falta compilar ni publicar
+    paths-ignore:
+      - '**/*.md'
   workflow_dispatch:
 
 permissions:
