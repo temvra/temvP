@@ -51,7 +51,8 @@
   /* ---------- Ciclo de vida ---------- */
   let bg=false;
   if(App){App.addListener('pause',()=>{bg=true;window.VTNative.bg=true;schedule();pushWidgets()});
-    App.addListener('resume',()=>{bg=false;window.VTNative.bg=false;syncTimer().then(clearAll);syncFired();theme();pushWidgets()});
+    /* Hasta recoger el estado del temporizador que llevaba Android, la app no cierra vueltas por su cuenta: sonarían otra vez y se contarían dos veces */
+    App.addListener('resume',()=>{bg=false;let d=0;const done=()=>{if(!d){d=1;window.VTNative.bg=false}};syncTimer().then(clearAll).finally(done);setTimeout(done,1500);syncFired();theme();pushWidgets()});
     App.addListener('backButton',()=>{const a=api();if(a&&a.back())return;App.minimizeApp()})}
   /* Programar también al cambiar cosas, por si Android cierra la app sin avisar */
   let t;const deb=()=>{clearTimeout(t);t=setTimeout(()=>{if(bg)schedule()},800)};
