@@ -151,6 +151,12 @@ button.digits:hover{background:var(--surface-2)}
 #fps-m{white-space:nowrap;position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;transform:translateX(-50%);z-index:2147483000;display:flex;align-items:center;gap:8px;padding:4px 10px 4px 8px;border-radius:999px;font:600 11px/1.2 ui-monospace,monospace;color:#fff;background:rgba(0,0,0,.72);box-shadow:0 0 0 1px rgba(255,255,255,.14);font-variant-numeric:tabular-nums;cursor:pointer;-webkit-user-select:none;user-select:none}
 #fps-m canvas{width:60px;height:18px;display:block}
 #fps-m b{min-width:52px}
+.ap-chip{display:flex;align-items:center;gap:8px;margin:0 auto 10px;padding:6px 12px 6px 10px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--fg);background:color-mix(in srgb,var(--surface-2) 70%,transparent);border:1px solid color-mix(in srgb,var(--fg) 10%,transparent)}
+.ap-chip[hidden]{display:none}
+.ap-chip i{width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 8px #3ddc84}
+.ap-chip.spin i{background:#2ec5ff;box-shadow:0 0 8px #2ec5ff;animation:apPulse 1s ease-in-out infinite}
+.ap-chip.err i{background:#ff6b6b;box-shadow:0 0 8px #ff6b6b}
+@keyframes apPulse{50%{opacity:.3}}
 .lz-prev{position:relative;height:30px;margin:12px 2px 0;border-radius:12px;background:var(--surface-2);overflow:hidden}
 .lz-prev b{position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:linear-gradient(90deg,transparent,rgb(var(--lz) / .5) 18%,rgb(var(--lz)) 40%,rgb(var(--lz3)) 48%,#fff 50%,rgb(var(--lz3)) 52%,rgb(var(--lz)) 60%,rgb(var(--lz) / .5) 82%,transparent);box-shadow:0 0 6px rgb(var(--lz2) / .8),0 0 16px rgb(var(--lz) / .45)}
 .lz-prev i{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff,0 0 10px rgb(var(--lz)),0 0 22px rgb(var(--lz) / .65)}
@@ -3200,6 +3206,15 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
       </div>
     </div>
 
+    <div class="label">Sincronización entre dispositivos</div>
+    <div class="card">
+      <div class="row-sw"><span class="t1">Agenda y Time en GitHub</span><button class="switch" role="switch" id="sw-ap" aria-label="Agenda y Time en GitHub"></button></div>
+      <p class="sub">Eventos, citas, calendarios, temporizadores, bloques, circuitos, alarmas y relojes se guardan como archivos en la carpeta .temvra del repositorio de tu bóveda de Notas. Cada cambio se sube al momento y tus otros dispositivos con la misma cuenta lo reciben en unos segundos.</p>
+      <p class="sub" id="ap-st" style="margin-top:8px"></p>
+      <div class="field" id="ap-vault-f" hidden><label for="ap-vault">Repositorio</label><select id="ap-vault"></select></div>
+      <div class="field"><button class="btn tonal" id="ap-now">Sincronizar ahora</button></div>
+    </div>
+
     <div class="label">Ayuda</div>
     <div class="card">
       <div class="t1">Tour de bienvenida</div>
@@ -3670,7 +3685,7 @@ if(!S.uiV){S.uiV=2;if(S.mode==='auto')S.mode='dark'}
 S.bg=Object.assign({},DEF.bg,S.bg||{});S.tts=Object.assign({},DEF.tts,S.tts||{});
 let bgImg=LS.get('bgimg',null),ownAudio=LS.get('own',null),ownName=LS.get('ownname','');
 let wT=0;
-const save=()=>{if(S.events&&S.agendas)S.events.forEach(e=>{if(!e.ag)e.ag=agNew()});calDirty=true;clearTimeout(wT);wT=setTimeout(()=>{if(typeof pushWidgets==='function')pushWidgets()},1500);return LS.set('state',S)};
+const save=()=>{if(S.events&&S.agendas)S.events.forEach(e=>{if(!e.ag)e.ag=agNew()});calDirty=true;if(window.apDirty)window.apDirty();clearTimeout(wT);wT=setTimeout(()=>{if(typeof pushWidgets==='function')pushWidgets()},1500);return LS.set('state',S)};
 
 /* ================= IDIOMA ================= */
 const LANGS=[['es-ES','Español (España)'],['es-MX','Español (México)'],['ca-ES','Català'],['en-US','English (US)'],['en-GB','English (UK)'],['pt-BR','Português (Brasil)'],['pt-PT','Português (Portugal)'],['fr-FR','Français'],['de-DE','Deutsch'],['it-IT','Italiano'],['ja-JP','日本語'],['zh-CN','中文 (简体)'],['ko-KR','한국어']];
@@ -5554,13 +5569,13 @@ function recordRecent(){if(!S.recent)S.recent=[];const k={s:S.period,loop:!!S.lo
   S.recent=[k,...S.recent.filter(r=>!(r.s===k.s&&r.loop===k.loop&&r.t===k.t))].slice(0,6);save();if(typeof renderPresets==='function')setTimeout(renderPresets,0)}
 function saveRecent(i){const r=S.recent[i];if(!r)return;S.timers.unshift({id:'t'+Date.now().toString(36),s:r.s,t:r.t,d:r.loop?'En bucle':'Una vez',loop:r.loop,f:''});S.recent.splice(i,1);save();renderPresets();toast('Guardado: '+r.t)}
 function renderPresets(){const loose=S.timers.filter(p=>!p.f||!tmFolder(p.f));
-  let h=`<div class="card head tm-head"><h2>Mis temporizadores</h2><div class="tm-btns"><button id="tm-save" class="btn tonal">＋ Guardar actual</button><button id="tm-newf" class="btn tonal" aria-label="Nuevo bloque">＋ Bloque</button></div></div>`;
+  let h=`<button class="ap-chip" data-apsync hidden><i></i><span>Bóveda en GitHub</span></button><div class="card head tm-head"><h2>Mis temporizadores</h2><div class="tm-btns"><button id="tm-save" class="btn tonal">＋ Guardar actual</button><button id="tm-newf" class="btn tonal" aria-label="Nuevo bloque">＋ Bloque</button></div></div>`;
   if((S.recent||[]).length)h+=`<div class="tm-recent"><span class="tpl-label">Recientes</span><div class="tm-rec-row">${S.recent.map((r,i)=>`<span class="tm-rec" data-rec="${i}"><button class="tm-rec-use" data-recuse="${i}"><span style="white-space:nowrap"><b>${fmt(r.s*1000)}</b>${r.loop?' ↻':''}</span><small>${esc(r.t)}</small></button><button class="tm-rec-save" data-recsave="${i}" aria-label="Guardar en Mis temporizadores">＋</button></span>`).join('')}</div></div>`;
   S.tfolders.forEach(f=>{const its=S.timers.filter(p=>p.f===f.id);h+=`<button class="row tm-folder${f.open===false?'':' open'}" data-tf="${f.id}"><div class="tile tf-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div class="txt"><div class="t1">${esc(f.name)}</div><div class="t2">Bloque · ${its.length} ${its.length===1?'temporizador':'temporizadores'}</div></div><span class="tf-chev">›</span></button>`;
     if(f.open!==false)h+=`<div class="tm-in" data-tfin="${f.id}">${its.map(tmRow).join('')||'<div class="tm-empty">Arrastra aquí un temporizador</div>'}</div>`});
   h+=loose.map(tmRow).join('');
   if(!S.timers.length)h+='<div class="row last"><div class="txt empty">Pulsa «＋ Guardar actual» para guardar el temporizador que tienes puesto.</div></div>';
-  $('presets').innerHTML=h}
+  $('presets').innerHTML=h;if(typeof apBadge==='function')try{apBadge()}catch(e){}}
 function useTimer(p){setPeriod(p.s);S.name=p.t;$('name').value=p.t;setLoop(!!p.loop);save();if(!running)tReset();renderPresets();show('timer')}
 const tmShareTxt=p=>`⏱ ${p.t} · ${fmt(p.s*1000)}${p.loop?' en bucle':''}${p.d?'\n'+p.d:''}\n— Temvra`;
 function shareText(title,txt){obSheet('Compartir',[{t:'WhatsApp',ic:SHIC.wa},{t:'Más apps…',ic:SHIC.more},{t:'Copiar texto',ic:SHIC.copy}],i=>{if(i===0)waOpen(txt);else if(i===1){if(navigator.share&&!window.VTNative)navigator.share({title,text:txt}).catch(()=>{});else if(window.VTNative)VTNative.share(safeName(title)+'.txt',new Blob([txt],{type:'text/plain'}),title,txt);else copyText(txt)}else copyText(txt)})}
@@ -7346,7 +7361,8 @@ async function ghPeek(L){const ref=await ghApi(`/repos/${L.repo}/git/ref/heads/$
 async function remoteTree(L){return (await ghHead(L)).rem}
 async function localMap(){const m={};for(const f of localFiles()){if(gitSkipRef(f.ref,f.kind==='n'))continue;m[f.path]={sha:await fileSha(f),f}}return m}
 let ghBusy=false;
-async function ghSync(L,mode,cmsg){if(ghBusy){ghPrint('Ya hay una sincronización en marcha…','dim');return}ghBusy=true;syncBtn();try{
+async function ghSync(L,mode,cmsg){if(window.__apBusy)await new Promise(r=>{const t0=Date.now(),iv=setInterval(()=>{if(!window.__apBusy||Date.now()-t0>8000){clearInterval(iv);r()}},150)});
+  if(ghBusy){ghPrint('Ya hay una sincronización en marcha…','dim');return}ghBusy=true;syncBtn();try{
   ghPrint(mode==='push'?'Leyendo el repositorio…':'Descargando cambios…','dim');
   let H=await ghHead(L);const base=L.base||{};
   const remoteChanged=Object.keys({...H.rem,...base}).some(p=>H.rem[p]!==base[p]);
@@ -7397,6 +7413,104 @@ async function ghMerge(L,rem,base){const loc=await localMap();let down=0,gone=0,
   save();renderNotes();if(curNote)renderNoteMeta();
   ghPrint(down||gone||conf?`✔ Pull: ${down} actualizados${gone?', '+gone+' borrados':''}${conf?', '+conf+(conf===1?' conflicto':' conflictos'):''}.`:'Pull: todo al día (Already up to date)','ok');if(down||gone||conf)toast('GitHub: '+[down+gone?(down+gone)+(down+gone===1?' cambio':' cambios'):'',conf?conf+(conf===1?' conflicto':' conflictos'):''].filter(Boolean).join(' · '));else if(!ghQuiet)toast('GitHub: todo al día');return conf}
 const ghPush=(L,m)=>ghSync(L,'push',m),ghPull=L=>ghSync(L,'pull');
+/* ===================== Agenda y Time en GitHub =====================
+   Cada evento, cita, temporizador, bloque, circuito, plantilla y alarma es un archivo JSON dentro de .temvra/ en el repositorio de la bóveda
+   (Notas no ve esa carpeta: empieza por punto). Fusión de 3 vías por archivo como en Notas; si los dos lados cambiaron lo mismo, gana el
+   cambio más reciente. Cualquier cambio se sube al momento y el otro dispositivo lo baja en unos segundos: mira la rama cada 5 s con ETag
+   (las respuestas 304 no gastan cupo de la API de GitHub) */
+const APP_DIR='.temvra/';
+const APC=[['agenda/eventos',()=>S.events||[],v=>{S.events=v}],['agenda/citas',()=>S.appts||[],v=>{S.appts=v}],
+  ['tiempo/temporizadores',()=>S.timers||[],v=>{S.timers=v}],['tiempo/bloques',()=>S.tfolders||[],v=>{S.tfolders=v}],
+  ['tiempo/circuitos',()=>S.myCircuits||[],v=>{S.myCircuits=v}],['tiempo/plantillas',()=>S.myTpl||[],v=>{S.myTpl=v}],['tiempo/alarmas',()=>S.alarms||[],v=>{S.alarms=v}]];
+const APF=[['agenda/calendarios.json',()=>({agendas:S.agendas,cals:S.cals,subs:(S.subs||[]).map(x=>{const {events,...y}=x;return y}),cats:S.blockCats,lists:S.lists,work:S.work}),
+    o=>{if(o.agendas&&o.agendas.length)S.agendas=o.agendas;if(o.cals&&o.cals.length)S.cals=o.cals;if(o.cats&&o.cats.length)S.blockCats=o.cats;if(o.lists&&o.lists.length)S.lists=o.lists;if(o.work)S.work=o.work;
+      if(o.subs){const old=new Map((S.subs||[]).map(x=>[x.id,x]));S.subs=o.subs.map(x=>Object.assign({},x,{events:(old.get(x.id)||{}).events||[]}));S.subs.forEach(x=>{if(!old.has(x.id)&&x.url&&typeof subFetch==='function')subFetch(x)})}
+      if(S.curAgenda!=='*'&&S.agendas&&S.agendas.length&&!S.agendas.some(a=>a.id===S.curAgenda))S.curAgenda=S.agendas[0].id}],
+  ['tiempo/relojes.json',()=>({cities:S.cities||[]}),o=>{S.cities=o.cities||[]}]];
+/* Lo que es de cada dispositivo (si ya avisó de un evento) no viaja */
+const AP_LOCAL=['notified'];
+const apStable=v=>JSON.stringify(v,(k,x)=>x&&typeof x==='object'&&!Array.isArray(x)?Object.keys(x).sort().reduce((o,q)=>{if(x[q]!==undefined)o[q]=x[q];return o},{}):x);
+const apFnv=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return (h>>>0).toString(36)+s.length.toString(36)};
+const apId=id=>String(id).replace(/[^\w.-]/g,'_');
+const apCore=it=>{const o={};Object.keys(it).forEach(k=>{if(!AP_LOCAL.includes(k)&&k!=='_at'&&it[k]!==undefined)o[k]=it[k]});return o};
+function apA(){if(!S.gh)return null;if(!S.gh.app)S.gh.app={on:true,vault:'',base:{},ls:{},mt:{},head:'',at:0};const A=S.gh.app;['base','ls','mt'].forEach(k=>{if(!A[k]||typeof A[k]!=='object')A[k]={}});return A}
+function apLink(){const A=apA();if(!A||!S.gh.token)return null;const ls=S.gh.links||{};if(!A.vault||!ls[A.vault])A.vault=ls[S.curVault]?S.curVault:(Object.keys(ls).find(k=>ls[k])||'');return A.vault?ls[A.vault]:null}
+const apOn=()=>{const A=apA(),L=A&&A.on!==false&&apLink();return !!(L&&!L.code)};
+function apLocal(){const A=apA(),out={},first=!Object.keys(A.ls).length,now=Date.now();
+  const add=(p,core)=>{const h=apFnv(apStable(core));if(A.ls[p]!==h){A.mt[p]=first&&A.ls[p]===undefined?0:now;A.ls[p]=h}out[p]={txt:apStable(Object.assign({},core,{_at:A.mt[p]||0}))+'\n'}};
+  APC.forEach(([d,g])=>{const ord=[];g().forEach(it=>{if(!it||typeof it!=='object')return;if(it.id==null)it.id='x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);ord.push(String(it.id));add(d+'/'+apId(it.id)+'.json',apCore(it))});add(d+'/_orden.json',{ids:ord})});
+  APF.forEach(([p,g])=>add(p,g()));
+  Object.keys(A.ls).forEach(p=>{if(!out[p]){delete A.ls[p];delete A.mt[p]}});return out}
+const APSH=new Map();async function apSha(txt){const k=apFnv(txt);let s=APSH.get(k);if(!s){s=await gitSha(new TextEncoder().encode(txt));APSH.set(k,s);if(APSH.size>6000)APSH.delete(APSH.keys().next().value)}return s}
+const apSig=()=>apFnv(JSON.stringify([APC.map(c=>c[1]()),APF.map(f=>f[1]())]));
+async function apRemote(L){const ref=await ghApi(`/repos/${L.repo}/git/ref/heads/${ghPath(L.branch||'main')}`,{ok404:true,ok409:true});if(!ref)return null;
+  const head=ref.object.sha,c=await ghApi(`/repos/${L.repo}/git/commits/${head}`),root=await ghApi(`/repos/${L.repo}/git/trees/${c.tree.sha}`),t=(root.tree||[]).find(x=>x.path==='.temvra'&&x.type==='tree'),rem={};
+  /* Nunca en un repositorio de código (el de la app, por ejemplo): cada cambio de la agenda sería un commit en el código y una compilación nueva */
+  if((root.tree||[]).some(x=>x.type==='blob'&&GH_CODE_MARK.test(x.path)||x.type==='tree'&&/^(android|ios|src|\.github)$/.test(x.path))){L.code=true;save();throw new Error('CODE')}
+  if(t){const sub=await ghApi(`/repos/${L.repo}/git/trees/${t.sha}?recursive=1`);(sub.tree||[]).forEach(x=>{if(x.type==='blob'&&/\.json$/.test(x.path))rem[x.path]=x.sha})}
+  return {head,tree:c.tree.sha,rem}}
+function apApply(p,obj){const A=apA(),f=APF.find(x=>x[0]===p);
+  if(f){if(obj){const o=Object.assign({},obj);delete o._at;f[2](o)}}
+  else{const m=p.match(/^(.*)\/([^/]+)\.json$/),col=m&&APC.find(x=>x[0]===m[1]);if(!col)return false;
+    if(m[2]==='_orden'){if(obj)(apOrdM||(apOrdM={}))[m[1]]=obj.ids||[]}
+    else{const arr=col[1]().slice(),i=arr.findIndex(x=>x&&apId(x.id)===m[2]);
+      if(!obj){if(i>=0)arr.splice(i,1)}else{const it=Object.assign({},obj);delete it._at;if(i>=0){AP_LOCAL.forEach(k=>{if(arr[i][k]!==undefined)it[k]=arr[i][k]});arr[i]=it}else arr.push(it)}col[2](arr)}}
+  if(!obj){delete A.ls[p];delete A.mt[p]}else{const c=Object.assign({},obj);delete c._at;A.ls[p]=apFnv(apStable(c));A.mt[p]=obj._at||0}return true}
+let apOrdM=null;function apOrder(){const O=apOrdM||{};APC.forEach(([d,g,s])=>{const ids=O[d];if(!ids)return;const ix=new Map(ids.map((x,i)=>[x,i]));const arr=g().map((x,i)=>[x,i]);arr.sort((a,b)=>(ix.has(String(a[0].id))?ix.get(String(a[0].id)):1e9+a[1])-(ix.has(String(b[0].id))?ix.get(String(b[0].id)):1e9+b[1]));s(arr.map(x=>x[0]))});apOrdM=null}
+const apWhat=ps=>{const n={a:0,t:0};ps.forEach(p=>{if(!/_orden\.json$/.test(p))n[p.startsWith('agenda/')?'a':'t']++});const c=k=>k===1?'1 cambio':k+' cambios';return [n.a?c(n.a)+' de agenda':'',n.t?(n.a?n.t+' de Time':c(n.t)+' de Time'):''].filter(Boolean).join(' y ')};
+function apRefresh(){calDirty=true;try{renderAll()}catch(e){}try{if(view==='blocks')renderBlocks()}catch(e){}try{renderPresets()}catch(e){}try{if(typeof renderCircuit==='function'&&view==='circ')renderCircuit()}catch(e){}}
+let apWait=null;
+async function appSync(why){const A=apA();if(!apOn())return;if(window.__apBusy||ghBusy){window.__apAgain=true;if(ghBusy&&!apWait)apWait=setTimeout(()=>{apWait=null;if(window.__apAgain){window.__apAgain=false;appSync('wait')}},2500);return}
+  window.__apBusy=true;apBadge();let pulled=[],pushed=[];
+  try{for(let tries=0;tries<3;tries++){const L=apLink();let R=await apRemote(L);if(!R){await ghHead(L);R=await apRemote(L)}
+      const loc=apLocal(),base=A.base,nb={},up=[],got=[];for(const x of Object.values(loc))x.sha=await apSha(x.txt);
+      for(const p of new Set([...Object.keys(R.rem),...Object.keys(base),...Object.keys(loc)])){const r=R.rem[p],b=base[p],l=loc[p]&&loc[p].sha;
+        if(r===l){if(r)nb[p]=r;continue}
+        if(r===b){up.push(p);continue}               // GitHub sin cambios: manda lo de aquí (también borrados)
+        if(l===b){got.push([p,r]);continue}          // aquí sin cambios: llega lo de GitHub (también borrados)
+        if(!r){up.push(p);continue}                  // borrado allí y editado aquí: se conserva
+        if(!l){got.push([p,r]);continue}             // borrado aquí y editado allí: vuelve
+        got.push([p,r,1])}                           // cambiado en los dos: el más reciente
+      apOrdM={};let ch=0;
+      for(const [p,r,q] of got){if(!r){if(apApply(p,null))ch++;continue}
+        const bl=await ghApi(`/repos/${L.repo}/git/blobs/${r}`);let obj;try{obj=JSON.parse(new TextDecoder().decode(b64bytes(bl.content)))}catch(e){nb[p]=r;continue}
+        if(q&&(A.mt[p]||0)>(obj._at||0)){up.push(p);continue}
+        if(apApply(p,obj))ch++;nb[p]=r;pulled.push(p)}
+      if(ch){apOrder();apRefresh()}
+      if(up.length){const fin=apLocal();for(const p of up){if(fin[p])fin[p].sha=await apSha(fin[p].txt)}
+        const entries=up.map(p=>fin[p]?{path:APP_DIR+p,mode:'100644',type:'blob',content:fin[p].txt}:{path:APP_DIR+p,mode:'100644',type:'blob',sha:null}).filter(e=>e.content!=null||R.rem[e.path.slice(APP_DIR.length)]);
+        if(entries.length){const tree=await ghApi(`/repos/${L.repo}/git/trees`,{method:'POST',body:{base_tree:R.tree,tree:entries}});
+          const cm=await ghApi(`/repos/${L.repo}/git/commits`,{method:'POST',body:{message:`Temvra: ${apWhat(up)||'orden'} · ${new Date().toLocaleString(LOC)}`,tree:tree.sha,parents:[R.head]}});
+          try{await ghApi(`/repos/${L.repo}/git/refs/heads/${ghPath(L.branch||'main')}`,{method:'PATCH',body:{sha:cm.sha}})}catch(e){if(/^422/.test(e.message)&&tries<2){A.base=Object.assign({},base,nb);continue}throw e}
+          up.forEach(p=>{if(fin[p])nb[p]=fin[p].sha;else delete nb[p]});A.head=cm.sha;pushed=up}else A.head=R.head}
+      else A.head=R.head;
+      A.base=nb;A.at=Date.now();A.err='';A.sig=apSig();save();break}
+    if(pulled.length){const w=apWhat(pulled);if(w)toast('⇅ '+w+' desde tu otro dispositivo')}}
+  catch(e){A.err=e.message==='NET'?'Sin conexión':e.message==='CODE'?'Es un repositorio de código: vincula Notas a un repositorio solo para notas':ghErrMsg(e).replace(/<[^>]+>/g,'')}
+  finally{window.__apBusy=false;apBadge();if(window.__apAgain){window.__apAgain=false;setTimeout(()=>appSync('again'),400)}}}
+/* Al guardar: si cambió algo de la agenda o de Time, se sube enseguida */
+let apT=0;function apDirty(){if(!apOn())return;clearTimeout(apT);apT=setTimeout(()=>{const A=apA();if(A&&A.sig!==apSig())appSync('cambio')},1200)}
+/* Mirar si hay algo nuevo: la referencia de la rama con ETag. Si cambió (y no fue este dispositivo), se baja; y también las notas si es la bóveda abierta */
+let apEtag='',apPolling=false;
+async function apPoll(force){const A=apA();if(!apOn()||apPolling||window.__apBusy||(!force&&document.hidden)||navigator.onLine===false)return;const L=apLink();apPolling=true;
+  try{const r=await fetch(`https://api.github.com/repos/${L.repo}/git/ref/heads/${ghPath(L.branch||'main')}`,{cache:'no-store',headers:Object.assign({'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Authorization':'Bearer '+S.gh.token},apEtag?{'If-None-Match':apEtag}:{})});
+    if(r.status===304||!r.ok)return;apEtag=r.headers.get('ETag')||'';const j=await r.json(),h=j&&j.object&&j.object.sha;if(!h||h===A.head)return;
+    await appSync('remoto');
+    const a=S.ob&&S.ob.sync&&S.ob.sync.auto||'both';if(A.vault===S.curVault&&(a==='both'||a==='app')&&!ghBusy&&!(curNote&&neEdit)&&ghLink()){ghQuiet=true;try{await ghPull(ghLink())}finally{ghQuiet=false}}}
+  catch(e){}finally{apPolling=false}}
+setInterval(()=>apPoll(),5000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>apPoll(true),300)});addEventListener('online',()=>{apPoll(true);apDirty()});
+setTimeout(()=>{if(apOn())appSync('inicio')},2500);
+/* Estado en Ajustes y en la bóveda de Time */
+function apBadge(){const A=apA(),L=apLink(),on=apOn(),st=!S.gh||!S.gh.token?'Conecta GitHub en Notas › Control de código para activarlo.':!L?'Vincula una bóveda de Notas a un repositorio para activarlo.':L.code?esc(L.repo)+' es un repositorio de código: elige otro para la agenda.':A.on===false?'Desactivado.':window.__apBusy?'Sincronizando…':A.err?'⚠ '+esc(A.err):A.at?'Al día · '+scmWhen(A.at):'Pendiente';
+  const box=$('ap-st');if(box){box.innerHTML=(L?'<b>'+esc(L.repo)+'</b> · ':'')+st;$('sw-ap').setAttribute('aria-checked',String(!!(A&&A.on!==false)));$('ap-now').disabled=!on;const sel=$('ap-vault'),ks=Object.keys(S.gh&&S.gh.links||{}).filter(k=>S.gh.links[k]);
+    $('ap-vault-f').hidden=ks.length<2;if(ks.length>1)sel.innerHTML=ks.map(k=>`<option value="${esc(k)}"${k===A.vault?' selected':''}>${esc((S.vaults.find(v=>v.id===k)||{}).name||k)} · ${esc(S.gh.links[k].repo)}</option>`).join('')}
+  document.querySelectorAll('.ap-chip').forEach(c=>{c.hidden=!on;c.classList.toggle('spin',!!(A&&window.__apBusy));c.classList.toggle('err',!!(A&&A.err));const t=c.querySelector('span');if(t)t.textContent=A&&window.__apBusy?'Sincronizando…':A&&A.err?A.err:A&&A.at?'Bóveda en GitHub · al día':'Bóveda en GitHub'})}
+$('sw-ap').onclick=()=>{const A=apA();if(!A){toast('Conecta GitHub en Notas para activarlo');return}A.on=A.on===false;save();apBadge();if(A.on)appSync('activar')};
+$('ap-now').onclick=()=>{apEtag='';appSync('manual').then(()=>{const A=apA();toast(A.err?'GitHub: '+A.err:'✔ Agenda y Time sincronizados')})};
+$('ap-vault').onchange=e=>{const A=apA();A.vault=e.target.value;A.base={};A.head='';apEtag='';save();apBadge();appSync('bóveda')};
+setInterval(()=>{if(!$('settings').hidden)apBadge()},30000);
+
+window.apDirty=apDirty;document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-apsync]')){apEtag='';appSync('manual').then(()=>{const A=apA();toast(A&&A.err?'GitHub: '+A.err:'✔ Bóveda sincronizada')})}});new MutationObserver(()=>{if(!$('settings').hidden)apBadge()}).observe($('settings'),{attributes:true,attributeFilter:['hidden']});setTimeout(apBadge,0);
 /* Solo mira GitHub (ghPeek no crea el README en un repositorio vacío) y respeta .gitignore y lo que está fuera del push, como el panel */
 async function ghStatus(L){try{const rem=await ghPeek(L),base=L.base||{};let mod=[],nw=[],rm=[],un=[];const lp=new Set();
   for(const f of localFiles()){const isN=f.kind==='n';if(gitSkipRef(f.ref,isN)){if(!gitIgn(f.ref,isN)&&rem[f.path]!==await fileSha(f))un.push(f.path);continue}lp.add(f.path);const sha=await fileSha(f);if(!rem[f.path])nw.push(f.path);else if(rem[f.path]!==sha)mod.push(f.path)}
