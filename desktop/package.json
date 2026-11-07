@@ -22,6 +22,7 @@
     "files": [
       "main.cjs",
       "preload.cjs",
+      "preload-widget.cjs",
       {
         "from": "../www",
         "to": "www"
@@ -34,8 +35,16 @@
         ]
       }
     ],
-    "win": { "icon": "../resources/icon-512.png", "artifactName": "Temvra-Personal-${version}-Windows.${ext}" },
-    "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "shortcutName": "Temvra" },
+    "win": {
+      "icon": "../resources/icon-512.png",
+      "artifactName": "Temvra-Personal-${version}-Windows.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Temvra"
+    },
     "linux": {
       "executableName": "temvra",
       "icon": "../resources/icon-512.png",

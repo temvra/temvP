@@ -46,7 +46,8 @@ public class Widgets {
              + m.getAppWidgetIds(new ComponentName(c, BlocksWidget.class)).length
              + m.getAppWidgetIds(new ComponentName(c, NotesWidget.class)).length
              + m.getAppWidgetIds(new ComponentName(c, LineWidget.class)).length
-             + m.getAppWidgetIds(new ComponentName(c, RegWidget.class)).length;
+             + m.getAppWidgetIds(new ComponentName(c, RegWidget.class)).length
+             + m.getAppWidgetIds(new ComponentName(c, PulseWidget.class)).length;
     }
 
     static void refreshAll(Context c) {
@@ -59,6 +60,7 @@ public class Widgets {
         for (int id : m.getAppWidgetIds(new ComponentName(c, NotesWidget.class))) updateNotes(c, m, id);
         for (int id : m.getAppWidgetIds(new ComponentName(c, RegWidget.class))) updateReg(c, m, id);
         for (int id : m.getAppWidgetIds(new ComponentName(c, LineWidget.class))) updateLine(c, m, id);
+        for (int id : m.getAppWidgetIds(new ComponentName(c, PulseWidget.class))) updatePulse(c, m, id);
         scheduleTick(c);
     }
 
@@ -68,7 +70,10 @@ public class Widgets {
         if (am == null) return;
         PendingIntent pi = tickIntent(c);
         if (count(c) == 0) { am.cancel(pi); return; }
-        long next = (System.currentTimeMillis() / 60_000L + 1) * 60_000L;
+        long now = System.currentTimeMillis(), next = (now / 60_000L + 1) * 60_000L;
+        /* Si un evento empieza antes del próximo minuto, el tic llega justo entonces: la cuenta atrás de «Ahora» pasa al siguiente sin quedarse en negativo */
+        long ev = nextPulseAt(c, now);
+        if (ev > now && ev < next) next = ev + 300;
         try { am.setExact(AlarmManager.RTC, next, pi); }
         catch (SecurityException e) { am.set(AlarmManager.RTC, next, pi); }
     }
@@ -686,6 +691,94 @@ public class Widgets {
             }
             v.addView(R.id.wm_rows, row);
         }
+        m.updateAppWidget(id, v);
+    }
+
+    /* ---------- «Ahora»: hora con segundos, el rayo del día y los dos próximos eventos ---------- */
+    static long nextPulseAt(Context c, long now) {
+        try {
+            JSONObject p = data(c).optJSONObject("pulse");
+            JSONArray n = p != null ? p.optJSONArray("next") : null;
+            long best = 0;
+            for (int i = 0; n != null && i < n.length(); i++) { long at = n.optJSONObject(i).optLong("at"); if (at > now && (best == 0 || at < best)) best = at; }
+            return best;
+        } catch (Exception e) { return 0; }
+    }
+
+    private static int colorOr(String s, int def) {
+        try { return s != null && s.matches("#[0-9a-fA-F]{6}") ? Color.parseColor(s) : def; } catch (Exception e) { return def; }
+    }
+
+    private static int lighten(int c, float k) {
+        int r = Color.red(c), g = Color.green(c), b = Color.blue(c);
+        return Color.rgb((int) (r + (255 - r) * k), (int) (g + (255 - g) * k), (int) (b + (255 - b) * k));
+    }
+
+    static String dur(long ms) {
+        long m = Math.max(0, Math.round(ms / 60000.0)), d = m / 1440, h = (m % 1440) / 60, mm = m % 60;
+        if (d > 0) return d + " d" + (h > 0 ? " " + h + " h" : "");
+        if (h > 0) return h + " h" + (mm > 0 ? " " + mm + " min" : "");
+        return mm + " min";
+    }
+
+    private static int px(Context c, float dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, c.getResources().getDisplayMetrics());
+    }
+
+    private static void pulseRow(Context c, RemoteViews v, JSONObject e, long now, int lz, int row, int bar, int title, int when, int chrono, int text, int code) {
+        if (e == null) { v.setViewVisibility(row, View.GONE); return; }
+        v.setViewVisibility(row, View.VISIBLE);
+        v.setTextViewText(title, e.optString("t"));
+        v.setTextViewText(when, e.optString("w"));
+        v.setInt(bar, "setColorFilter", colorOr(e.optString("c"), lz));
+        long dt = e.optLong("at") - now;
+        int lzl = lighten(lz, .3f);
+        if (dt < 24L * 3600_000L) {
+            v.setViewVisibility(chrono, View.VISIBLE);
+            v.setViewVisibility(text, View.GONE);
+            v.setChronometerCountDown(chrono, true);
+            v.setChronometer(chrono, SystemClock.elapsedRealtime() + dt, null, true);
+            v.setTextColor(chrono, lzl);
+        } else {
+            v.setViewVisibility(chrono, View.GONE);
+            v.setViewVisibility(text, View.VISIBLE);
+            v.setTextViewText(text, dur(dt));
+            v.setTextColor(text, lzl);
+        }
+        String a = e.optString("a", "agenda");
+        v.setOnClickPendingIntent(row, open(c, a.isEmpty() ? "agenda" : a, code));
+    }
+
+    static void updatePulse(Context c, AppWidgetManager m, int id) {
+        JSONObject d = data(c), p = d.optJSONObject("pulse");
+        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_pulse);
+        Bundle o = m.getAppWidgetOptions(id);
+        int w = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 280), h = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 180);
+        int lz = colorOr(p != null ? p.optString("laser") : null, 0xFFFF3B43), lzl = lighten(lz, .3f);
+        float clock = clamp(Math.min(h * .32f, w * .2f), 34, 76);
+        v.setTextViewTextSize(R.id.wp_hm, TypedValue.COMPLEX_UNIT_SP, clock);
+        v.setTextViewTextSize(R.id.wp_s, TypedValue.COMPLEX_UNIT_SP, clock * .4f);
+        v.setTextColor(R.id.wp_s, lzl);
+        Calendar cal = Calendar.getInstance();
+        long now = System.currentTimeMillis();
+        int mins = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE);
+        float frac = mins / 1440f;
+        /* El rayo del día llega hasta ahora: el resto del ancho se deja como relleno a la derecha */
+        int inner = Math.max(60, w - 36 - 14);
+        v.setViewPadding(R.id.wp_lzw, 0, 0, px(c, (1 - frac) * inner), 0);
+        v.setInt(R.id.wp_lz, "setColorFilter", lz);
+        v.setInt(R.id.wp_halo, "setColorFilter", lz);
+        v.setTextViewText(R.id.wp_left, "Quedan " + dur((1440 - mins) * 60_000L));
+        List<JSONObject> up = new ArrayList<>();
+        JSONArray n = p != null ? p.optJSONArray("next") : null;
+        for (int i = 0; n != null && i < n.length(); i++) { JSONObject e = n.optJSONObject(i); if (e != null && e.optLong("at") > now) up.add(e); }
+        java.util.Collections.sort(up, (a, b) -> Long.compare(a.optLong("at"), b.optLong("at")));
+        boolean small = h < 150, tiny = h < 105;
+        pulseRow(c, v, tiny || up.isEmpty() ? null : up.get(0), now, lz, R.id.wp_r1, R.id.wp_d1, R.id.wp_t1, R.id.wp_w1, R.id.wp_c1, R.id.wp_x1, 9601);
+        pulseRow(c, v, small || up.size() < 2 ? null : up.get(1), now, lz, R.id.wp_r2, R.id.wp_d2, R.id.wp_t2, R.id.wp_w2, R.id.wp_c2, R.id.wp_x2, 9602);
+        v.setViewVisibility(R.id.wp_lbl, tiny || small || up.isEmpty() ? View.GONE : View.VISIBLE);
+        v.setViewVisibility(R.id.wp_empty, !tiny && up.isEmpty() ? View.VISIBLE : View.GONE);
+        v.setOnClickPendingIntent(R.id.wp_root, open(c, "agenda", 9600));
         m.updateAppWidget(id, v);
     }
 }

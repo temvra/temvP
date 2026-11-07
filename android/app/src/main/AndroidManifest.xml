@@ -66,6 +66,10 @@
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_line_info" />
         </receiver>
+        <receiver android:name=".PulseWidget" android:exported="true" android:label="@string/widget_pulse_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_pulse_info" />
+        </receiver>
         <receiver android:name=".RegWidget" android:exported="true" android:label="@string/widget_reg_label">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_reg_info" />

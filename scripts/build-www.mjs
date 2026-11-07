@@ -22,5 +22,5 @@ html=html.replace(/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/jspdf\/[^'"]+\/
 const head='<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>Temvra</title>';
 if(!/^<!doctype/i.test(html.trim()))html=`<!doctype html><html lang="es"><head>${head}</head><body>${html}<script src="native.js"></script></body></html>`;
 else html=html.replace('</body>','<script src="native.js"></script></body>');
-fs.writeFileSync(path.join(www,'index.html'),html);cp(path.join(root,'src','native.js'),'native.js');
+fs.writeFileSync(path.join(www,'index.html'),html);cp(path.join(root,'src','native.js'),'native.js');cp(path.join(root,'src','widget.html'),'widget.html');
 const left=html.match(/https:\/\/cdnjs[^'"]+/g);console.log('www listo ·',(fs.statSync(path.join(www,'index.html')).size/1024|0)+' KB',left?'· aún externos: '+left.join(', '):'· todo local');

@@ -124,6 +124,24 @@ ipcMain.handle('upd-install',async(e,file)=>{
     if(process.env.APPIMAGE){const dst=process.env.APPIMAGE,tmp=dst+'.new';fs.copyFileSync(file,tmp);fs.chmodSync(tmp,0o755);fs.renameSync(tmp,dst);app.relaunch({execPath:dst});quitting=true;app.exit(0);return {ok:true}}
     shell.showItemInFolder(file);return {ok:true,shown:true}
   }catch(err){return {error:String(err.message||err)}}});
+// Widget «Ahora» en el escritorio: ventana pequeña, sin marco y transparente con la hora, el rayo del día y los dos próximos eventos.
+// Recuerda si estaba abierto, dónde y de qué tamaño. Los datos los manda la ventana principal cada minuto y al cambiar algo
+let wwin=null,wdata=null;const WCFG=()=>path.join(app.getPath('userData'),'widget.json');
+const wcfg=()=>{try{return JSON.parse(fs.readFileSync(WCFG(),'utf8'))}catch(e){return {}}},wsave=o=>{try{fs.writeFileSync(WCFG(),JSON.stringify(Object.assign(wcfg(),o)))}catch(e){}};
+function widgetOpen(){if(wwin){wwin.showInactive();return}const c=wcfg();
+  wwin=new BrowserWindow({width:c.w||370,height:c.h||262,x:c.x,y:c.y,minWidth:260,minHeight:120,frame:false,transparent:true,resizable:true,skipTaskbar:true,alwaysOnTop:c.top!==false,hasShadow:false,show:false,backgroundColor:'#00000000',icon:ICON,
+    webPreferences:{preload:path.join(__dirname,'preload-widget.cjs'),backgroundThrottling:false}});
+  wwin.once('ready-to-show',()=>wwin&&wwin.showInactive());
+  wwin.webContents.on('did-finish-load',()=>{if(wdata&&wwin)wwin.webContents.send('widget-data',wdata)});
+  wwin.webContents.setWindowOpenHandler(()=>({action:'deny'}));wwin.webContents.on('will-navigate',e=>e.preventDefault());
+  const keep=()=>{if(!wwin)return;const b=wwin.getBounds();wsave({x:b.x,y:b.y,w:b.width,h:b.height})};wwin.on('moved',keep);wwin.on('resized',keep);wwin.on('closed',()=>{wwin=null});
+  wwin.loadURL(ORIGIN+'/widget.html')}
+function widgetShow(on){wsave({on:!!on});if(on)widgetOpen();else if(wwin){const w=wwin;wwin=null;w.close()}}
+ipcMain.on('widget-data',(e,d)=>{if(!fromApp(e))return;wdata=d;if(wwin)wwin.webContents.send('widget-data',d)});
+ipcMain.on('widget-show',(e,on)=>{if(fromApp(e))widgetShow(on)});
+ipcMain.on('widget-state',e=>{e.returnValue=!!wcfg().on});
+ipcMain.on('widget-hide',e=>{if(!fromApp(e))return;widgetShow(false);if(win)win.webContents.send('widget-closed')});
+ipcMain.on('widget-open',(e,a)=>{if(!fromApp(e))return;showWin();if(win)win.webContents.send('widget-action',String(a||'agenda'))});
 function open(hidden){
   win=new BrowserWindow({show:!hidden,width:1280,height:820,minWidth:360,minHeight:500,backgroundColor:'#000000',icon:ICON,webPreferences:{backgroundThrottling:false,preload:path.join(__dirname,'preload.cjs')}});
   win.on('close',e=>{if(tray&&!quitting){e.preventDefault();win.hide()}});
@@ -150,6 +168,7 @@ else{
     });
     if(useTray){setupTray();firstRunLogin()}
     open(useTray&&process.argv.includes('--hidden'));
+    if(wcfg().on)widgetOpen();
   });
   app.on('window-all-closed',()=>{if(!tray)app.quit()});
 }
