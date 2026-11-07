@@ -2205,7 +2205,7 @@ body:not(.desk) .nav button[aria-current="page"] .ic{filter:drop-shadow(0 0 6px 
 .lg-lens.lift:not(.sph)::before{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;opacity:calc(var(--lv,0)*1.4);background:conic-gradient(from calc(var(--la,0)*1deg),#ff3b6b,#ffb02e,#ffe95c,#3ddc84,#2ec5ff,#8f6bff,#ff3b6b);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;padding:calc(1px + var(--lv,0)*2px);filter:saturate(1.5)}
 /* Destello de refracción al pulsar */
 lg-glint{display:block;position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;z-index:3;mix-blend-mode:screen;contain:strict}
-lg-glint lg-r{display:block;position:absolute;border-radius:50%;background:radial-gradient(closest-side,transparent 58%,rgba(255,59,107,.55) 66%,rgba(255,176,46,.5) 71%,rgba(255,233,92,.55) 76%,rgba(61,220,132,.5) 81%,rgba(46,197,255,.55) 87%,rgba(143,107,255,.45) 93%,transparent 99%);will-change:transform,opacity;transform:scale(.08)}
+lg-glint lg-r{display:block;position:absolute;border-radius:50%;background:radial-gradient(closest-side,transparent 58%,rgba(255,59,107,.55) 66%,rgba(255,176,46,.5) 71%,rgba(255,233,92,.55) 76%,rgba(61,220,132,.5) 81%,rgba(46,197,255,.55) 87%,rgba(143,107,255,.45) 93%,transparent 99%);will-change:transform,opacity;transform:scale(.08);opacity:0}
 lg-glint lg-b{display:block;position:absolute;left:0;background:linear-gradient(90deg,rgba(255,59,107,0),rgba(255,59,107,.35) 18%,rgba(255,176,46,.4) 32%,rgba(255,240,170,.75) 46%,rgba(255,255,255,.9) 50%,rgba(160,255,210,.6) 55%,rgba(46,197,255,.45) 70%,rgba(143,107,255,.35) 84%,rgba(143,107,255,0));will-change:transform,opacity;opacity:0}
 .app-light lg-glint{mix-blend-mode:multiply;opacity:.75}
 .app-light lg-glint lg-b{background:linear-gradient(90deg,rgba(255,59,107,0),rgba(255,59,107,.35) 18%,rgba(255,176,46,.4) 34%,rgba(230,200,40,.45) 46%,rgba(61,220,132,.4) 56%,rgba(46,160,255,.45) 70%,rgba(143,107,255,.35) 84%,rgba(143,107,255,0))}
@@ -3208,6 +3208,8 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
         <button class="btn tonal" id="bkp-export">Guardar copia</button>
         <button class="btn tonal" id="bkp-import">Restaurar copia</button>
         <input type="file" id="bkp-file" accept=".zip,application/zip" hidden>
+        <button class="btn tonal" id="tvp-open">Abrir archivo compartido</button>
+        <input type="file" id="tvp-file" accept=".json,application/json,.ics,text/calendar,.zip,application/zip" hidden>
       </div>
     </div>
 
@@ -3522,7 +3524,7 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
   <div class="field"><label for="bks-remind">Avisar</label><select id="bks-remind"><option value="-1">Sin aviso</option><option value="0">Al empezar</option><option value="5">5 min antes</option><option value="10">10 min antes</option><option value="15">15 min antes</option><option value="30">30 min antes</option></select></div>
   <div class="field" style="justify-content:space-between"><span class="sub" style="margin:0">Mostrar en el calendario</span><button class="switch" role="switch" id="bks-cal" aria-checked="true" aria-label="Mostrar en el calendario"></button></div>
   <div class="field"><label for="bks-notes">Notas</label><input type="text" id="bks-notes" maxlength="200" placeholder="Objetivo del bloque, ejercicios, temas…"></div>
-  <div class="sheet-actions"><button class="btn tonal" id="bks-guide">Preparar sesión</button><button class="btn tonal" id="bks-del">Eliminar</button><button class="btn tonal" id="bks-dup">Duplicar</button><span style="flex:1"></span><button class="btn tonal" id="bks-cancel">Cancelar</button><button class="btn" id="bks-save">Guardar</button></div>
+  <div class="sheet-actions"><button class="btn tonal" id="bks-guide">Preparar sesión</button><button class="btn tonal" id="bks-del">Eliminar</button><button class="btn tonal" id="bks-dup">Duplicar</button><button class="btn tonal" id="bks-share">Compartir</button><span style="flex:1"></span><button class="btn tonal" id="bks-cancel">Cancelar</button><button class="btn" id="bks-save">Guardar</button></div>
 </div></div>
 <!-- Lienzo -->
 <div class="settings cvview" id="canvasview" hidden style="z-index:23">
@@ -4702,7 +4704,8 @@ function apSlots(a,k){const d=fromKey(k),rs=a.av[d.getDay()]||[],busy=calEvents(
 const mHM=m=>pad(Math.floor(m/60))+':'+pad(m%60);
 function shareAppt(a){const lines=[];for(let i=0;i<14&&lines.length<7;i++){const d=new Date();d.setDate(d.getDate()+i);const k=dk(d),sl=apSlots(a,k);if(sl.length)lines.push(`• ${cap(d.toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'short'}))}: ${sl.map(mHM).join(', ')}`)}
   const txt=`📅 ${a.title} (${a.dur} min)\nHuecos libres:\n${lines.join('\n')||'Ahora mismo no hay huecos libres.'}\n\nDime cuál te viene bien y te lo reservo.`;
-  obSheet('Compartir horarios',[{t:'WhatsApp'},{t:'Correo'},{t:'Más apps…'},{t:'Copiar texto'}],i=>{
+  obSheet('Compartir horarios',[Object.assign({},TVP_OPT,{s:'Le llega la página de citas; al abrirla se añade a su agenda'}),{t:'WhatsApp'},{t:'Correo'},{t:'Más apps…'},{t:'Copiar texto'}],i=>{
+    if(i===0){tvpShare(a.title||'Citas',{appts:[a]});return}i--;
     if(i===0)window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');else if(i===1)location.href='mailto:?subject='+encodeURIComponent(a.title)+'&body='+encodeURIComponent(txt);
     else if(i===2){if(navigator.share)navigator.share({title:a.title,text:txt}).catch(()=>{});else{copyText(txt)}}else copyText(txt)})}
 function copyText(t){(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copiado'),()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Copiado')}catch(e){}ta.remove()})}
@@ -5028,7 +5031,7 @@ function openBlock(id,day,mins){bkOcc=id&&String(id).includes('@')?String(id).sp
   $('bks-title').value=bkEdit?bkEdit.title:'';$('bks-date').value=bkEdit?bkEdit.date:(day||bkDay);$('bks-start').value=bkEdit?bkEdit.start:mHM(st);$('bks-end').value=bkEdit?bkEdit.end:mHM(Math.min(1439,st+60));
   $('bks-notes').value=bkEdit?bkEdit.notes||'':'';$('bks-remind').value=bkEdit?bkEdit.remind:5;$('bks-cal').setAttribute('aria-checked',String(!(bkEdit&&bkEdit.hideCal)));
   bkRep=bkEdit&&bkEdit.rec?(bkEdit.rec.f==='wd'?[1,2,3,4,5]:bkEdit.rec.f==='d'?[0,1,2,3,4,5,6]:bkEdit.rec.days||[]):[];
-  $('bks-del').hidden=$('bks-dup').hidden=!bkEdit;renderBkSheet();$('bk-sheet').hidden=false;$('bk-sheet').querySelector('.sheet').scrollTop=0;sheetSnap($('bk-sheet'));if(!bkEdit)setTimeout(()=>$('bks-title').focus(),60)}
+  $('bks-del').hidden=$('bks-dup').hidden=$('bks-share').hidden=!bkEdit;renderBkSheet();$('bk-sheet').hidden=false;$('bk-sheet').querySelector('.sheet').scrollTop=0;sheetSnap($('bk-sheet'));if(!bkEdit)setTimeout(()=>$('bks-title').focus(),60)}
 function renderBkSheet(){$('bks-cats').innerHTML=S.blockCats.map(c=>`<button data-bks="${c.id}" aria-pressed="${c.id===bkSel}" style="--bc:${c.color}"><span>${c.emoji}</span>${esc(c.name)}</button>`).join('')+`<button data-bks="_new">＋ Nueva</button>`;
   $('bks-rep').innerHTML=[1,2,3,4,5,6,0].map(d=>`<button type="button" data-bkr="${d}" aria-pressed="${bkRep.includes(d)}">${DAYN[d]}</button>`).join('');
   const c=bkCat(bkSel);$('bk-sheet').querySelector('.sheet').style.setProperty('--bc',c.color);$('bks-title').placeholder=c.id==='gym'?'Pierna, cardio…':c.id==='work'?'Correo, reunión, proyecto…':c.id==='study'?'Repasar Java, apuntes…':'Nombre del bloque';
@@ -5048,6 +5051,8 @@ $('bks-save').onclick=()=>{const title=$('bks-title').value.trim()||bkCat(bkSel)
   save();$('bk-sheet').hidden=true;if(bkDays.includes(date))renderBlocks();else bkJump(date);if(view==='cal')renderCal();toast('Bloque guardado'+(data.hideCal?'':' · también en el calendario'))};
 $('bks-del').onclick=()=>{const u=evUndo(),all=()=>{S.events=S.events.filter(x=>x!==bkEdit);save();$('bk-sheet').hidden=true;renderBlocks();toast('Bloque eliminado',u)};
   if(bkEdit.rec&&bkOcc)obSheet('Bloque que se repite',[{t:'Quitar solo este día'},{t:'Eliminar todos',danger:true}],i=>{if(i===0){bkEdit.ex=(bkEdit.ex||[]).concat(bkOcc);save();$('bk-sheet').hidden=true;renderBlocks();toast('Quitado de este día',u)}else all()});else all()};
+$('bks-share').onclick=()=>{if(!bkEdit)return;const c=S.blockCats.find(x=>x.id===bkEdit.cat),k=bkOcc||bkEdit.date,nm=bkEdit.title||(c&&c.name)||'Bloque';
+  shareText(nm,`${c?c.emoji+' ':''}${nm} · ${cap(fromKey(k).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'short'}))} · ${bkEdit.start}–${bkEdit.end}\n— Temvra`,{events:[Object.assign({},bkEdit,{date:k})],blockCats:c?[c]:[]})};
 $('bks-dup').onclick=()=>{const c=JSON.parse(JSON.stringify(bkEdit));c.id='bk'+Date.now().toString(36);delete c.rec;delete c.ex;delete c.doneOn;c.done=false;c.date=bkOcc||c.date;S.events.push(c);save();$('bk-sheet').hidden=true;renderBlocks();openBlock(c.id);toast('Duplicado: cambia la hora')};
 /* Categorías */
 const BK_EMOJI=['🏋️','🏃','🚴','🧘','💼','💻','📞','📚','✍️','🧠','🎸','🎨','🍳','🛒','🧹','🚗','👨‍👩‍👧','🎮','😴','⭐'];
@@ -5077,26 +5082,89 @@ function noteShareText(n){if(isCanvas(n)){const c=cvParse(n);return `🧩 ${n.ti
 const mdFileOf=n=>({name:safeName(n.title||'Sin título')+(isCanvas(n)?'.canvas':'.md'),text:n.body,type:isCanvas(n)?'application/json':'text/markdown'});
 /* En la app de Android, WhatsApp recibe un archivo de verdad: la nota como PDF «Título.pdf» o la carpeta como ZIP con sus subcarpetas. En el navegador va el texto. */
 function shareSheet(title,opts){const nat=!!window.VTNative;
-  obSheet(title,[{t:'WhatsApp',s:nat?(opts.zip?'Envía la carpeta en un ZIP, con sus subcarpetas':'Envía el PDF «'+(opts.pdfName||'nota.pdf')+'»'):'Envía el texto de la nota',ic:SHIC.wa},{t:'Drive, correo y más apps…',s:'Abre el menú de compartir del '+(nat?'móvil':'sistema'),ic:SHIC.more},{t:'PDF',s:opts.pdfName?'Guarda o envía «'+opts.pdfName+'»':'Documento listo para imprimir o enviar',ic:SHIC.pdf},{t:opts.zip?'ZIP con todos los archivos':'Archivo Markdown (.md)',s:opts.zip?'Para importar en Obsidian u otra app':'Se abre en Obsidian y cualquier editor',ic:SHIC.file},{t:'Correo',ic:SHIC.mail},{t:'Copiar texto',ic:SHIC.copy},...(opts.exp?[{t:'Exportar a Word y otros formatos…',s:'Word, OpenDocument, RTF, HTML, texto…',ic:SHIC.file}]:[])],i=>[nat?(opts.zip?opts.file:opts.pdf):opts.wa,opts.more,opts.pdf,opts.file,opts.mail,()=>copyText(opts.text()),opts.exp][i]())}
+  obSheet(title,[...(opts.tv?[TVP_OPT]:[]),{t:'WhatsApp',s:nat?(opts.zip?'Envía la carpeta en un ZIP, con sus subcarpetas':'Envía el PDF «'+(opts.pdfName||'nota.pdf')+'»'):'Envía el texto de la nota',ic:SHIC.wa},{t:'Drive, correo y más apps…',s:'Abre el menú de compartir del '+(nat?'móvil':'sistema'),ic:SHIC.more},{t:'PDF',s:opts.pdfName?'Guarda o envía «'+opts.pdfName+'»':'Documento listo para imprimir o enviar',ic:SHIC.pdf},{t:opts.zip?'ZIP con todos los archivos':'Archivo Markdown (.md)',s:opts.zip?'Para importar en Obsidian u otra app':'Se abre en Obsidian y cualquier editor',ic:SHIC.file},{t:'Correo',ic:SHIC.mail},{t:'Copiar texto',ic:SHIC.copy},...(opts.exp?[{t:'Exportar a Word y otros formatos…',s:'Word, OpenDocument, RTF, HTML, texto…',ic:SHIC.file}]:[])],i=>[...(opts.tv?[opts.tv]:[]),nat?(opts.zip?opts.file:opts.pdf):opts.wa,opts.more,opts.pdf,opts.file,opts.mail,()=>copyText(opts.text()),opts.exp][i]())}
 const SHIC={wa:'<svg width="22" height="22" viewBox="0 0 24 24" fill="#25d366"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.2-4.6-4.1-4.7-4.3-.1-.2-1.1-1.5-1.1-2.9s.7-2.1 1-2.3c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2 1.3 2.3 1.4.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>',
   more:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>',
   pdf:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e5484d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M8.5 15h1.5a1.2 1.2 0 0 0 0-2.4H8.5V17M13 12.6V17h1a2.2 2.2 0 0 0 0-4.4z"/></svg>',
   file:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>',
   mail:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+  tv:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
   copy:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>'};
+/* Opción común de los menús de compartir (va detrás de SHIC: un const usado antes de definirse rompe el arranque) */
+const TVP_OPT={t:'Para otro Temvra',s:'Le llega un archivo; al abrirlo se añade a su app',ic:SHIC.tv};
 const waOpen=t=>window.open('https://wa.me/?text='+encodeURIComponent(t.length>3500?t.slice(0,3500)+'…':t),'_blank');
 async function shareBlob(name,blob,title,text){if(window.VTNative)return VTNative.share(name,blob,title,text);const f=new File([blob],name,{type:blob.type||'application/octet-stream'});
   try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:title||name,text:text||undefined});return}}catch(e){if(e.name==='AbortError')return}
   dlSave(name,blob)}
+/* ---------- Compartir con otro Temvra ----------
+   Un archivo «.temvra.json»: al abrirlo desde WhatsApp u otra app se abre Temvra, enseña lo que trae y lo añade con un toque.
+   Va como JSON (application/json) porque Android y WhatsApp conocen ese tipo: el archivo llega entero y Temvra sale en «Abrir con».
+   Los adjuntos de las notas van dentro; lo que es de cada dispositivo (avisado, pospuesto) no viaja */
+const TVP_APP='https://github.com/temvra/temvP/releases/latest';
+const TVP_N={notes:['nota','notas'],atts:['adjunto','adjuntos'],timers:['temporizador','temporizadores'],tfolders:['bloque de temporizadores','bloques de temporizadores'],myCircuits:['circuito','circuitos'],myTpl:['plantilla de circuito','plantillas de circuito'],alarms:['alarma','alarmas'],events:['evento','eventos'],appts:['página de citas','páginas de citas']};
+const tvpSum=d=>Object.keys(TVP_N).filter(k=>d[k]&&d[k].length).map(k=>d[k].length+' '+TVP_N[k][d[k].length===1?0:1]).join(', ')||'nada';
+const tvpB64=b=>new Promise((ok,ko)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]||'');r.onerror=ko;r.readAsDataURL(b)});
+/* Adjuntos que una nota usa: ![[foto.png]], [[documento.pdf]] o (foto.png) */
+const tvpAttsOf=notes=>S.atts.filter(a=>notes.some(n=>{const b=n.body||'';return b.includes('[['+a.name)||b.includes('('+a.name+')')||b.includes('('+encodeURI(a.name)+')')}));
+/* Una carpeta se comparte desde su nombre: «Trabajo/Recetas» llega como «Recetas» con sus subcarpetas */
+function tvpFolder(p,notes,atts){const nm=baseName(p),re=f=>nm+String(f||'').slice(p.length);
+  return {notes:notes.map(n=>Object.assign({},n,{folder:re(n.folder)})),atts:atts.map(a=>Object.assign({},a,{folder:re(a.folder)})),folders:S.folders.filter(f=>f===p||f.startsWith(p+'/')).map(re)}}
+async function tvpMake(titulo,d){const clean=x=>{const c=JSON.parse(JSON.stringify(x));['notified','notif','snoozeUntil','sid'].forEach(k=>delete c[k]);return c};
+  const o={temvra:'compartir',v:1,titulo:titulo||'Temvra',creado:Date.now(),datos:{}},D=o.datos;
+  if(d.notes&&d.notes.length)D.notes=d.notes.map(n=>Object.assign({title:n.title||'',body:n.body||'',folder:n.folder||'',created:n.created,updated:n.updated},n.kind?{kind:n.kind}:{},n.color?{color:n.color}:{}));
+  if(d.folders&&d.folders.length)D.folders=d.folders.slice();
+  if(d.atts&&d.atts.length){D.atts=[];for(const a of d.atts){const m={name:a.name,folder:a.folder||''};
+    if(a.kind==='file'){const b=await fileGet(a.id);if(!b)continue;Object.assign(m,{kind:'file',mime:a.mime||b.type||'',data:await tvpB64(b)})}else{const im=getImg(a.id);if(!im)continue;m.data=im}D.atts.push(m)}}
+  ['timers','tfolders','myCircuits','myTpl','alarms','blockCats','appts'].forEach(k=>{if(d[k]&&d[k].length)D[k]=d[k].map(clean)});
+  if(d.events&&d.events.length)D.events=d.events.map(e=>{const c=clean(e);delete c.img;delete c.doneOn;c.done=false;if(e.img){const im=getImg(String(e.id).split('@')[0]);if(im)c.imgData=im}return c});
+  o.resumen=tvpSum(D);return o}
+async function tvpShare(titulo,d){let o;try{o=await tvpMake(titulo,d)}catch(e){toast('No se pudo preparar el archivo');return}
+  const cap=`📦 «${o.titulo}» · ${o.resumen}\nÁbrelo con Temvra y se añade a tu app.\n¿Aún no tienes Temvra? ${TVP_APP}`;
+  await shareBlob(safeName(o.titulo)+'.temvra.json',new Blob([JSON.stringify(o)],{type:'application/json'}),o.titulo,cap);
+  if(!window.VTNative)toast('Envía el archivo por WhatsApp o donde quieras: al abrirlo con Temvra se añade')}
+/* Lo que llega de otro Temvra: primero se enseña qué trae; al aceptar se añade con identificadores nuevos, sin pisar nada */
+function tvpOpen(o){const d=o&&o.datos;if(!d||typeof d!=='object'||tvpSum(d)==='nada'){toast('Este archivo de Temvra está vacío o dañado');return}
+  const names=[...(d.notes||[]).map(n=>n.title||'Sin título'),...(d.timers||[]).map(t=>t.t),...(d.myCircuits||[]).map(c=>c.name),...(d.myTpl||[]).map(c=>c.name),
+    ...(d.alarms||[]).map(a=>(a.label||'Alarma')+' '+a.t),...(d.events||[]).map(e=>e.title),...(d.appts||[]).map(a=>a.title)].filter(Boolean);
+  obSheet('Te han compartido «'+(o.titulo||'Temvra')+'»',[{t:'Añadir a mi Temvra',s:tvpSum(d)+(names.length?' · '+names.slice(0,4).join(', ')+(names.length>4?' y '+(names.length-4)+' más':''):''),ic:SHIC.tv},{t:'Ahora no'}],i=>{if(i===0)tvpAdd(o)})}
+async function tvpAdd(o){const d=o.datos,uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6),done=[];let go=null;
+  /* Notas: en la bóveda abierta, con sus carpetas. Si ya hay una nota o un adjunto con ese nombre en la carpeta, el nuevo lleva «(2)» */
+  if((d.notes&&d.notes.length)||(d.atts&&d.atts.length)){
+    const fold=f=>{f=String(f||'').replace(/^\/+|\/+$/g,'');let q=f;while(q){if(!S.folders.includes(q))S.folders.push(q);q=parentOf(q)}return f};
+    const free=(list,key,folder,name)=>{const ext=key==='name'?(name.match(/(\.[^.\/]+)$/)||[''])[0]:'',base=ext?name.slice(0,-ext.length):name;let q=name,i=2;while(list.some(x=>(x.folder||'')===folder&&(x[key]||'')===q))q=base+' ('+(i++)+')'+ext;return q};
+    (d.folders||[]).forEach(fold);const ren={},first=[];
+    for(const a of d.atts||[]){if(!a.data)continue;const folder=fold(a.folder),name=free(S.atts,'name',folder,a.name||'archivo'),id=uid('a');if(name!==a.name)ren[a.name]=name;
+      if(a.kind==='file'){const by=b64bytes(a.data);await filePut(id,new Blob([by],{type:a.mime||'application/octet-stream'}));S.atts.push({id,kind:'file',name,mime:a.mime||'',size:by.length,folder,created:Date.now(),updated:Date.now()})}
+      else{setImg(id,a.data);S.atts.push({id,name,folder,created:Date.now(),updated:Date.now()})}}
+    for(const n of d.notes||[]){const folder=fold(n.folder);let body=String(n.body||'');Object.keys(ren).forEach(k=>{body=body.split('[['+k).join('[['+ren[k])});
+      const x=Object.assign({id:nid(),title:free(S.notes,'title',folder,n.title||'Sin título'),folder,body,pinned:false,created:Date.now(),updated:Date.now()},n.kind==='canvas'?{kind:'canvas'}:{},n.color?{color:n.color}:{});S.notes.push(x);first.push(x)}
+    done.push(tvpSum(d.notes&&d.notes.length?{notes:d.notes}:{atts:d.atts}));go=()=>{show('notes');renderNotes();if(first.length===1)openNote(first[0].id)}}
+  /* Tiempo: los bloques de temporizadores se unen por nombre; las alarmas llegan como las mandaron */
+  if((d.timers&&d.timers.length)||(d.tfolders&&d.tfolders.length)){const fm={};(d.tfolders||[]).forEach(f=>{const ex=S.tfolders.find(x=>x.name===f.name);if(ex)fm[f.id]=ex.id;else{const nf={id:uid('f'),name:f.name||'Bloque',open:true};S.tfolders.push(nf);fm[f.id]=nf.id}});
+    (d.timers||[]).forEach(t=>S.timers.push(Object.assign({},t,{id:uid('t'),f:fm[t.f]||''})));done.push(tvpSum(d.timers&&d.timers.length?{timers:d.timers}:{tfolders:d.tfolders}));go=go||(()=>{show('timer');renderPresets()})}
+  if(d.myCircuits&&d.myCircuits.length){d.myCircuits.forEach(c=>S.myCircuits.push(Object.assign(JSON.parse(JSON.stringify(c)),{id:uid('m')})));done.push(tvpSum({myCircuits:d.myCircuits}));go=go||(()=>{show('circ');renderCircuit()})}
+  if(d.myTpl&&d.myTpl.length){d.myTpl.forEach(c=>S.myTpl.push(Object.assign(JSON.parse(JSON.stringify(c)),{id:uid('u')})));done.push(tvpSum({myTpl:d.myTpl}));go=go||(()=>{show('circ');renderCircuit()})}
+  if(d.alarms&&d.alarms.length){d.alarms.forEach((a,i)=>{const x=Object.assign({},a,{id:Date.now()+i,days:[...(a.days||[])]});delete x.snooze;S.alarms.push(x)});done.push(tvpSum({alarms:d.alarms}));go=go||(()=>{show('alarm');renderAlarms()})}
+  /* Agenda: en la agenda abierta y en tu calendario si no tienes el suyo; las categorías de los bloques se unen por nombre */
+  let cal=false;
+  if(d.events&&d.events.length){const cm={};(d.blockCats||[]).forEach(c=>{const ex=S.blockCats.find(x=>x.id===c.id||x.name===c.name);if(ex)cm[c.id]=ex.id;else{const nc=Object.assign({},c,{id:uid('k')});S.blockCats.push(nc);cm[c.id]=nc.id}});
+    const ag=S.curAgenda&&S.curAgenda!=='*'?S.curAgenda:(S.agendas[0]||{}).id,first=[];
+    d.events.forEach(e=>{const x=Object.assign({},e);delete x.imgData;x.id=(e.cat?'bk':'e')+Date.now().toString(36)+Math.random().toString(36).slice(2,5);x.done=false;delete x.doneOn;
+      if(!S.cals.some(c=>c.id===x.cal))x.cal=(S.cals[0]||{}).id;if(ag)x.ag=ag;if(x.cat){x.cat=cm[x.cat]||x.cat;if(!S.blockCats.some(c=>c.id===x.cat))delete x.cat}
+      if(x.kind==='task'&&x.list&&!(S.lists||[]).some(l=>l.id===x.list))x.list='default';if(e.imgData){setImg(x.id,e.imgData);x.img=true}S.events.push(x);first.push(x)});
+    done.push(tvpSum({events:d.events}));cal=true;const f0=first[0];go=go||(()=>{if(f0&&f0.date)goBlocksDay(f0.date);else show('cal')})}
+  if(d.appts&&d.appts.length){d.appts.forEach(a=>S.appts.push(Object.assign(JSON.parse(JSON.stringify(a)),{id:uid('p')})));done.push(tvpSum({appts:d.appts}));cal=true;go=go||(()=>show('cal'))}
+  if(!done.length){toast('No había nada que añadir');return}
+  if(cal)calChanged();else save();try{go&&go()}catch(e){}toast('✔ Añadido: '+done.join(', '))}
 function shareNote(n){if(!n)return;if(n===curNote&&neEdit)saveNote();const txt=()=>noteShareText(n);
-  shareSheet(n.title||'Sin título',{exp:()=>exportNote(n),text:txt,pdfName:safeName(n.title||'Nota')+'.pdf',wa:()=>waOpen(txt()),
+  shareSheet(n.title||'Sin título',{tv:()=>tvpShare(n.title||'Nota',{notes:[Object.assign({},n,{folder:''})],atts:tvpAttsOf([n]).map(a=>Object.assign({},a,{folder:''}))}),exp:()=>exportNote(n),text:txt,pdfName:safeName(n.title||'Nota')+'.pdf',wa:()=>waOpen(txt()),
     more:async()=>{const f=mdFileOf(n);try{const file=new File([f.text],f.name,{type:f.type});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:n.title,text:txt()});return}if(navigator.share){await navigator.share({title:n.title,text:txt()});return}}catch(e){if(e.name==='AbortError')return}shareBlob(f.name,new Blob([f.text],{type:f.type}),n.title)},
     pdf:()=>makePdf([n],safeName(n.title||'Nota')+'.pdf'),file:()=>{const f=mdFileOf(n);shareBlob(f.name,new Blob([f.text],{type:f.type}),n.title)},
     mail:()=>{location.href='mailto:?subject='+encodeURIComponent(n.title||'Nota')+'&body='+encodeURIComponent(txt().slice(0,1800))}})}
 function shareFolder(p){const inF=x=>(x.folder||'')===p||(x.folder||'').startsWith(p+'/'),notes=S.notes.filter(inF),atts=S.atts.filter(inF),name=baseName(p);
   if(!notes.length&&!atts.length){toast('La carpeta está vacía');return}
   const txt=()=>`📁 ${name}\n\n`+notes.map(noteShareText).join('\n\n———\n\n');
-  shareSheet(name+' · '+notes.length+' notas',{zip:true,text:txt,pdfName:safeName(name)+'.pdf',wa:()=>waOpen(txt()),more:()=>zipFolder(p,notes,atts,true),pdf:()=>makePdf(notes,safeName(name)+'.pdf'),file:()=>zipFolder(p,notes,atts,false),
+  shareSheet(name+' · '+notes.length+' notas',{zip:true,tv:()=>tvpShare(name,tvpFolder(p,notes,atts)),text:txt,pdfName:safeName(name)+'.pdf',wa:()=>waOpen(txt()),more:()=>zipFolder(p,notes,atts,true),pdf:()=>makePdf(notes,safeName(name)+'.pdf'),file:()=>zipFolder(p,notes,atts,false),
     mail:()=>{location.href='mailto:?subject='+encodeURIComponent(name)+'&body='+encodeURIComponent(txt().slice(0,1800))}})}
 async function zipFolder(p,notes,atts,share){toast('Preparando ZIP…');let Z;try{Z=await JSZipLib()}catch(e){toast('No se pudo cargar el compresor (sin conexión).');return}
   const z=new Z(),root=baseName(p),rel=x=>(x.folder||'').slice(p.length).replace(/^\//,'');
@@ -5591,17 +5659,17 @@ function renderPresets(){const loose=S.timers.filter(p=>!p.f||!tmFolder(p.f));
   $('presets').innerHTML=h;if(typeof apBadge==='function')try{apBadge()}catch(e){}}
 function useTimer(p){setPeriod(p.s);S.name=p.t;$('name').value=p.t;setLoop(!!p.loop);save();if(!running)tReset();renderPresets();show('timer')}
 const tmShareTxt=p=>`⏱ ${p.t} · ${fmt(p.s*1000)}${p.loop?' en bucle':''}${p.d?'\n'+p.d:''}\n— Temvra`;
-function shareText(title,txt){obSheet('Compartir',[{t:'WhatsApp',ic:SHIC.wa},{t:'Más apps…',ic:SHIC.more},{t:'Copiar texto',ic:SHIC.copy}],i=>{if(i===0)waOpen(txt);else if(i===1){if(navigator.share&&!window.VTNative)navigator.share({title,text:txt}).catch(()=>{});else if(window.VTNative)VTNative.share(safeName(title)+'.txt',new Blob([txt],{type:'text/plain'}),title,txt);else copyText(txt)}else copyText(txt)})}
+function shareText(title,txt,pack){obSheet('Compartir',[...(pack?[TVP_OPT]:[]),{t:'WhatsApp',ic:SHIC.wa},{t:'Más apps…',ic:SHIC.more},{t:'Copiar texto',ic:SHIC.copy}],i=>{if(pack){if(i===0){tvpShare(title,pack);return}i--}if(i===0)waOpen(txt);else if(i===1){if(navigator.share&&!window.VTNative)navigator.share({title,text:txt}).catch(()=>{});else if(window.VTNative)VTNative.share(safeName(title)+'.txt',new Blob([txt],{type:'text/plain'}),title,txt);else copyText(txt)}else copyText(txt)})}
 function tmMenu(p){obSheet(p.t,[{t:'Duplicar'},{t:'Cambiar nombre'},{t:'Usar la duración actual',s:fmt(S.period*1000)+(S.loop?' · bucle':'')},{t:'Mover a un bloque…'},{t:'Compartir'},{t:'Eliminar',danger:true,sep:true}],i=>{
   if(i===0){const c={...p,id:'t'+Date.now().toString(36),t:p.t+' (copia)'};S.timers.splice(S.timers.indexOf(p)+1,0,c);save();renderPresets();toast('Duplicado')}
   else if(i===1)askName('Nombre',p.t,n=>{p.t=n;save();renderPresets()});
   else if(i===2){p.s=S.period;p.loop=S.loop;if(p.d==='Una vez'||p.d==='En bucle')p.d=S.loop?'En bucle':'Una vez';save();renderPresets();toast('Actualizado')}
   else if(i===3)obSheet('Mover a…',[{t:'Fuera de bloques',on:!p.f||!tmFolder(p.f)},...S.tfolders.map(f=>({t:f.name,on:p.f===f.id})),{t:'Nuevo bloque',sep:true}],j=>{if(j===0)p.f='';else if(j<=S.tfolders.length)p.f=S.tfolders[j-1].id;else{askName('Nuevo bloque','',n=>{const f={id:'f'+Date.now().toString(36),name:n,open:true};S.tfolders.push(f);p.f=f.id;save();renderPresets()});return}save();renderPresets()});
-  else if(i===4)shareText(p.t,tmShareTxt(p));
+  else if(i===4)shareText(p.t,tmShareTxt(p),{timers:[p]});
   else{const old=S.timers;S.timers=S.timers.filter(x=>x!==p);save();renderPresets();undoToast('Eliminado',()=>{S.timers=old;renderPresets()})}})}
 function tfMenu(f){const its=S.timers.filter(p=>p.f===f.id);obSheet(f.name,[{t:'Cambiar nombre'},{t:'Compartir bloque',s:its.length+(its.length===1?' temporizador':' temporizadores')},{t:'Eliminar bloque',s:'Los temporizadores se quedan fuera',danger:true,sep:true}],i=>{
   if(i===0)askName('Nombre del bloque',f.name,n=>{f.name=n;save();renderPresets()});
-  else if(i===1)shareText(f.name,`📁 ${f.name}\n`+its.map(p=>`• ${p.t} · ${fmt(p.s*1000)}${p.loop?' ↻':''}`).join('\n')+'\n— Temvra');
+  else if(i===1)shareText(f.name,`📁 ${f.name}\n`+its.map(p=>`• ${p.t} · ${fmt(p.s*1000)}${p.loop?' ↻':''}`).join('\n')+'\n— Temvra',{tfolders:[f],timers:its});
   else{const old=S.tfolders;its.forEach(p=>p.f='');S.tfolders=S.tfolders.filter(x=>x!==f);save();renderPresets();undoToast('Bloque eliminado',()=>{its.forEach(p=>p.f=f.id);S.tfolders=old;renderPresets()})}})}
 /* Pulsar: usar · mantener pulsado: opciones · mantener y mover: reordenar o meter en un bloque */
 let tmLP=null,tmDrag=null,tmNoClick=0,lastPT='touch';
@@ -5661,17 +5729,17 @@ sortable($('alarm-list'),'id',{skip:'.switch',render:renderAlarms,
   dup:(f,t,af)=>{if(!S.alOwn){S.alOwn=true;S.alarms.sort((a,b)=>a.t.localeCompare(b.t))}return dupIn(S.alarms,x=>String(x.id),a=>({...a,days:[...a.days],id:Date.now()+Math.floor(Math.random()*999)}),f,t,af)},
   menu:r=>{const a=S.alarms.find(x=>x.id==r.dataset.id);if(!a)return;obSheet((a.label||'Alarma')+' · '+a.t,[{t:'Duplicar'},{t:'Editar'},{t:'Compartir'},{t:'Eliminar',danger:true,sep:true}],i=>{
   if(i===0){S.alarms.push({...a,id:Date.now(),days:[...a.days]});save();renderAlarms();toast('Duplicada')}else if(i===1)openAlarm(a.id);
-  else if(i===2)shareText(a.label||'Alarma',`⏰ ${a.label||'Alarma'} · ${a.t} · ${daysTxt(a.days)}\n— Temvra`);else{const old=S.alarms;S.alarms=S.alarms.filter(x=>x!==a);save();renderAlarms();undoToast('Eliminada',()=>{S.alarms=old;renderAlarms()})}})}});
+  else if(i===2)shareText(a.label||'Alarma',`⏰ ${a.label||'Alarma'} · ${a.t} · ${daysTxt(a.days)}\n— Temvra`,{alarms:[a]});else{const old=S.alarms;S.alarms=S.alarms.filter(x=>x!==a);save();renderAlarms();undoToast('Eliminada',()=>{S.alarms=old;renderAlarms()})}})}});
 holdMenu($('tpl'),'[data-tpl],[data-utpl]',r=>{const k=r.dataset.tpl,u=k?null:S.myTpl.find(x=>x.id===r.dataset.utpl),tp=k?TEMPLATES[k]():u;if(!tp)return;const nm=k?TPL_NAMES.find(x=>x[0]===k)[1]:u.name;
   obSheet(nm,[{t:'Usar plantilla'},{t:'Copiar a Mis circuitos'},...(u?[{t:'Cambiar nombre'}]:[]),{t:'Compartir'},{t:k?'Ocultar plantilla':'Eliminar plantilla',s:k?'Puedes restaurarla después':'',danger:true,sep:true}],i=>{const o=u?['use','copy','ren','share','del']:['use','copy','share','del'],a=o[i];
     if(a==='use')r.click();else if(a==='copy'){const c=JSON.parse(JSON.stringify(tp));delete c._tpl;c.id='c'+Date.now();c.name=nm.replace(/^★ /,'');S.myCircuits.push(c);S.curMine=c.id;save();renderCircuit();$('name').value=c.name;toast('Copiada a Mis circuitos')}
     else if(a==='ren')askName('Nombre',u.name,n=>{u.name=n;save();renderCircuit()});
-    else if(a==='share')shareText(nm,`🏋️ ${nm} · ${tp.rounds} rondas\n`+tp.steps.map(s=>`• ${s.name} · ${mmss(s.sec)}${s.type==='rest'?' (descanso)':''}`).join('\n')+'\n— Temvra');
+    else if(a==='share')shareText(nm,`🏋️ ${nm} · ${tp.rounds} rondas\n`+tp.steps.map(s=>`• ${s.name} · ${mmss(s.sec)}${s.type==='rest'?' (descanso)':''}`).join('\n')+'\n— Temvra',{myTpl:[Object.assign({},tp,{name:nm})]});
     else{const oh=S.hidTpl.slice(),om=S.myTpl;if(k)S.hidTpl.push(k);else S.myTpl=S.myTpl.filter(x=>x!==u);save();renderCircuit();undoToast(k?'Plantilla oculta':'Plantilla eliminada',()=>{S.hidTpl=oh;S.myTpl=om;renderCircuit()})}})});
 const mineMenu=r=>{const c=S.myCircuits.find(x=>x.id===r.dataset.mine);if(!c)return;obSheet(c.name,[{t:'Duplicar'},{t:'Cambiar nombre'},{t:'Compartir'},{t:'Guardar como plantilla'},{t:'Eliminar',danger:true,sep:true}],i=>{
   if(i===0){const n=JSON.parse(JSON.stringify(c));n.id='c'+Date.now();n.name=c.name+' (copia)';S.myCircuits.push(n);save();renderCircuit();toast('Duplicado')}
   else if(i===1)askName('Nombre',c.name,n=>{c.name=n;save();renderCircuit();$('name').value=C_().name});
-  else if(i===2)shareText(c.name,`🏋️ ${c.name} · ${c.rounds} rondas\n`+c.steps.map(s=>`• ${s.name} · ${mmss(s.sec)}${s.type==='rest'?' (descanso)':''}`).join('\n')+'\n— Temvra');
+  else if(i===2)shareText(c.name,`🏋️ ${c.name} · ${c.rounds} rondas\n`+c.steps.map(s=>`• ${s.name} · ${mmss(s.sec)}${s.type==='rest'?' (descanso)':''}`).join('\n')+'\n— Temvra',{myCircuits:[c]});
   else if(i===3){const t=JSON.parse(JSON.stringify(c));t.id='u'+Date.now().toString(36);S.myTpl.push(t);save();renderCircuit();toast('Guardado como plantilla')}
   else{const old=S.myCircuits,cm=S.curMine;S.myCircuits=S.myCircuits.filter(x=>x!==c);if(S.curMine===c.id)S.curMine=null;save();renderCircuit();$('name').value=C_().name;undoToast('Circuito eliminado',()=>{S.myCircuits=old;S.curMine=cm;renderCircuit();$('name').value=C_().name})}})};
 
@@ -6360,7 +6428,8 @@ $('ev-map').onclick=()=>{const q=$('ev-loc').value.trim();if(!q){toast('Escribe 
 $('ev-meet').onclick=()=>{window.open('https://meet.google.com/new','_blank');toast('Copia el enlace de la reunión y pégalo aquí')};
 function evText(e){const d=e.date?fromKey(e.date):null;return `📅 ${e.title}\n${d?cap(d.toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long',year:'numeric'})):''}${e.allDay||!e.start?' · todo el día':' · '+e.start+(e.end?'–'+e.end:'')}${e.loc?'\n📍 '+e.loc:''}${e.video?'\n🎥 '+e.video:''}${e.notes?'\n'+e.notes:''}`}
 function curEvDraft(){const isTask=evKind==='task';return Object.assign({id:evEdit?evEdit.id:'e'+Date.now(),kind:isTask?'task':'event',title:$('ev-title').value.trim()||'Evento',date:$('ev-date').value,start:evAll?'':$('ev-start').value,end:evAll?'':$('ev-end').value,allDay:evAll,notes:$('ev-notes').value.trim(),remind:+$('ev-remind').value},evExtra())}
-function shareEv(e,emails){const txt=evText(e);obSheet('Compartir '+(e.kind==='task'?'tarea':'evento'),[{t:'WhatsApp y otras apps',s:window.VTNative?'Envía el evento en un archivo: al abrirlo se añade a su calendario':'Envía los datos del evento'},{t:'Correo'+(emails?' a los invitados':'')},{t:'Archivo de calendario (.ics)',s:'Para añadirlo a Google Calendar, Outlook…'},{t:'Copiar texto'}],i=>{
+function shareEv(e,emails){const txt=evText(e);obSheet('Compartir '+(e.kind==='task'?'tarea':'evento'),[Object.assign({},TVP_OPT,{s:'Le llega un archivo; al abrirlo se añade a su agenda'}),{t:'WhatsApp y otras apps',s:window.VTNative?'Envía el evento en un archivo: al abrirlo se añade a su calendario':'Envía los datos del evento'},{t:'Correo'+(emails?' a los invitados':'')},{t:'Archivo de calendario (.ics)',s:'Para añadirlo a Google Calendar, Outlook…'},{t:'Copiar texto'}],i=>{
+  if(i===0){tvpShare(e.title||'Evento',{events:[e],blockCats:e.cat?S.blockCats.filter(c=>c.id===e.cat):[]});return}i--;
   if(i===0){if(window.VTNative)VTNative.share(safeName(e.title)+'.ics',new Blob([toICS([e],e.title)],{type:'text/calendar'}),e.title,txt);else window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank')}else if(i===1)location.href='mailto:'+encodeURIComponent(emails||'')+'?subject='+encodeURIComponent(e.title)+'&body='+encodeURIComponent(txt);
   else if(i===2)shareFile(safeName(e.title)+'.ics',toICS([e],e.title),'text/calendar',e.title);else copyText(txt)})}
 $('ev-share').onclick=()=>shareEv(curEvDraft());
@@ -7529,7 +7598,9 @@ setInterval(()=>{if(!$('settings').hidden)apBadge()},30000);
 {const f=$('pv-pulse');f.addEventListener('load',()=>pushPulse());new MutationObserver(()=>{if(!$('settings').hidden){if(!f.getAttribute('src'))f.src='widget.html';else pushPulse()}}).observe($('settings'),{attributes:true,attributeFilter:['hidden']});
   if(window.VTDesktop&&VTDesktop.widgetShow){const sw=$('sw-dw'),st=()=>sw.setAttribute('aria-checked',String(!!VTDesktop.widgetState()));$('dw-card').hidden=false;st();
     sw.onclick=()=>{VTDesktop.widgetShow(!VTDesktop.widgetState());st();setTimeout(pushPulse,600)};
-    if(VTDesktop.onWidget)VTDesktop.onWidget(a=>{if(a==='closed'){st();return}if(window.VTAPI)VTAPI.timerAction(a)});setTimeout(pushPulse,1500)}}
+    if(VTDesktop.onWidget)VTDesktop.onWidget(a=>{if(a==='closed'){st();return}if(window.VTAPI)VTAPI.timerAction(a)});setTimeout(pushPulse,1500)}
+  /* «Abrir con Temvra» en el PC: el archivo llega desde el proceso principal */
+  if(window.VTDesktop&&VTDesktop.onFile)VTDesktop.onFile(x=>importIncoming(x))}
 window.apDirty=apDirty;document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-apsync]')){apEtag='';appSync('manual').then(()=>{const A=apA();toast(A&&A.err?'GitHub: '+A.err:'✔ Bóveda sincronizada')})}});new MutationObserver(()=>{if(!$('settings').hidden)apBadge()}).observe($('settings'),{attributes:true,attributeFilter:['hidden']});setTimeout(apBadge,0);
 /* Solo mira GitHub (ghPeek no crea el README en un repositorio vacío) y respeta .gitignore y lo que está fuera del push, como el panel */
 async function ghStatus(L){try{const rem=await ghPeek(L),base=L.base||{};let mod=[],nw=[],rm=[],un=[];const lp=new Set();
@@ -8580,8 +8651,11 @@ async function importVaultZip(file){let Z;try{Z=await JSZipLib()}catch(e){toast(
     Object.assign(S.vaultData[v.id],{notes:d.notes||[],folders:d.folders||[],atts});save();switchVault(v.id);toast('Bóveda «'+name+'» añadida')})}
 $('vault-file').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)importVaultZip(f)};
 openVaultMgr=(f=>function(){f.apply(this,arguments);$('vmg-vaults').insertAdjacentHTML('beforeend','<button class="btn tonal vmg-imp" id="vmg-import">Importar bóveda recibida</button>');$('vmg-import').onclick=()=>$('vault-file').click()})(openVaultMgr);
-function importIncoming(x){let bin;try{bin=atob(x.data)}catch(e){return}const a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);const nm=x.name||'archivo',isZip=/zip/.test(x.mime||'')||/\.zip$/i.test(nm);
-  const file=new File([a],nm,{type:x.mime||''});if(isZip){importVaultZip(file);return}
+function importIncoming(x){let bin;try{bin=atob(x.data)}catch(e){return}const a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);importBytes(x.name||'archivo',x.mime||'',a)}
+function importBytes(nm,mime,a){const isZip=/zip/.test(mime)||/\.zip$/i.test(nm);
+  /* Lo compartido desde otro Temvra (.temvra.json): también si llega con otro nombre o tipo, por su contenido */
+  if(/json/.test(mime)||/\.json$/i.test(nm)||/^\s*\{\s*"temvra"/.test(new TextDecoder().decode(a.slice(0,40)))){let o=null;try{o=JSON.parse(new TextDecoder().decode(a))}catch(e){}if(o&&o.temvra==='compartir')tvpOpen(o);else toast('Este archivo no es de Temvra');return}
+  const file=new File([a],nm,{type:mime});if(isZip){importVaultZip(file);return}
   show('cal');const dt=new DataTransfer();dt.items.add(file);const el=$('ics-file');el.files=dt.files;el.dispatchEvent(new Event('change'))}
 /* ===== Notas en móvil: cajón lateral y campo de nota rápida ===== */
 function openNotesDrawer(){const v=curVaultObj(),hid=S.ndHide||[],vis=b=>!hid.includes(b.getAttribute('aria-label')||b.textContent.trim()),tabs=[...$('vn-tabs').querySelectorAll('[data-vtab]')],tools=[...$('ob-tools').querySelectorAll('[data-tool]')].filter(b=>b.dataset.tool!=='new'&&b.dataset.tool!=='scm');
@@ -9045,6 +9119,7 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
       const g=document.createElement('lg-glint');g.setAttribute('aria-hidden','true');const big=Math.hypot(r.width,r.height)*1.15,px=(x==null?r.width/2:x-r.left),py=(y==null?r.height/2:y-r.top);
       g.innerHTML=`<lg-r style="width:${big*2}px;height:${big*2}px;left:${px-big}px;top:${py-big}px"></lg-r><lg-b style="height:${r.height*2.4}px;top:${-r.height*.7}px"></lg-b>`;el.appendChild(g);LIVE.set(el,g);
       const ring=g.firstChild,band=g.lastChild,w=Math.max(40,r.width),bw=Math.min(160,Math.max(46,w*.55));band.style.width=bw+'px';
+      /* Al terminar vuelve a su estilo de base, que es invisible: antes era visible y dejaba un aro donde se pulsó hasta que se quitaba */
       const a1=ring.animate([{transform:'scale(.08)',opacity:1},{transform:'scale(.7)',opacity:.85,offset:.45},{transform:'scale(1)',opacity:0}],{duration:620,easing:'cubic-bezier(.2,.8,.3,1)'});
       band.animate([{transform:`translate3d(${-bw}px,0,0) rotate(18deg)`,opacity:0},{opacity:1,offset:.25},{opacity:.9,offset:.7},{transform:`translate3d(${w+bw*.2}px,0,0) rotate(18deg)`,opacity:0}],{duration:560,delay:40,easing:'cubic-bezier(.3,.6,.25,1)',fill:'backwards'});
       a1.onfinish=()=>setTimeout(()=>{if(LIVE.get(el)===g){LIVE.delete(el)}g.remove()},120)};
@@ -9390,6 +9465,10 @@ const ex=$('bkp-export'),im=$('bkp-import'),fi=$('bkp-file');
 if(ex)ex.onclick=bkpExport;
 if(im)im.onclick=()=>obConfirm('¿Sustituir tus datos por los de una copia?','Elegir copia y restaurar',()=>fi.click());
 if(fi)fi.onchange=()=>{const f=fi.files&&fi.files[0];fi.value='';if(f)bkpRestore(f)};
+/* Archivo de otro Temvra, un .ics o una bóveda en ZIP: elegirlo o soltarlo sobre la ventana es como abrirlo desde WhatsApp en el móvil */
+{const b=$('tvp-open'),f2=$('tvp-file'),rd=async f=>importBytes(f.name,f.type||'',new Uint8Array(await f.arrayBuffer()));if(b&&f2){b.onclick=()=>f2.click();f2.onchange=()=>{const f=f2.files&&f2.files[0];f2.value='';if(f)rd(f)}}
+  document.addEventListener('dragover',e=>{if(e.dataTransfer&&[...e.dataTransfer.types].includes('Files'))e.preventDefault()});
+  document.addEventListener('drop',e=>{const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(!f||!/\.(json|ics|zip)$/i.test(f.name))return;e.preventDefault();rd(f)})}
 bkpLabel();
 // Recordatorio: si hay datos, no hay sincronización con GitHub y la última copia tiene más de 14 días
 setTimeout(()=>{try{const synced=S.gh&&S.gh.links&&Object.keys(S.gh.links).length;

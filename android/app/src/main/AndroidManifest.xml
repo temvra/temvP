@@ -24,19 +24,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Abrir o recibir un evento (.ics) o una bóveda (.zip) desde WhatsApp u otra app -->
+            <!-- Abrir o recibir un evento (.ics), una bóveda (.zip) o lo compartido desde otro Temvra (.temvra.json) desde WhatsApp u otra app -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/calendar" />
                 <data android:mimeType="text/x-vcalendar" />
                 <data android:mimeType="application/zip" />
+                <data android:mimeType="application/json" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/calendar" />
                 <data android:mimeType="application/zip" />
+                <data android:mimeType="application/json" />
             </intent-filter>
 
         </activity>

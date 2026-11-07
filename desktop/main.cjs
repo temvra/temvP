@@ -144,6 +144,12 @@ ipcMain.on('widget-show',(e,on)=>{if(fromApp(e))widgetShow(on)});
 ipcMain.on('widget-state',e=>{e.returnValue=!!wcfg().on});
 ipcMain.on('widget-hide',e=>{if(!fromApp(e))return;widgetShow(false);if(win)win.webContents.send('widget-closed')});
 ipcMain.on('widget-open',(e,a)=>{if(!fromApp(e))return;showWin();if(win)win.webContents.send('widget-action',String(a||'agenda'))});
+// «Abrir con Temvra»: el archivo llega como argumento al arrancar o, con la app abierta, a la segunda instancia. Se lee aquí y se pasa a la ventana
+let pendingFiles=[];
+function fileArgs(argv){return argv.slice(1).map(a=>{try{return a.startsWith('file://')?decodeURIComponent(new URL(a).pathname):a}catch(e){return a}})
+  .filter(a=>/\.(json|ics|zip)$/i.test(a)&&!a.startsWith('-')&&fs.existsSync(a)&&fs.statSync(a).isFile()&&fs.statSync(a).size<60e6)}
+function sendFiles(list){if(!list.length)return;if(!win||win.isDestroyed()||win.webContents.isLoading()){pendingFiles=pendingFiles.concat(list);return}
+  list.forEach(p=>{try{win.webContents.send('vt-file',{name:path.basename(p),mime:/\.json$/i.test(p)?'application/json':/\.ics$/i.test(p)?'text/calendar':'application/zip',data:fs.readFileSync(p).toString('base64')})}catch(e){}})}
 function open(hidden){
   win=new BrowserWindow({show:!hidden,width:1280,height:820,minWidth:360,minHeight:500,backgroundColor:'#000000',icon:ICON,webPreferences:{backgroundThrottling:false,preload:path.join(__dirname,'preload.cjs')}});
   win.on('close',e=>{if(tray&&!quitting){e.preventDefault();win.hide()}});
@@ -155,11 +161,13 @@ function open(hidden){
   wc.on('context-menu',(_,p)=>{
     const t=p.isEditable?[{role:'cut',label:'Cortar'},{role:'copy',label:'Copiar'},{role:'paste',label:'Pegar'},{type:'separator'},{role:'selectAll',label:'Seleccionar todo'}]:p.selectionText?[{role:'copy',label:'Copiar'}]:[];
     if(t.length)Menu.buildFromTemplate(t).popup({window:win})});
+  wc.on('did-finish-load',()=>{if(!pendingFiles.length)return;const l=pendingFiles;pendingFiles=[];setTimeout(()=>sendFiles(l),1500)});
   win.loadURL(ORIGIN+'/index.html');
 }
 if(!app.requestSingleInstanceLock())app.quit();
 else{
-  app.on('second-instance',(e,argv)=>{if(!argv.includes('--hidden'))showWin()});
+  app.on('second-instance',(e,argv)=>{if(!argv.includes('--hidden'))showWin();sendFiles(fileArgs(argv))});
+  pendingFiles=fileArgs(process.argv);
   app.on('before-quit',()=>{quitting=true});
   app.whenReady().then(()=>{
     Menu.setApplicationMenu(null);

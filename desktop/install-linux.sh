@@ -17,6 +17,7 @@ Exec="$d/temvra/temvra" %U
 Icon=temvra
 Terminal=false
 Categories=Utility;
+MimeType=application/json;text/calendar;application/zip;
 StartupWMClass=temvra
 DESKTOP
 command -v update-desktop-database >/dev/null && update-desktop-database "$d/applications" || true
