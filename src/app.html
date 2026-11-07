@@ -156,6 +156,7 @@ button.digits:hover{background:var(--surface-2)}
 .ap-chip.spin i{background:#2ec5ff;box-shadow:0 0 8px #2ec5ff;animation:apPulse 1s ease-in-out infinite}
 .ap-chip.err i{background:#ff6b6b;box-shadow:0 0 8px #ff6b6b}
 @keyframes apPulse{50%{opacity:.3}}
+.pv-pulse{display:block;flex:none;width:min(100%,380px);height:262px;margin:0 auto;border:0;background:transparent;color-scheme:dark}
 .lz-prev{position:relative;height:30px;margin:12px 2px 0;border-radius:12px;background:var(--surface-2);overflow:hidden}
 .lz-prev b{position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:linear-gradient(90deg,transparent,rgb(var(--lz) / .5) 18%,rgb(var(--lz)) 40%,rgb(var(--lz3)) 48%,#fff 50%,rgb(var(--lz3)) 52%,rgb(var(--lz)) 60%,rgb(var(--lz) / .5) 82%,transparent);box-shadow:0 0 6px rgb(var(--lz2) / .8),0 0 16px rgb(var(--lz) / .45)}
 .lz-prev i{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff,0 0 10px rgb(var(--lz)),0 0 22px rgb(var(--lz) / .65)}
@@ -3159,6 +3160,10 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
       <div class="empty" id="pv-notif-off" hidden style="color:#a0a3ad">Notificación desactivada</div>
     </div>
     <div class="gap"></div>
+    <div class="t2" style="margin:0 6px 8px">Widget «Ahora» · la hora con segundos y lo que queda para tus próximos eventos</div>
+    <iframe id="pv-pulse" class="pv-pulse" title="Vista previa del widget Ahora" style="height:262px"></iframe>
+    <div class="card" id="dw-card" hidden style="margin-top:8px"><div class="row-sw"><span class="t1">Widget en el escritorio</span><button class="switch" role="switch" id="sw-dw" aria-label="Widget en el escritorio"></button></div><p class="sub">Una ventana pequeña y transparente, siempre visible. Arrástrala donde quieras y cambia su tamaño desde los bordes.</p></div>
+    <div class="gap"></div>
     <div class="t2" style="margin:0 6px 8px">Vista previa · widgets en la pantalla de inicio</div>
     <div class="home">
       <div class="widget">
@@ -4021,7 +4026,15 @@ function tSkip(){if(!running){tStart()}lap++;endAt=Date.now()+S.period*1000;toas
 function tNotif(){runSave();if(!window.VTNative||!VTNative.hasPlugin||VTNative.bg)return;const show=S.notif!=='never'&&(running||remain<S.period*1000||tHeld);
   VTNative.timerNotify({show,title:S.hide?'Temporizador':(S.name||'Temporizador'),body:T('Vuelta '+lap)+(running?'':' · '+T('En pausa')+' '+fmt(remain)),running,endAt,period:S.period*1000,remain});
   pushWidgets()}
-function pushWidgets(){if(window.VTNative&&VTNative.widgets&&!VTNative.bg&&window.VTAPI)VTNative.widgets(VTAPI.widgetData())}
+function pushWidgets(){if(window.VTNative&&VTNative.widgets&&!VTNative.bg&&window.VTAPI)VTNative.widgets(VTAPI.widgetData());pushPulse()}
+/* Widget «Ahora»: la hora, el rayo del día y los próximos eventos con la cuenta atrás. Lo pintan el widget de Android, el de escritorio y la vista previa de Ajustes */
+function pulseData(){const d=new Date(),now=+d,t0=dk(d),k1=new Date(d);k1.setDate(d.getDate()+30);let all=[];try{all=expandEvents(agEvents().concat(subEvents()),t0,dk(k1))}catch(e){}
+  const next=[];all.forEach(e=>{if(!e||!e.title||e.allDay||!e.start||!e.date||e.date<t0)return;if(e.kind==='task'&&e.done)return;try{if(!evVisible(e))return}catch(x){}
+    const t=fromKey(e.date),[h,m]=e.start.split(':').map(Number);t.setHours(h,m,0,0);if(+t<=now)return;const di=Math.round((fromKey(e.date)-fromKey(t0))/864e5);
+    next.push({at:+t,t:e.title,c:evColorOf(e)||'',w:(di===0?'':di===1?T('Mañana')+' · ':cap(t.toLocaleDateString(LOC,{weekday:'short',day:'numeric'}))+' · ')+e.start+(e.end?' – '+e.end:'')+(e.loc?' · '+e.loc:''),a:(e.cat?'block:':'event:')+'|'+e.id+'|'+e.date})});
+  next.sort((a,b)=>a.at-b.at);return {laser:lzHex(),loc:LOC,next:next.slice(0,12)}}
+function pushPulse(){const f=$('pv-pulse'),desk=window.VTDesktop&&VTDesktop.widgetData;if(!desk&&(!f||$('settings').hidden))return;const d=pulseData();
+  if(desk)try{VTDesktop.widgetData(d)}catch(e){}if(f&&f.contentWindow&&!$('settings').hidden)f.contentWindow.postMessage({type:'pulse',data:d},'*')}
 function setPeriod(sec){
   sec=Math.max(5,Math.min(99*3600+59*60+59,Math.round(sec)));const d=(sec-S.period)*1000;S.period=sec;save();
   $('min').value=Math.floor(sec/60);$('sec').value=String(sec%60).padStart(2,'0');
@@ -7509,6 +7522,12 @@ $('ap-now').onclick=()=>{apEtag='';appSync('manual').then(()=>{const A=apA();toa
 $('ap-vault').onchange=e=>{const A=apA();A.vault=e.target.value;A.base={};A.head='';apEtag='';save();apBadge();appSync('bóveda')};
 setInterval(()=>{if(!$('settings').hidden)apBadge()},30000);
 
+
+/* Vista previa del widget «Ahora» en Ajustes y widget de escritorio */
+{const f=$('pv-pulse');f.addEventListener('load',()=>pushPulse());new MutationObserver(()=>{if(!$('settings').hidden){if(!f.getAttribute('src'))f.src='widget.html';else pushPulse()}}).observe($('settings'),{attributes:true,attributeFilter:['hidden']});
+  if(window.VTDesktop&&VTDesktop.widgetShow){const sw=$('sw-dw'),st=()=>sw.setAttribute('aria-checked',String(!!VTDesktop.widgetState()));$('dw-card').hidden=false;st();
+    sw.onclick=()=>{VTDesktop.widgetShow(!VTDesktop.widgetState());st();setTimeout(pushPulse,600)};
+    if(VTDesktop.onWidget)VTDesktop.onWidget(a=>{if(a==='closed'){st();return}if(window.VTAPI)VTAPI.timerAction(a)});setTimeout(pushPulse,1500)}}
 window.apDirty=apDirty;document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-apsync]')){apEtag='';appSync('manual').then(()=>{const A=apA();toast(A&&A.err?'GitHub: '+A.err:'✔ Bóveda sincronizada')})}});new MutationObserver(()=>{if(!$('settings').hidden)apBadge()}).observe($('settings'),{attributes:true,attributeFilter:['hidden']});setTimeout(apBadge,0);
 /* Solo mira GitHub (ghPeek no crea el README en un repositorio vacío) y respeta .gitignore y lo que está fuera del push, como el panel */
 async function ghStatus(L){try{const rem=await ghPeek(L),base=L.base||{};let mod=[],nw=[],rm=[],un=[];const lp=new Set();
@@ -9301,7 +9320,7 @@ window.VTAPI={
     const pack=(id,notes,folders)=>{const v=S.vaults.find(x=>x.id===id)||{};return {id,name:v.name||'Notas',tc:v.titleColor||'',fc:v.fc||{},folders:[...new Set(folders.concat(notes.map(n=>n.folder||'').filter(Boolean)).flatMap(f=>{const o=[];while(f){o.push(f);f=parentOf(f)}return o}))].sort(cmpName),notes:notes.filter(x=>!isCanvas(x)&&!x.trashed).sort((p,q)=>cmpName(p.title||'',q.title||'')).slice(0,400).map(x=>({id:x.id,t:x.title||T('Sin título'),f:x.folder||'',c:x.color||''}))}};
     const vaults=S.vaults.map(v=>v.id===S.curVault?pack(v.id,S.notes,S.folders):pack(v.id,(S.vaultData[v.id]||{}).notes||[],(S.vaultData[v.id]||{}).folders||[]));
     return {accent:VTAPI.accentHex(),weekStart:S.weekStart==='auto'?1:+S.weekStart,curVault:S.curVault,vaults,regs:regPublic(),alarms:S.alarms.map(x=>({id:x.id,t:x.t,on:!!x.on,label:(x.label||T('Alarma'))+' · '+daysTxt(x.days)})),timer:{name:S.hide?'Temporizador':(S.name||'Temporizador'),running,endAt,remain:running?Math.max(0,endAt-Date.now()):remain,period:S.period*1000,lap,loop:!!S.loop},
-      alarm:n?{at:+n.d,time:n.a.t,sub:(n.a.label||'Alarma')+' · '+cap(n.d.toLocaleDateString(LOC,{weekday:'long'}))}:null,days}},
+      alarm:n?{at:+n.d,time:n.a.t,sub:(n.a.label||'Alarma')+' · '+cap(n.d.toLocaleDateString(LOC,{weekday:'long'}))}:null,days,pulse:pulseData()}},
   /* El color de acento, en #rrggbb, para los widgets */
   accentHex(){const c=document.createElement('canvas').getContext('2d');c.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();return c.fillStyle},
   /* Alarmas que sonaron con la app cerrada: las de una sola vez quedan apagadas y no vuelven a sonar al abrirla */

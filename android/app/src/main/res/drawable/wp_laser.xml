@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Blanco: se tiñe con el color del rayo desde el código -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle"><gradient android:angle="0" android:startColor="#00FFFFFF" android:centerColor="#99FFFFFF" android:endColor="#FFFFFFFF"/><corners android:radius="2dp"/><size android:height="2dp"/></shape>

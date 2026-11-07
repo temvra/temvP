@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- «Ahora»: cristal oscuro con un borde que refracta la luz en arcoíris y un resplandor del color del rayo en la esquina -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><shape android:shape="rectangle"><gradient android:type="sweep" android:startColor="#B3FF3B6B" android:centerColor="#B32EC5FF" android:endColor="#B3FFE95C"/><corners android:radius="26dp"/></shape></item>
+    <item android:left="1.5dp" android:top="1.5dp" android:right="1.5dp" android:bottom="1.5dp"><shape android:shape="rectangle"><gradient android:angle="300" android:startColor="#F21A1A28" android:endColor="#F508080E"/><corners android:radius="24.5dp"/></shape></item>
+    <item android:left="1.5dp" android:top="1.5dp" android:right="1.5dp" android:bottom="1.5dp"><shape android:shape="rectangle"><gradient android:type="radial" android:gradientRadius="140%" android:centerX="0" android:centerY="0" android:startColor="#26FF3B43" android:endColor="#00000000"/><corners android:radius="24.5dp"/></shape></item>
+    <item android:left="1.5dp" android:top="1.5dp" android:right="1.5dp" android:bottom="1.5dp"><shape android:shape="rectangle"><gradient android:type="radial" android:gradientRadius="130%" android:centerX="1" android:centerY="1" android:startColor="#1F5A78FF" android:endColor="#00000000"/><corners android:radius="24.5dp"/></shape></item>
+    <item android:left="1.5dp" android:top="1.5dp" android:right="1.5dp" android:bottom="1.5dp"><shape android:shape="rectangle"><gradient android:angle="270" android:startColor="#1AFFFFFF" android:centerColor="#00FFFFFF" android:endColor="#00000000"/><corners android:radius="24.5dp"/></shape></item>
+</layer-list>

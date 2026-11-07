@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Temvra · Ahora</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* «Ahora»: la hora con segundos, el rayo del día y lo que queda para los dos próximos eventos. El mismo diseño que el widget de Android */
+:root{--lz:255 59 67;--lz2:255 120 124;--fg:#f6f6fa;--mu:rgba(246,246,250,.56);color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:transparent;overflow:hidden;font-family:'Roboto Flex',system-ui,sans-serif;color:var(--fg);-webkit-font-smoothing:antialiased;user-select:none}
+.card{position:absolute;inset:6px;border-radius:26px;padding:16px 18px 14px;display:flex;flex-direction:column;overflow:hidden;isolation:isolate;
+  background:radial-gradient(120% 90% at 0% 0%,rgb(var(--lz) / .16),transparent 55%),radial-gradient(90% 80% at 100% 100%,rgba(90,120,255,.14),transparent 60%),linear-gradient(160deg,rgba(26,26,40,.92),rgba(8,8,14,.94));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 18px 40px rgba(0,0,0,.45);-webkit-app-region:drag}
+/* Borde que refracta la luz: un arcoíris fino que cambia de tono despacio */
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:conic-gradient(from 210deg,#ff3b6b,#ffb02e,#ffe95c,#3ddc84,#2ec5ff,#8f6bff,#ff3b6b);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.55;pointer-events:none;animation:hue 24s linear infinite;z-index:2}
+@keyframes hue{to{filter:hue-rotate(360deg)}}
+/* Destello que cruza el cristal al cambiar de minuto */
+.glint{position:absolute;inset:-40% auto -40% 0;width:38%;background:linear-gradient(100deg,transparent,rgba(255,59,107,.12) 30%,rgba(255,233,92,.16) 45%,rgba(255,255,255,.22) 50%,rgba(46,197,255,.14) 58%,rgba(143,107,255,.1) 70%,transparent);transform:translateX(-120%) rotate(14deg);pointer-events:none;mix-blend-mode:screen;z-index:1}
+.glint.go{animation:glint 1.3s cubic-bezier(.3,.6,.2,1)}
+@keyframes glint{to{transform:translateX(330%) rotate(14deg)}}
+.top{display:flex;align-items:flex-end;gap:10px}
+.clock{display:flex;align-items:flex-end;font-variant-numeric:tabular-nums;line-height:.86}
+.hm{font-size:clamp(40px,17vw,76px);font-weight:200;letter-spacing:-.03em}
+.ss{font-size:clamp(17px,6.8vw,30px);font-weight:500;margin:0 0 .28em .1em;color:rgb(var(--lz2));text-shadow:0 0 12px rgb(var(--lz) / .9),0 0 26px rgb(var(--lz) / .45);min-width:1.25em}
+.date{margin-left:auto;text-align:right;padding-bottom:.35em;min-width:0;flex:1 1 auto;overflow:hidden}
+.date b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.date small{display:block;font-size:11.5px;color:var(--mu);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* El rayo del día: lo recorrido brilla, el punto marca ahora y late con los segundos */
+.laser{position:relative;height:14px;margin:10px 2px 2px}
+.laser i{position:absolute;left:0;right:0;top:6px;height:2px;border-radius:2px;background:rgba(255,255,255,.12)}
+.laser em{position:absolute;left:0;top:6px;height:2px;width:var(--f);border-radius:2px;background:linear-gradient(90deg,transparent,rgb(var(--lz) / .45) 25%,rgb(var(--lz)) 75%,#fff);box-shadow:0 0 6px rgb(var(--lz2) / .9),0 0 16px rgb(var(--lz) / .5)}
+.laser b{position:absolute;top:2px;left:var(--f);width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff,0 0 10px rgb(var(--lz)),0 0 22px rgb(var(--lz) / .7)}
+.laser b.beat{animation:beat .6s ease-out}
+@keyframes beat{0%{transform:scale(1.45)}100%{transform:scale(1)}}
+.lbl{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--mu);margin:10px 0 4px;text-transform:uppercase}
+.ev{display:flex;align-items:center;gap:11px;padding:7px 10px 7px 8px;margin:0 -8px;border-radius:14px;-webkit-app-region:no-drag;cursor:default;transition:background .2s}
+.ev:hover{background:rgba(255,255,255,.05)}
+.ev .bar{width:4px;align-self:stretch;border-radius:4px;background:var(--c);box-shadow:0 0 10px var(--c)}
+.ev .tx{flex:1;min-width:0}
+.ev .t{font-size:15px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev .w{font-size:12px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev .cd{font-variant-numeric:tabular-nums;font-size:17px;font-weight:600;color:rgb(var(--lz2));text-align:right;white-space:nowrap}
+.ev .cd small{display:block;font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--mu);text-transform:uppercase}
+.ev.n2{opacity:.72}.ev.n2 .t{font-size:14px}.ev.n2 .cd{font-size:15px}
+.ev.soon{background:rgb(var(--lz) / .1)}
+.ev.soon .cd{animation:soon 1s ease-in-out infinite}
+@keyframes soon{50%{opacity:.45}}
+.empty{font-size:13px;color:var(--mu);padding:10px 2px}
+.x{position:absolute;top:10px;right:12px;width:24px;height:24px;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:var(--fg);font-size:15px;line-height:24px;opacity:0;transition:opacity .2s;-webkit-app-region:no-drag;cursor:pointer;z-index:3}
+body.desk .card:hover .x{opacity:1}
+body:not(.desk) .x{display:none}
+@media (max-height:200px){.lbl,.ev.n2{display:none}}
+@media (max-height:140px){.ev,.lbl,.empty{display:none}}
+@media (prefers-reduced-motion:reduce){.card::before,.glint.go,.laser b.beat,.ev.soon .cd{animation:none}}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <span class="glint" id="glint"></span>
+  <button class="x" id="x" aria-label="Ocultar widget">×</button>
+  <div class="top">
+    <div class="clock"><span class="hm" id="hm">--:--</span><span class="ss" id="ss">--</span></div>
+    <div class="date"><b id="dt"></b><small id="left"></small></div>
+  </div>
+  <div class="laser" aria-hidden="true"><i></i><em id="lzf"></em><b id="dot"></b></div>
+  <div class="lbl" id="lbl">Próximos</div>
+  <div id="evs"></div>
+</div>
+<script>
+(()=>{const $=id=>document.getElementById(id);let D={laser:'#ff3b43',loc:navigator.language||'es-ES',next:[]},lastMin=-1;
+  const hex=h=>{h=String(h||'').replace('#','');if(!/^[0-9a-f]{6}$/i.test(h))h='ff3b43';return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16))};
+  const dur=ms=>{const m=Math.max(0,Math.round(ms/6e4)),d=Math.floor(m/1440),h=Math.floor(m%1440/60),mm=m%60;return d?d+' d'+(h?' '+h+' h':''):h?h+' h'+(mm?' '+mm+' min':''):mm+' min'};
+  const cd=ms=>{const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60,p=n=>String(n).padStart(2,'0');return (h?h+':'+p(m):m)+':'+p(x)};
+  function theme(){const [r,g,b]=hex(D.laser),st=document.documentElement.style;st.setProperty('--lz',r+' '+g+' '+b);st.setProperty('--lz2',[r,g,b].map(v=>Math.round(v+(255-v)*.3)).join(' '))}
+  function events(now){const up=(D.next||[]).filter(e=>e.at>now).sort((a,b)=>a.at-b.at).slice(0,2),box=$('evs');
+    if(!up.length){if(box.dataset.k!=='0'){box.dataset.k='0';box.innerHTML='<div class="empty">Nada más en el horizonte ✦</div>'}return}
+    const k=up.map(e=>e.at+e.t).join('|');if(box.dataset.k!==k){box.dataset.k=k;box.innerHTML=up.map((e,i)=>`<div class="ev n${i+1}" data-a="${String(e.a||'').replace(/"/g,'&quot;')}" style="--c:${/^#[0-9a-f]{6}$/i.test(e.c||'')?e.c:'rgb(var(--lz))'}"><span class="bar"></span><div class="tx"><div class="t"></div><div class="w"></div></div><div class="cd"><small>en</small><span></span></div></div>`).join('');
+      box.querySelectorAll('.ev').forEach((el,i)=>{el.querySelector('.t').textContent=up[i].t;el.querySelector('.w').textContent=up[i].w||''})}
+    box.querySelectorAll('.ev').forEach((el,i)=>{const ms=up[i].at-now,big=ms>=864e5;el.querySelector('.cd span').textContent=big?dur(ms):cd(ms);el.classList.toggle('soon',ms<5*6e4)})}
+  function tick(){const n=new Date(),now=+n,p=v=>String(v).padStart(2,'0');$('hm').textContent=p(n.getHours())+':'+p(n.getMinutes());$('ss').textContent=p(n.getSeconds());
+    const dot=$('dot');dot.classList.remove('beat');void dot.offsetWidth;dot.classList.add('beat');
+    const mi=n.getHours()*60+n.getMinutes();if(mi!==lastMin){const f=(mi*60+n.getSeconds())/86400;document.querySelector('.laser').style.setProperty('--f',(f*100).toFixed(2)+'%');
+      $('dt').textContent=n.toLocaleDateString(D.loc||'es-ES',{weekday:'short',day:'numeric',month:'short'});$('left').textContent='Quedan '+dur((1440-mi)*6e4);
+      if(lastMin>=0){const g=$('glint');g.classList.remove('go');void g.offsetWidth;g.classList.add('go')}lastMin=mi}
+    events(now);setTimeout(tick,1000-Date.now()%1000+5)}
+  const set=d=>{if(!d)return;D=Object.assign(D,d);theme();lastMin=-1;$('evs').dataset.k='';tick.once||0};
+  addEventListener('message',e=>{if(e.data&&e.data.type==='pulse')set(e.data.data)});
+  if(window.VTWidget){document.body.classList.add('desk');VTWidget.onData(set);$('x').onclick=()=>VTWidget.hide();$('card').ondblclick=e=>{if(!e.target.closest('.ev'))VTWidget.open('agenda')};
+    $('evs').onclick=e=>{const ev=e.target.closest('.ev');if(ev)VTWidget.open(ev.dataset.a||'agenda')}}
+  theme();tick()})();
+</script>
+</body>
+</html>
