@@ -2749,6 +2749,19 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
 .is-light:not(.has-bg) .bkw-ovt i.on{color:var(--accent)}
 .is-light:not(.has-bg) .bkw-ovt i.on :is(span,b){filter:none}
 #bk-week.bkw-hide>button>*{visibility:hidden}
+/* ===== El rayo de la línea de tiempo también en Mes y Año ===== */
+#cal-grid{position:relative}
+#cal-grid .m-laser,body:not(.desk) #cal-grid>.m-laser{position:absolute;left:0;right:0;grid-column:1/-1;height:2px;min-height:0!important;overflow:visible;margin-top:-1px;z-index:3;clip-path:inset(-90px 0 -12px 0)}
+#cal-grid .m-laser::before{height:48px}
+#cal-grid .m-laser i{height:52px}
+.yr-g{position:relative}
+.yr-g .yr-laser{position:absolute;left:0;right:0;grid-column:1/-1;height:1.5px;margin-top:-1px;z-index:2;clip-path:inset(-16px 0 -6px 0)}
+.yr-g .yr-laser::before{height:12px}
+.yr-g .yr-laser i{height:13px}
+.yr-g .yr-laser::after{width:56px;height:6px;top:-2px}
+.yr-g .yr-laser .wk-dot{width:6px;height:6px;margin-left:-3px;top:-2.25px}
+/* Con gota, la opción elegida no lleva además su propio brillo: se veían dos (la opción nueva encendiéndose de golpe y la gota llegando) */
+.seg.lg-host>button[aria-pressed="true"],.cdr-body.lg-host .cdr-views button[aria-pressed="true"]{box-shadow:none!important}
 </style>
 
 <div class="bg" id="bg" hidden><div class="bg-img" id="bg-img"></div><div class="bg-dim" id="bg-dim"></div></div>
@@ -3906,15 +3919,20 @@ function renderTimer(){
   $('digits').textContent=fmt(l);$('ring').style.strokeDashoffset=RC*(1-frac);
   $('state').textContent=running?'En marcha':(remain<P?'En pausa':'Listo');$('lapline').textContent='Vuelta '+lap;$('lapline').style.visibility=S.loop||lap>1?'':'hidden';
 }
-function finish(){
-  alert_();
-  S.laps.unshift({n:lap,at:Date.now(),p:S.period,name:S.name});S.laps=S.laps.slice(0,100);
-  logAct('timer',S.name,'Vuelta '+lap+' · '+fmt(S.period*1000),S.focusNote);save();renderLaps();
+/* Fin de vuelta. Si la app estuvo parada (pantalla apagada, ventana minimizada) se recuperan todas las vueltas que pasaron, al mismo compás:
+   antes solo se contaba una y la siguiente volvía a empezar desde cero, así que la cuenta se repetía y se quedaba atrás.
+   Solo suena la vuelta que acaba de terminar; las anteriores ya avisaron desde Android (en el navegador suena una vez, al volver) */
+function finish(){const P=S.period*1000,now=Date.now(),late=now-endAt>1500;
+  if(!late||!(window.VTNative&&VTNative.hasPlugin))alert_();
+  const done=[];do{done.push({n:lap,at:endAt});if(!S.loop)break;lap++;endAt+=P}while(endAt<=now);
+  done.forEach(d=>{S.laps.unshift({n:d.n,at:d.at,p:S.period,name:S.name});logAct('timer',S.name,'Vuelta '+d.n+' · '+fmt(P),S.focusNote)});S.laps=S.laps.slice(0,100);save();renderLaps();
   $('clock').classList.add('flash');setTimeout(()=>$('clock').classList.remove('flash'),600);
-  if(S.loop){lap++;endAt+=S.period*1000;if(endAt<Date.now())endAt=Date.now()+S.period*1000}
-  else{running=false;$('clock').classList.remove('running');remain=S.period*1000;releaseWake();renderFabs();if(S.focusNote)focusDone();showBanner(S.name,'Tiempo cumplido',null,null,'timer')}
+  if(!S.loop){running=false;$('clock').classList.remove('running');remain=P;releaseWake();renderFabs();if(S.focusNote)focusDone();showBanner(S.name,'Tiempo cumplido',null,null,'timer')}
   tNotif();
 }
+/* Se comprueba en cada fotograma (sin el «00:00» de un instante al cambiar de vuelta) y en el tic de fondo. Con la app en segundo plano
+   en Android las vueltas las lleva el sistema: la app no cierra ninguna hasta recoger su estado al volver, o sonarían otra vez */
+function tCheck(){if(running&&!inBg()&&endAt<=Date.now()){lastTick=-1;finish()}}
 let tHeld=false;
 function tStart(){tHeld=false;recordRecent();ac();running=true;$('clock').classList.add('running');endAt=Date.now()+remain;lastTick=-1;requestWake();renderFabs();tNotif()}
 function tPause(){remain=Math.max(0,endAt-Date.now());running=false;$('clock').classList.remove('running');releaseWake();renderFabs();tNotif()}
@@ -4186,10 +4204,16 @@ function cGo(i){
   if(i>=cSeq.length){cFinish();return}
   cIdx=i;cRemain=cSeq[i].sec*1000;cEnd=Date.now()+cRemain;cTick=-1;announce(cSeq[i]);
 }
-function cFinish(){
+/* Paso terminado: el siguiente empieza justo donde acabó este (antes arrastraba el retraso de cada comprobación) y, si la app estuvo parada,
+   se saltan los pasos que ya pasaron en vez de seguir por donde se quedó. Solo se anuncia el paso que acaba de empezar */
+function cAdvance(){const now=Date.now();let i=cIdx,end=cEnd;
+  while(end<=now){i++;if(i>=cSeq.length){cFinish(now-end>1500);return}end+=cSeq[i].sec*1000}
+  cIdx=i;cEnd=end;cRemain=end-now;cTick=-1;if(now-(end-cSeq[i].sec*1000)<1500)announce(cSeq[i])}
+function cCheck(){if(cRun&&cEnd<=Date.now())cAdvance()}
+function cFinish(late){
   const total=cSeq.reduce((a,b)=>a+b.sec,0);
-  buzz([300,120,300,120,600]);
-  if(S.aviso!=='none'){duckMusic();if(S.aviso!=='duckOnly'){S.sound==='voz'?speak(S.tts.lang==='ja-JP'?'お疲れ様！':'¡Circuito completado! ¡Buen trabajo!'):playSound()}}
+  if(!late){buzz([300,120,300,120,600]);
+  if(S.aviso!=='none'){duckMusic();if(S.aviso!=='duckOnly'){S.sound==='voz'?speak(S.tts.lang==='ja-JP'?'お疲れ様！':'¡Circuito completado! ¡Buen trabajo!'):playSound()}}}
   S.laps.unshift({n:C_().rounds,at:Date.now(),p:total,name:'Circuito · '+C_().name});
   logAct('circuit',C_().name,C_().rounds+' rondas · '+fmt(total*1000));save();renderLaps();
   cStop();toast('¡Circuito completado! '+fmt(total*1000));
@@ -4388,7 +4412,7 @@ function bkV(v){return v==='day'||v==='week'||v==='3d'}
 function bkWkN(){return S.calView==='week'?7:S.calView==='3d'?(DESK.matches?3:7):0}
 const agV=()=>bkV(S.calView)?'blocks':'cal';
 function agGo(v,fn){const from=view,was=S.calView,ag=from==='cal'||from==='blocks',anim=ag&&!agRM()&&(v!==was||from!==(bkV(v)?'blocks':'cal'));
-  const run=()=>{S.calView=v;save();if(!bkV(v)){const sc=$('v-cal');sc.scrollTop=0;sc.classList.remove('compact');
+  const run=()=>{S.calView=v;save();if(window.lgDustClear)lgDustClear(null,{left:-1e4,top:-1e4,right:1e5,bottom:1e5});if(!bkV(v)){const sc=$('v-cal');sc.scrollTop=0;sc.classList.remove('compact');
       /* Mes y Año se abren donde estabas: en el mes del día que se veía en Día o en Semana */
       if(from==='blocks'&&bkDay){const d=fromKey(bkDay);calMonth=new Date(d.getFullYear(),d.getMonth(),1)}}
     const tgt=agV();if(view!==tgt||!ag){show(tgt);if(anim)$('v-'+tgt).style.animation='none'}else if(tgt==='cal')renderCal();else renderBlocks();if(fn)fn();agSeg()};
@@ -4432,14 +4456,14 @@ function agIn(v,g){const sc=$('v-cal'),R=sc.getBoundingClientRect();
     /* Ancho y alto con muelles distintos y una inclinación que oscila: se abre como una ventana de escritorio que se deforma al aparecer */
     el.animate(A.map((a,i)=>({transform:`perspective(1100px) rotateX(${(D[i]*26).toFixed(2)}deg) skewX(${(-B[i]*13).toFixed(2)}deg) scale(${(1-a*.9).toFixed(4)},${(1-C[i]*.96).toFixed(4)})`,opacity:Math.min(1,(1-a)*4).toFixed(3)})),{duration:T*1000,easing:'linear',fill:'backwards'});
     agFade(g,420,0,'scale(.94)');return}
-  if(v==='year'){const ms=[...sc.querySelectorAll('#cal-alt .yr-m')],y=calMonth.getFullYear(),now=new Date(),c0=y===now.getFullYear()?now.getMonth():0,f=spSeries(.52,.62,1.05),vh=innerHeight;
+  if(v==='year'){const ms=[...sc.querySelectorAll('#cal-alt .yr-m')],y=calMonth.getFullYear(),now=new Date(),c0=y===now.getFullYear()?now.getMonth():0,f=spSeries(.46,.66,.85),vh=innerHeight;
     /* Orden en onda desde el mes actual: primero él, luego sus vecinos a un lado y a otro */
     const ord=ms.map((m,i)=>i).sort((a,b)=>Math.abs(a-c0)-Math.abs(b-c0)||a-b);let last=0;
-    ord.forEach((i,j)=>{const m=ms[i],r=m.getBoundingClientRect();if(r.top>vh+40)return;const d=j*85;last=Math.max(last,d);const tilt=(i%2?1:-1)*9;
-      m.animate(kfY(f,vh-r.top+30,u=>` rotate(${(u*tilt).toFixed(2)}deg)`),{duration:1050,delay:d,easing:'linear',fill:'backwards'})});
+    let j=0;ord.forEach(i=>{const m=ms[i],r=m.getBoundingClientRect();if(r.top>vh+40||r.bottom<-40)return;const d=j++*55;last=Math.max(last,d);const tilt=(i%2?1:-1)*9;
+      m.animate(kfY(f,vh-r.top+30,u=>` rotate(${(u*tilt).toFixed(2)}deg)`),{duration:850,delay:d,easing:'linear',fill:'backwards'})});
     const card=sc.querySelector('#cal-alt .yr-card'),hd=card&&card.querySelector('.yr-h');
-    if(card){card.animate([{opacity:0,transform:'scale(.96)'},{opacity:1,transform:'none'}],{pseudoElement:'::before',duration:520,delay:last+520,easing:getComputedStyle(document.documentElement).getPropertyValue('--sp-soft').trim()||'ease-out',fill:'backwards'});
-      if(hd)hd.animate([{opacity:0,transform:'translateY(-10px)'},{opacity:1,transform:'none'}],{duration:480,delay:last+600,easing:'ease-out',fill:'backwards'})}
+    if(card){card.animate([{opacity:0,transform:'scale(.96)'},{opacity:1,transform:'none'}],{pseudoElement:'::before',duration:520,delay:last+380,easing:getComputedStyle(document.documentElement).getPropertyValue('--sp-soft').trim()||'ease-out',fill:'backwards'});
+      if(hd)hd.animate([{opacity:0,transform:'translateY(-10px)'},{opacity:1,transform:'none'}],{duration:480,delay:last+440,easing:'ease-out',fill:'backwards'})}
     agFade(g,360);return}
   if(v==='sched'){const f=spSeries(.44,.78,.8);[...sc.querySelectorAll('#cal-alt .sc-m,#cal-alt .sc-d')].filter(x=>x.getBoundingClientRect().top<innerHeight).forEach((x,i)=>{x.animate(f.map(u=>({transform:`translate3d(${(u*46).toFixed(1)}px,0,0)`,opacity:(1-u).toFixed(3)})),{duration:800,delay:i*38,easing:'linear',fill:'backwards'})});agFade(g,260);return}
   agFade(g,240)}
@@ -4639,7 +4663,8 @@ let yrN=2;function renderYear(){const y=calMonth.getFullYear();return [...Array(
 function yearCard(y){const todayK=dk(new Date()),CE=calEvents(),has=new Set(CE.filter(e=>e.date&&e.date.startsWith(y+'')).map(e=>e.date)),fd=firstDay();
   const nd=(y%4===0&&y%100!==0)||y%400===0?366:365;
   return `<div class="yr-card"><div class="yr-h"><b>${y}</b><span>${nd} ${T('días')}</span></div><div class="yr">${[...Array(12)].map((_,m)=>{const first=new Date(y,m,1),off=(first.getDay()-fd+7)%7,nd=new Date(y,m+1,0).getDate();let c='';
-    for(let i=0;i<off;i++)c+='<i></i>';for(let dd=1;dd<=nd;dd++){const k=dk(new Date(y,m,dd));c+=`<button data-day="${k}" class="${k===todayK?'today':''}${holOn(k).length?' hol':''}${has.has(k)?' has':''}">${dd}${k===todayK?`<i class="yr-now" style="--f:${((new Date().getHours()*60+new Date().getMinutes())/1440).toFixed(3)}"></i>`:''}</button>`}
+    for(let i=0;i<off;i++)c+='<i></i>';let li='';for(let dd=1;dd<=nd;dd++){const k=dk(new Date(y,m,dd));c+=`<button data-day="${k}" class="${k===todayK?'today':''}${holOn(k).length?' hol':''}${has.has(k)?' has':''}">${dd}</button>`;
+      if(k===todayK){const ix=off+dd-1,f=(new Date().getHours()*60+new Date().getMinutes())/1440;li=`<b class="bk-now wk-laser yr-laser" aria-hidden="true" style="grid-row:${Math.floor(ix/7)+1}/${Math.floor(ix/7)+2};top:${(f*100).toFixed(2)}%;--p:${((ix%7+.5)/7*100).toFixed(2)}%;--c0:${(ix%7/7*100).toFixed(2)}%"><i></i><b class="wk-dot"></b></b>`}}c+=li;
     return `<div class="yr-m"><button class="yr-t" data-ymonth="${m}" data-yy="${y}">${cap(first.toLocaleDateString(LOC,{month:'long'}))}</button><div class="yr-wd">${dayOrder().map(x=>`<i>${DAYN[x]}</i>`).join('')}</div><div class="yr-g">${c}</div></div>`}).join('')}</div></div>`}
 let schedDays=45;
 function renderSched(){const out=[],todayK=dk(new Date()),CE=calEvents();let lastM='';
@@ -4665,6 +4690,9 @@ function renderCalAlt(){const v=S.calView,month=v==='month';$('wk-hd').hidden=v!
   if(v==='sched'&&ttl.scrollWidth>ttl.clientWidth+1)ttl.textContent=cap(new Date().toLocaleDateString(LOC,{month:'long'}));
   const first=!$('cal-alt').dataset.v||$('cal-alt').dataset.v!==v;$('cal-alt').dataset.v=v;if(first&&v==='year')yrN=2;
   $('cal-alt').innerHTML=v==='week'?renderWeek(7):v==='3d'?renderWeek(3):v==='year'?renderYear():renderSched();
+  /* El año se abre con el mes actual en el centro, con su rayo a la vista (antes empezaba en enero y noviembre quedaba fuera) */
+  if(first&&v==='year'&&calMonth.getFullYear()===new Date().getFullYear()){const sc=$('v-cal'),me=$('cal-alt').querySelectorAll('.yr-card')[0];const mm=me&&me.querySelectorAll('.yr-m')[new Date().getMonth()];
+    if(mm){const r=mm.getBoundingClientRect(),s0=sc.getBoundingClientRect();sc.scrollTop=Math.max(0,sc.scrollTop+r.top-s0.top-(sc.clientHeight-r.height)/2)}}
   if(first&&(v==='week'||v==='3d'))requestAnimationFrame(()=>{const b=$('cal-alt').querySelector('.wk-body');if(b)$('v-cal').scrollTop=b.offsetTop+7*WH-20})}
 
 /* ===================== Bloques de trabajo ===================== */
@@ -5950,9 +5978,9 @@ function renderCal(){if(S.calView==='3d'&&!DESK.matches){S.calView='week';save()
   const fit=Math.max(1,comp?Math.floor((cellH-22)/13):Math.floor((cellH-40)/19));
   const twd=(new Date().getDay()-fd+7)%7;
   let html=dayOrder().map(x=>DAYN[x]).map((d,i)=>`<div class="cal-wd${i===twd&&y===new Date().getFullYear()&&m===new Date().getMonth()?' today':''}"><span>${d}</span></div>`).join('');
-  const frac=dayFrac();
+  const frac=dayFrac();let ti=-1;
   for(let i=0;i<weeks*7;i++){
-    const d=new Date(start);d.setDate(start.getDate()+i);const k=dk(d),isT=k===todayK;
+    const d=new Date(start);d.setDate(start.getDate()+i);const k=dk(d),isT=k===todayK;if(isT)ti=i;
     const chips=[],hol=holOn(k);hol.forEach(h=>chips.push(`<span class="mchip hol">${esc(h)}</span>`));
     const mo=moonOn(k);if(mo)chips.push(`<span class="mchip moon">${mo}</span>`);
     if(S.calShow.notes!==false)S.notes.filter(n=>n.date===k).forEach(n=>chips.push(`<span class="mchip note">${OB_IC.note} ${esc(n.title||'Sin título')}</span>`));
@@ -5965,9 +5993,12 @@ function renderCal(){if(S.calView==='3d'&&!DESK.matches){S.calView='week';save()
     const shown=chips.length>fit?chips.slice(0,fit-1).join('')+`<span class="mmore">+${chips.length-fit+1} más</span>`:chips.join('');
     const cls=['mcell',d.getMonth()!==m?'out':'',isT?'today':'',k<todayK?'past':'',hol.length?'hol':'',S.hol&&S.hol.we===false?'':isWeekend(k)?'we':''].join(' ');
     html+=`<button class="${cls}" data-day="${k}" aria-label="${d.toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long'})}${hol.length?', festivo: '+esc(hol.join(', ')):''}${chips.length?', '+chips.length+(chips.length===1?' elemento':' elementos'):''}">`+
-      (isT?`<span class="fill" style="width:${(frac*100).toFixed(1)}%"></span><span class="nowbar" style="left:${(frac*100).toFixed(1)}%"></span><span class="left">${(1-frac)*24<1?Math.max(1,Math.round((1-frac)*1440))+' min':Math.ceil((1-frac)*24)+'h'}</span>`:'')+
+      (isT?`<span class="left">${(1-frac)*24<1?Math.max(1,Math.round((1-frac)*1440))+' min':Math.ceil((1-frac)*24)+'h'}</span>`:'')+
       `<span class="mnum">${d.getDate()}</span>${S.weekNum&&i%7===0?`<span class="mwk">S${weekNo(d)}</span>`:''}${shown}</button>`;
   }
+  /* El rayo de la línea de tiempo, el mismo de Día y Semana: cruza la semana de hoy a la altura de la hora (arriba las 0:00, abajo las 24:00)
+     y brilla más sobre el día de hoy. Antes el mes solo tenía una raya pequeña dentro de la casilla */
+  if(ti>=0){const r=Math.floor(ti/7),c=ti%7;html+=`<div class="bk-now wk-laser m-laser" aria-hidden="true" style="grid-row:${r+2}/${r+3};top:${(frac*100).toFixed(2)}%;--p:${((c+.5)/7*100).toFixed(2)}%;--c0:${(c/7*100).toFixed(2)}%"><i></i><b class="wk-dot"></b></div>`}
   grid.innerHTML=html;renderCalAlt();
   // Próximos 7 días
   const up=[];for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()+i);const k=dk(d);
@@ -6004,7 +6035,7 @@ function openDay(k){goBlocksDay(k)}
 /* Rayo de la hora en las vistas del calendario: cada minuto se mueve; en Programación se redibuja cuando cambia de sitio */
 function calNowTick(){const nw=new Date(),m=nw.getHours()*60+nw.getMinutes(),f=m/1440;
   document.querySelectorAll('#cal-alt .wk-laser').forEach(l=>{l.style.top=m/60*WH+'px';const sp=l.querySelector('span');if(sp)sp.textContent=hm(nw)});
-  document.querySelectorAll('#cal-alt .yr-now').forEach(l=>l.style.setProperty('--f',f.toFixed(3)));
+  document.querySelectorAll('#cal-alt .yr-laser').forEach(l=>l.style.top=(f*100).toFixed(2)+'%');
   if(!bkDrag&&$('ob-sheet').hidden&&(S.calView==='month'||S.calView==='sched'))renderCal()}
 function secHtml(k){
   const d=fromKey(k),todayK=dk(new Date()),isT=k===todayK,items=dayItems(k);
@@ -7232,14 +7263,20 @@ async function ghCreate(nm,pub){try{ghPrint(`Creando <b>${esc(nm)}</b> (${pub?'p
   const r=await ghApi('/user/repos',{method:'POST',body:{name:nm,private:!pub,auto_init:true,description:'Bóveda de notas de Temvra'}});
   S.gh.links[S.curVault]={repo:r.full_name,branch:r.default_branch||'main'};save();ghPrint('✔ Repositorio creado: <a href="'+esc(r.html_url)+'" target="_blank" rel="noopener">'+esc(r.full_name)+'</a>','ok');ghPrint('Ahora pulsa <b>⇅ Sincronizar</b> para guardar tus notas en GitHub.','dim');ghState()}catch(e){ghErr(e);ghState()}}
 const GH_FILE=/\.(md|markdown|canvas|png|jpe?g|gif|webp|pdf|mp3|m4a|wav|ogg|mp4|webm|txt|csv|json|docx|xlsx|pptx|zip)$/i;
+/* Un repositorio de código (el de la propia app, por ejemplo) no es una bóveda: al vincularlo, Notas se llenaba con los iconos,
+   las pantallas de arranque y los package.json de la app. Sus carpetas de código no se traen a Notas, no se borran desde aquí y no se sube nada */
+const APP_FILE_RE=/(^|\/)(android\/app\/src\/main\/res\/(drawable|mipmap)[\w-]*\/[\w.-]+\.(png|webp|jpe?g)|resources\/icon-[\w-]+\.png|(desktop\/)?package(-lock)?\.json|capacitor\.config\.json)$/i;
+const GH_CODE_MARK=/^(capacitor\.config\.json|package\.json|android\/gradlew|settings\.gradle|build\.gradle|pubspec\.yaml|Cargo\.toml|go\.mod|pyproject\.toml)$/;
+const GH_CODE_DIR=/^(android|ios|desktop|electron|node_modules|src|scripts|resources|parked|www|dist|build|gradle|lib|bin|obj|target|vendor)\//;
+const ghCodeSkip=(L,p)=>!!(L&&L.code&&(GH_CODE_DIR.test(p)||!p.includes('/')&&/\.(json|lock)$/i.test(p)));
 const ghPath=p=>p.split('/').map(encodeURIComponent).join('/');
 async function ghHead(L){let ref=await ghApi(`/repos/${L.repo}/git/ref/heads/${ghPath(L.branch||'main')}`,{ok404:true,ok409:true});
   if(!ref){ghPrint('El repositorio está vacío: creo el primer commit…','dim');
     await ghApi(`/repos/${L.repo}/contents/README.md`,{method:'PUT',body:{message:'Temvra Notas: iniciar bóveda',content:b64e('# '+((S.vaults.find(v=>v.id===S.curVault)||{}).name||'Notas')+'\n\nBóveda de notas de Temvra.\n'),branch:L.branch||'main'}});
     ref=await ghApi(`/repos/${L.repo}/git/ref/heads/${ghPath(L.branch||'main')}`)}
   const head=ref.object.sha,c=await ghApi(`/repos/${L.repo}/git/commits/${head}`);return {head,tree:c.tree.sha,rem:await ghRem(L,c.tree.sha)}}
-async function ghRem(L,tree){const t=await ghApi(`/repos/${L.repo}/git/trees/${tree}?recursive=1`),rem={};
-  (t.tree||[]).forEach(x=>{if(x.type==='blob'&&GH_FILE.test(x.path)&&x.path!=='README.md'&&!x.path.split('/').some(q=>q.startsWith('.')))rem[x.path]=x.sha});return rem}
+async function ghRem(L,tree){const t=await ghApi(`/repos/${L.repo}/git/trees/${tree}?recursive=1`),rem={},all=t.tree||[];L.code=all.some(x=>x.type==='blob'&&GH_CODE_MARK.test(x.path));
+  all.forEach(x=>{if(x.type==='blob'&&GH_FILE.test(x.path)&&x.path!=='README.md'&&!x.path.split('/').some(q=>q.startsWith('.'))&&!ghCodeSkip(L,x.path))rem[x.path]=x.sha});return rem}
 async function ghPeek(L){const ref=await ghApi(`/repos/${L.repo}/git/ref/heads/${ghPath(L.branch||'main')}`,{ok404:true,ok409:true});if(!ref)return {};
   const c=await ghApi(`/repos/${L.repo}/git/commits/${ref.object.sha}`);return ghRem(L,c.tree.sha)}
 async function remoteTree(L){return (await ghHead(L)).rem}
@@ -7253,8 +7290,10 @@ async function ghSync(L,mode,cmsg){if(ghBusy){ghPrint('Ya hay una sincronizació
     /* Con conflictos no se sube nada: antes hay que revisar las copias «(GitHub)» */
     if(cf&&mode==='push'){L.base=H.rem;L.at=Date.now();SCM.inc=[];save();ghPrint(`✖ ${cf===1?'Hay 1 conflicto':'Hay '+cf+' conflictos'} con GitHub: no se ha subido nada. Revisa ${cf===1?'la copia':'las copias'} «(GitHub)» y vuelve a pulsar Confirmar y subir.`,'err');toast(`GitHub: ${cf===1?'1 conflicto':cf+' conflictos'} · revísalo antes de subir`);return}}
   if(mode==='pull'){L.base=H.rem;L.at=Date.now();save();return}
+  /* En un repositorio de código no se sube nada: cada nota sería un commit en el código (y en el de la app, una versión nueva) */
+  if(L.code){L.base=H.rem;L.at=Date.now();save();ghPrint(`✖ ${esc(L.repo)} es un repositorio de código, no una bóveda: no se sube nada para no tocar su código. Vincula Notas a un repositorio solo para notas (por ejemplo con <b>gh repo create notas</b>).`,'err');if(!ghQuiet)toast('GitHub: '+L.repo+' es de código; vincula Notas a otro repositorio');return}
   const loc=await localMap(),entries=[];let up=0,del=0;
-  for(const [p,x] of Object.entries(loc)){if(H.rem[p]===x.sha)continue;
+  for(const [p,x] of Object.entries(loc)){if(H.rem[p]===x.sha||ghCodeSkip(L,p))continue;
     const blob=await ghApi(`/repos/${L.repo}/git/blobs`,{method:'POST',body:{content:x.f.kind==='a'?x.f.b64:b64e(x.f.ref.body),encoding:'base64'}});
     entries.push({path:p,mode:'100644',type:'blob',sha:blob.sha});up++;ghPrint('⬆ '+esc(p),'dim')}
   for(const p of Object.keys(H.rem))if(!loc[p]&&base[p]===H.rem[p]&&!gitSkipPath(p)){entries.push({path:p,mode:'100644',type:'blob',sha:null});del++;ghPrint('✕ '+esc(p),'dim')}
@@ -7290,7 +7329,7 @@ async function ghMerge(L,rem,base){const loc=await localMap();let down=0,gone=0,
       down++;ghPrint('⬇ '+esc(p),'dim')}
     if(folder&&!S.folders.includes(folder))S.folders.push(folder)}
   for(const [p,l] of Object.entries(loc))if(!rem[p]&&base[p]!==undefined&&l.sha===base[p]){ // borrada en GitHub y sin cambios aquí
-    if(l.f.kind==='n'){if(curNote===l.f.ref)closeNote();trashNote(l.f.ref);S.notes=S.notes.filter(n=>n!==l.f.ref)}else{S.atts=S.atts.filter(a=>a!==l.f.ref);delImg(l.f.ref.id)}gone++;ghPrint('✕ '+esc(p),'dim')}
+    if(l.f.kind==='n'){if(curNote===l.f.ref)closeNote();trashNote(l.f.ref);S.notes=S.notes.filter(n=>n!==l.f.ref)}else{S.atts=S.atts.filter(a=>a!==l.f.ref);(l.f.ref.kind==='file'?fileDel:delImg)(l.f.ref.id)}gone++;ghPrint('✕ '+esc(p),'dim')}
   save();renderNotes();if(curNote)renderNoteMeta();
   ghPrint(down||gone||conf?`✔ Pull: ${down} actualizados${gone?', '+gone+' borrados':''}${conf?', '+conf+(conf===1?' conflicto':' conflictos'):''}.`:'Pull: todo al día (Already up to date)','ok');if(down||gone||conf)toast('GitHub: '+[down+gone?(down+gone)+(down+gone===1?' cambio':' cambios'):'',conf?conf+(conf===1?' conflicto':' conflictos'):''].filter(Boolean).join(' · '));else if(!ghQuiet)toast('GitHub: todo al día');return conf}
 const ghPush=(L,m)=>ghSync(L,'push',m),ghPull=L=>ghSync(L,'pull');
@@ -8029,7 +8068,7 @@ En ☰ Comandos: «Timer: iniciar enfoque con esta nota». Al terminar se anota 
 let view='timer';
 const TITLES={ai:'Asistente',alarm:'Alarmas',clock:'Reloj',blocks:'Bloques',stop:'Cronómetro',cal:'Calendario',notes:'Notas'};
 function show(v){
-  if(v==='time')v=S.lastTime||'timer';$('v-cal').style.animation=$('v-blocks').style.animation='';
+  if(v==='time')v=S.lastTime||'timer';$('v-cal').style.animation=$('v-blocks').style.animation='';if(window.lgDustClear)lgDustClear(null,{left:-1e4,top:-1e4,right:1e5,bottom:1e5});
   /* Agenda: lo que se ve lo decide la vista; abrir Bloques es pasar a la vista Día */
   if(v==='cal'&&bkV(S.calView))v='blocks';else if(v==='blocks'&&!bkV(S.calView)){S.calView='day';save()}
   const TIMEV=['timer','circ','stop','alarm','laps','clock'];
@@ -8112,6 +8151,7 @@ function renderPreview(){
 }
 let lastPv=0;
 function frame(now){
+  tCheck();cCheck();
   if(view==='timer')renderTimer();
   else if(view==='stop')renderSw();
   else if(view==='circ')renderCircRun();
@@ -8123,10 +8163,10 @@ let lastSec=-1;
 setInterval(()=>{
   if(running){const l=endAt-Date.now(),sec=Math.ceil(l/1000);
     if(S.tick&&sec<=3&&sec>=1&&sec!==lastTick&&S.period>4&&S.aviso!=='none'&&S.aviso!=='duckOnly'){lastTick=sec;tone(660,0,.09,'sine',.25)}
-    if(l<=0){lastTick=-1;finish()}}
+    tCheck()}
   if(cRun){const l=cEnd-Date.now(),sec=Math.ceil(l/1000);
     if(S.tick&&sec<=3&&sec>=1&&sec!==cTick&&S.aviso!=='none'&&S.aviso!=='duckOnly'){cTick=sec;tone(660,0,.09,'sine',.25)}
-    if(l<=0)cGo(cIdx+1)}
+    cCheck()}
   const s=new Date().getSeconds();
   if(s!==lastSec){lastSec=s;if(view==='clock')renderClock();if((view==='blocks'||DESK.matches&&view==='cal')&&s===0&&$('bk-sheet').hidden&&!bkDrag)renderBlocks();if(s===0){renderCities();renderAlarms();if(view==='cal')calNowTick()}checkAlarms();checkReminders();
     if(s%30===0){if(view==='cal')renderCal();tickDay()}if(s===0)pushWidgets();
@@ -8175,6 +8215,15 @@ if((S.uiV||0)<7){S.uiV=7;
   ['Casa','Personal'].forEach(f=>{if(!S.notes.some(n=>n.folder===f||(n.folder||'').startsWith(f+'/'))&&!S.atts.some(a=>(a.folder||'')===f)&&!S.folders.some(x=>x.startsWith(f+'/')))S.folders=S.folders.filter(x=>x!==f)});
   if(S.obActive&&!S.notes.some(n=>n.id===S.obActive))S.obActive=null;save();calDirty=true;renderNotes();renderAlarms();renderPresets();renderCal()}
 if((S.uiV||0)<8){S.uiV=8;if(S.calPage==='blocks')S.calView='day';delete S.calPage;delete S.pgHint;save()}
+/* Las fotos de la app (iconos de cada tamaño, pantallas de arranque) y sus package.json que se colaron en Notas al sincronizar con el repositorio de la app:
+   se quitan de todas las bóvedas junto con las carpetas que quedan vacías, y se olvidan en la sincronización para que un push no las borre del repositorio */
+if((S.uiV||0)<9){S.uiV=9;let n=0;const isApp=x=>APP_FILE_RE.test((x.folder?x.folder+'/':'')+x.name),inF=(x,f)=>(x.folder||'')===f||(x.folder||'').startsWith(f+'/');
+  const clean=D=>{const gone=(D.atts||[]).filter(isApp);if(!gone.length)return;gone.forEach(a=>(a.kind==='file'?fileDel:delImg)(a.id));n+=gone.length;D.atts=D.atts.filter(a=>!isApp(a));
+    const up=new Set();gone.forEach(a=>{let f=a.folder||'';while(f){up.add(f);f=f.includes('/')?f.slice(0,f.lastIndexOf('/')):''}});
+    D.folders=(D.folders||[]).filter(f=>!(up.has(f)||[...up].some(g=>f.startsWith(g+'/')))||D.atts.some(x=>inF(x,f))||(D.notes||[]).some(x=>inF(x,f)))};
+  const cur={atts:S.atts,folders:S.folders,notes:S.notes};clean(cur);S.atts=cur.atts;S.folders=cur.folders;Object.keys(S.vaultData||{}).forEach(k=>{if(k!==S.curVault)clean(S.vaultData[k])});
+  Object.values((S.gh&&S.gh.links)||{}).forEach(L=>{if(L&&L.base)Object.keys(L.base).forEach(p=>{if(APP_FILE_RE.test(p))delete L.base[p]})});
+  save();if(n){renderNotes();setTimeout(()=>toast(n===1?'Quitada de Notas 1 foto de la app que venía del repositorio':'Quitadas de Notas '+n+' fotos y archivos de la app que venían del repositorio'),1500)}}
 /* Deslizar para cerrar: cada menú se cierra en sentido contrario al que se abrió (hojas hacia abajo, paneles laterales hacia la izquierda) */
 (()=>{let g=null;
   const scrolled=(el,top)=>{for(;el&&el!==top.parentElement;el=el.parentElement)if(el.scrollTop>0&&getComputedStyle(el).overflowY!=='visible')return true;return false};
@@ -8579,7 +8628,11 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
     /* Vertical solo por la forma de la caja: la propia lente, al crecer, desborda y cambiaría scrollWidth en mitad del arrastre */
     const on=()=>box.offsetParent!==null,V=()=>DESK.matches&&box.clientHeight>box.clientWidth*1.4;
     /* Mientras se pulsa, la gota va a la opción pulsada (como en iOS 26), no se levanta en la que ya estaba */
-    function aim(){const c=dg&&dg.it.isConnected&&dg.it.offsetWidth?dg.it:cur();if(!c)return false;const r=tgt(c).getBoundingClientRect(),b=box.getBoundingClientRect();if(!r.width)return false;const cx=box.clientLeft,cy=box.clientTop;
+    /* Escala con la que se ve la caja: mientras una hoja o un menú se abre creciendo, sus medidas en pantalla son más pequeñas que las reales.
+       Sin corregirlo la gota se colocaba encogida y luego corría y se estiraba hasta su sitio, separada de su opción */
+    const scl=b=>[b.width/(box.offsetWidth||b.width)||1,b.height/(box.offsetHeight||b.height)||1];
+    function aim(){const c=dg&&dg.it.isConnected&&dg.it.offsetWidth?dg.it:cur();if(!c)return false;const r0=tgt(c).getBoundingClientRect(),b=box.getBoundingClientRect();if(!r0.width)return false;const cx=box.clientLeft,cy=box.clientTop;
+      const [kx,ky]=scl(b),r={left:b.left+(r0.left-b.left)/kx,top:b.top+(r0.top-b.top)/ky,width:r0.width/kx,height:r0.height/ky};
       /* Mientras se arrastra, el eje del gesto lo marca el dedo (lo fija pointermove); el otro eje sigue a la pestaña */
       const dr=!!(dg&&dg.moved),vt=V(),sp=drag&&lift,D=sp?Math.max(r.width,r.height)*1.12:0;
       /* En las barras que se arrastran, al pulsar la gota se vuelve una esfera algo mayor que la pestaña, centrada en ella */
@@ -8602,8 +8655,9 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
       /* La esfera rueda por la barra: sus destellos giran según lo que recorre */
       const rot=((V()?o.y:o.x)/Math.max(8,o.w/2)*57.3%360).toFixed(1);
       /* Levantada o viajando, la gota curva la luz de lo que tiene alrededor como un agujero negro con su forma; la esfera además atrae el fondo hacia su centro */
-      if((lift||tv>.25)&&window.lgHole){const b=box.getBoundingClientRect(),c={x:b.left+box.clientLeft+o.x-box.scrollLeft+o.w/2,y:b.top+box.clientTop+o.y-box.scrollTop+o.h/2},rad=Math.min(o.w,o.h)/2,R=sp?Math.min(o.w,o.h)*.44:Math.max(12,Math.min(28,Math.min(o.w,o.h)*.22+6));
-        if(!hole)hole=window.lgHole(o.w,o.h,rad,R,sp);if(hole)hole.resize(o.w,o.h,rad,R,sp).at(c.x,c.y,px,py).rot(rot).str(sp?(dr?1:.85):lift?.7:Math.min(.7,tv))}
+      if((lift||tv>.25)&&window.lgHole){const b=box.getBoundingClientRect(),[kx,ky]=scl(b),c={x:b.left+(box.clientLeft+o.x-box.scrollLeft+o.w/2)*kx,y:b.top+(box.clientTop+o.y-box.scrollTop+o.h/2)*ky},rad=Math.min(o.w,o.h)/2,R=sp?Math.min(o.w,o.h)*.44:Math.max(12,Math.min(28,Math.min(o.w,o.h)*.22+6));
+        /* El halo sigue a la gota también mientras se apaga: si la hoja cambiaba de tamaño al elegir, se quedaba suelto donde estaba la opción */
+        if(!hole){hole=window.lgHole(o.w,o.h,rad,R,sp);if(hole)hole.track(L)}if(hole)hole.resize(o.w,o.h,rad,R,sp).at(c.x,c.y,px,py).rot(rot).str(sp?(dr?1:.85):lift?.7:Math.min(.7,tv))}
       else if(hole){hole.str(0);hole=null}
       const lf=lift||tv>.3;if(L.classList.contains('lift')!==lf){L.classList.toggle('lift',lf);if(lf&&!sp&&window.lgRefract)window.lgRefract(L,true)}
       if(L.classList.contains('sph')!==sp)L.classList.toggle('sph',sp);L.style.setProperty('--hrot',rot+'deg');if(window.lgLensDust&&Math.random()<.5)window.lgLensDust(L,o.vx,o.vy,sp);
@@ -8623,7 +8677,7 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
     addEventListener('pointermove',e=>{if(!dg||e.pointerId!==dg.id||drag!==true)return;const vert=V();if(!dg.moved&&Math.abs(vert?e.clientY-dg.y0:e.clientX-dg.x0)<8)return;dg.moved=true;
       const n=performance.now(),ldt=Math.max(1,n-dg.lt);dg.sx=(e.clientX-dg.lx)/ldt*1000;dg.sy=(e.clientY-dg.ly)/ldt*1000;dg.lx=e.clientX;dg.ly=e.clientY;dg.lt=n;
       const b=box.getBoundingClientRect(),[lo,hi]=ends(vert),q=vert?e.clientY:e.clientX,c=q<lo?lo+rubber(q-lo,80):q>hi?hi+rubber(q-hi,80):q;
-      if(vert)ty=c-b.top-box.clientTop+box.scrollTop-th/2;else tx=c-b.left-box.clientLeft+box.scrollLeft-tw/2;kick(200)});
+      const [kx,ky]=scl(b);if(vert)ty=(c-b.top)/ky-box.clientTop+box.scrollTop-th/2;else tx=(c-b.left)/kx-box.clientLeft+box.scrollLeft-tw/2;kick(200)});
     const end=e=>{if(!dg||e.pointerId!==dg.id)return;const d=dg;dg=null;lift=false;
       /* Tocar sin mover: el clic normal. Arrastrar: se elige la pestaña donde se suelta y se descarta el clic de la original */
       /* La inercia solo cuenta si el dedo aún se movía al soltar: tras una pausa se queda donde está */
@@ -8647,7 +8701,11 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
   DESK.addEventListener('change',()=>NL&&NL.kick(600));
   /* En los menús: vistas del menú de la Agenda y pestañas del panel de Notas */
   lens($('cdr-body'),'[data-cview]',()=>$('cdr-body').querySelector('[data-cview][aria-pressed="true"]'),el=>el,false);
-  document.querySelectorAll('.seg').forEach(sg=>{if(sg.querySelector('button[aria-pressed]'))lens(sg,'button',()=>sg.querySelector('button[aria-pressed="true"]'),el=>el,false)});
+  const segLens=sg=>{if(!sg.classList.contains('lg-host')&&sg.querySelector('button[aria-pressed]'))lens(sg,'button',()=>sg.querySelector('button[aria-pressed="true"]'),el=>el,false)};
+  document.querySelectorAll('.seg').forEach(segLens);
+  /* Los que eligen su opción al abrirse (el tipo de evento, por ejemplo) no tenían gota: la opción nueva se encendía de golpe mientras la anterior
+     seguía encendida, con el anillo de la pulsación encima. Ahora llevan la misma gota, que se desliza de una a otra */
+  new MutationObserver(ms=>{for(const m of ms){const sg=m.target.closest&&m.target.closest('.seg');if(sg)segLens(sg)}}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['aria-pressed']});
   /* La gota de los días llega en unos 300 ms y frena suave, sin rebotar */
   const BW=lens($('bk-week'),'button[data-bkday]',()=>$('bk-week').querySelector('button.on'),el=>el,true,null,{resp:.3,damp:.86});
   /* Al compactarse o abrirse la cabecera de Bloques los días cambian de tamaño: la gota se vuelve a medir */
@@ -8739,7 +8797,10 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
       const m=/^#(..)(..)(..)$/.exec(c),hal=m?`rgba(${parseInt(m[1],16)},${parseInt(m[2],16)},${parseInt(m[3],16)},.35)`:c;
       r.addColorStop(0,'#fff');r.addColorStop(.16,'#fff');r.addColorStop(.26,c);r.addColorStop(.42,hal);r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,32,32);SPR.set(c,s);return s};
     /* Las barras van delante del contenido: lo que suelta el contenido pasa por detrás de ellas y lo que suelta una barra se queda dentro de ella */
-    const BARS='.nav,.tabs.lg-host,#bk-week.lg-host,.bk-headwrap',barOf=el=>el&&el.closest?el.closest(BARS):null,RAD=new WeakMap();
+    /* Los menús y las hojas abiertos también son barras: sus chispas salen por encima del menú y se quedan dentro de él (antes se pintaban
+       por debajo, emborronadas por el cristal del menú) y lo que suelta el contenido no se ve mientras hay un menú delante */
+    const SHEETP='.sheet-back:not([hidden])>.sheet,.sheet-back:not([hidden])>.cdr,.sheet-back:not([hidden])>.vcard';
+    const BARS='.nav,.tabs.lg-host,#bk-week.lg-host,.bk-headwrap,'+SHEETP,barOf=el=>el&&el.closest?el.closest(BARS):null,RAD=new WeakMap();
     const shape=(x,k)=>{const r=x.r,h=r.height+2*k,w=r.width+2*k;let rd=RAD.get(x.b);if(rd==null){rd=parseFloat(getComputedStyle(x.b).borderTopLeftRadius)||0;RAD.set(x.b,rd)}rd=Math.min(h/2,w/2,rd+k);
       if(cx.roundRect&&rd)cx.roundRect(r.left-k,r.top-k,w,h,rd);else cx.rect(r.left-k,r.top-k,w,h)};
     const draw=p=>{const a=Math.min(1,p.life/p.max*1.6),d=p.r*(2.2+a*1.6);cx.globalAlpha=Math.min(1,a*1.25);cx.drawImage(sprite(p.c),p.x-d,p.y-d,d*2,d*2)};
@@ -8749,8 +8810,9 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
       cx.globalCompositeOperation='lighter';
       ps=ps.filter(p=>{p.life-=dt;if(p.life<=0)return false;p.ph+=dt*p.w;p.vx+=Math.cos(p.ph)*p.wob*dt;p.vy+=Math.sin(p.ph*1.3)*p.wob*dt;p.vx*=Math.exp(-p.drag*dt);p.vy*=Math.exp(-p.drag*dt);p.x+=p.vx*dt;p.y+=p.vy*dt;return true});
       const bs=[...document.querySelectorAll(BARS)].map(b=>({b,r:b.getBoundingClientRect()})).filter(x=>x.r.width&&x.r.height&&x.r.bottom>0&&x.r.top<H);
-      ps.forEach(p=>{if(!p.bar)draw(p)});if(bs.length){cx.globalCompositeOperation='destination-out';cx.globalAlpha=1;cx.beginPath();bs.forEach(x=>shape(x,0));cx.fill();cx.globalCompositeOperation='lighter'}
-      bs.forEach(x=>{const own=ps.filter(p=>p.bar===x.b);if(!own.length)return;cx.save();cx.beginPath();shape(x,4);cx.clip();own.forEach(draw);cx.restore()});
+      const menu=bs.some(x=>x.b.matches(SHEETP)),z=menu?'45':'9';if(cv.style.zIndex!==z)cv.style.zIndex=z;
+      if(!menu)ps.forEach(p=>{if(!p.bar)draw(p)});if(bs.length){cx.globalCompositeOperation='destination-out';cx.globalAlpha=1;cx.beginPath();bs.forEach(x=>shape(x,0));cx.fill();cx.globalCompositeOperation='lighter'}
+      bs.forEach(x=>{if(menu&&!x.b.matches(SHEETP))return;const own=ps.filter(p=>p.bar===x.b);if(!own.length)return;cx.save();cx.beginPath();shape(x,4);cx.clip();own.forEach(draw);cx.restore()});
       cx.globalAlpha=1;if(ps.length)raf=requestAnimationFrame(tick);else{raf=0;cx.clearRect(0,0,W,H)}}
     /* n motas en (x,y) con color c; vx/vy base, apertura y gravedad (negativa: suben) */
     window.lgDust=(x,y,c,n,o={})=>{if(RM.matches||document.hidden)return;for(let i=0;i<n&&ps.length<90;i++){const a=(o.a||0)+(Math.random()-.5)*(o.spread||Math.PI*2),sp=(o.sp==null?60:o.sp)*(.4+Math.random()*.9);
@@ -8763,7 +8825,7 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
     /* Al pulsar: chispas desde el punto de contacto, del color del control */
     document.addEventListener('pointerdown',e=>{if(e.button>0)return;const el=e.target.closest&&e.target.closest(LG_PRESS+',.nav-in button,.nav-set,.tab,#bk-week button');if(!el)return;const wk=el.closest('#bk-week');window.lgDust(e.clientX,e.clientY,el.closest('.nav')?'#ffffff':colorOf(el),wk?4:7,wk?{sp:38,r:1.2,life:.55,bar:barOf(el)}:{sp:70,r:1.4,life:1.1,bar:barOf(el)})},{passive:true});
     /* El rayo de la hora suelta motas que suben por la estela */
-    setInterval(()=>{const n=document.querySelector('.bk-now');if(!n||!n.offsetParent||document.hidden||document.body.classList.contains('bkw-sliding'))return;const r=n.getBoundingClientRect();if(r.top<0||r.top>H)return;const x=r.left+Math.random()*Math.min(r.width,W-r.left);window.lgDust(x,r.top,'#ff8a90',1,{a:-Math.PI/2,spread:.9,sp:18,vx:-10,r:1.2,life:2.4,drag:.5,wob:40})},260);}
+    setInterval(()=>{if(document.hidden||document.body.classList.contains('bkw-sliding'))return;let r=null;const n=[...document.querySelectorAll('.bk-now:not(.yr-laser),.sc-now')].find(x=>{if(!x.offsetParent)return false;const q=x.getBoundingClientRect();if(!q.width||q.top<0||q.top>H||q.right<0||q.left>W)return false;r=q;return true});if(!n)return;const x=r.left+Math.random()*Math.min(r.width,W-r.left);window.lgDust(x,r.top,'#ff8a90',1,{a:-Math.PI/2,spread:.9,sp:18,vx:-10,r:1.2,life:2.4,drag:.5,wob:40})},260);}
   /* Las lentes sueltan motas al correr, cuanto más rápido más. La esfera las suelta desde su borde, girando con ella como si rodara */
   const DUSTC=['#ffffff','#cfe8ff','#ffd9f4','#fff3bf'];
   /* En la tira de días son pocas, cortas y no se alejan de la gota: se apagan antes de que llegue al día elegido */
@@ -8900,7 +8962,7 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
     ob.addEventListener('pointerdown',e=>{if(!ob.classList.contains('pop'))return;const it=item(e.clientX,e.clientY);dn=it?{id:e.pointerId,it,moved:false}:null;to(it);
       const sh=ob.querySelector(':scope>.sheet');sh.style.touchAction=sh.scrollHeight>sh.clientHeight+1?'pan-y':'none'});
     ob.addEventListener('pointermove',e=>{if(!ob.classList.contains('pop')||(e.pointerType!=='mouse'&&!dn))return;const it=item(e.clientX,e.clientY);if(dn&&it&&it!==dn.it)dn.moved=true;to(it)});
-    ob.addEventListener('pointerup',e=>{const d=dn;dn=null;if(!d)return;const it=item(e.clientX,e.clientY);if(d.moved&&it){it.click()}if(e.pointerType!=='mouse')to(null)});
+    ob.addEventListener('pointerup',e=>{const d=dn;dn=null;if(!d)return;const it=item(e.clientX,e.clientY);if(d.moved&&it){it.click()}if(e.pointerType!=='mouse'&&!it)to(null)});
     ob.addEventListener('pointercancel',()=>{dn=null;to(null)});ob.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')to(null)});
     window.popHlReset=()=>{cur=null;if(hl)hl.classList.remove('on')}}
   function popClose(b,g,st){const gs=g.querySelector(':scope>.sheet');if(st.raf)cancelAnimationFrame(st.raf);
