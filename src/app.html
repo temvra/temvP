@@ -8224,6 +8224,14 @@ if((S.uiV||0)<9){S.uiV=9;let n=0;const isApp=x=>APP_FILE_RE.test((x.folder?x.fol
   const cur={atts:S.atts,folders:S.folders,notes:S.notes};clean(cur);S.atts=cur.atts;S.folders=cur.folders;Object.keys(S.vaultData||{}).forEach(k=>{if(k!==S.curVault)clean(S.vaultData[k])});
   Object.values((S.gh&&S.gh.links)||{}).forEach(L=>{if(L&&L.base)Object.keys(L.base).forEach(p=>{if(APP_FILE_RE.test(p))delete L.base[p]})});
   save();if(n){renderNotes();setTimeout(()=>toast(n===1?'Quitada de Notas 1 foto de la app que venía del repositorio':'Quitadas de Notas '+n+' fotos y archivos de la app que venían del repositorio'),1500)}}
+/* Las tres fotos de prueba del 3 de noviembre (16:30) que seguían en Notas: Android las vuelve a poner al reinstalar la app, con su copia
+   de seguridad automática, y parecían venir de serie. Se borran de todas las bóvedas junto con sus enlaces dentro de las notas */
+if((S.uiV||0)<10){S.uiV=10;const BAD=['IMG20261103163037.jpg','IMG20261103163046.jpg','IMG20261103163059.jpg'],bad=a=>a&&BAD.includes(a.name);let n=0;
+  const strip=b=>String(b||'').split('\n').filter(l=>!BAD.some(nm=>new RegExp('^\\s*!\\[\\['+nm.replace(/\./g,'\\.')+'(\\|[^\\]]*)?\\]\\]\\s*$').test(l))).join('\n').replace(/\n{3,}/g,'\n\n');
+  const clean=D=>{(D.atts||[]).filter(bad).forEach(a=>{(a.kind==='file'?fileDel:delImg)(a.id);n++});D.atts=(D.atts||[]).filter(a=>!bad(a));
+    (D.notes||[]).forEach(x=>{if(x.body&&BAD.some(nm=>x.body.includes(nm))){x.body=strip(x.body);x.updated=Date.now()}})};
+  const cur={atts:S.atts,notes:S.notes};clean(cur);S.atts=cur.atts;Object.keys(S.vaultData||{}).forEach(k=>{if(k!==S.curVault)clean(S.vaultData[k])});
+  save();if(n){renderNotes();setTimeout(()=>toast(n===1?'Borrada de Notas 1 foto de prueba':'Borradas de Notas '+n+' fotos de prueba'),1900)}}
 /* Deslizar para cerrar: cada menú se cierra en sentido contrario al que se abrió (hojas hacia abajo, paneles laterales hacia la izquierda) */
 (()=>{let g=null;
   const scrolled=(el,top)=>{for(;el&&el!==top.parentElement;el=el.parentElement)if(el.scrollTop>0&&getComputedStyle(el).overflowY!=='visible')return true;return false};
