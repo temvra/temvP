@@ -760,10 +760,26 @@ body.nogit #ob-pmenu [data-panel="git"],body.nogit #vn-menu::after,body.desknote
 .scm-repo>div{flex:1}.scm-rmore{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ob-text);flex:none}.scm-rmore:active{background:var(--ob-sel)}body.desknotes .scm-rmore{display:none}
 .scm-log.err button{min-height:44px;padding:0 4px}.scm-log.err:has(.scm-fix){flex-wrap:wrap;align-items:center}.scm-log.err:has(.scm-fix) span{flex-basis:100%}.scm-log.err .scm-fix{text-decoration:none;align-self:center;padding:0 16px;border-radius:999px;background:var(--accent);color:var(--on-accent);font:600 14px var(--font)}
 @keyframes ghBusy{50%{opacity:.3;transform:translateY(-2px)}}
-body.desk .cal-vseg{display:flex;flex:none;width:max-content;max-width:100%;margin:0 auto 12px;overflow-x:auto;scrollbar-width:none}
+body.desk .cal-vseg{display:flex;flex:none;width:max-content;max-width:100%;margin:0;overflow-x:auto;scrollbar-width:none}
 body.desk .cal-vseg button{height:34px;padding:0 14px;font-size:13.5px;white-space:nowrap}
-/* En PC el panel de Bloques ya es la vista de día */
-body.deskcal .cal-vseg [data-cv="day"]{display:none}
+/* PC: una sola barra de vistas para toda la Agenda, siempre en el mismo sitio. Cada página llevaba la suya, a distinta altura: la gota saltaba de una a otra y en Año se iba con el contenido */
+.ag-vbar{display:none}
+body.desk .ag-vbar:not([hidden]){display:flex;justify-content:center;position:fixed;top:calc(var(--sat,env(safe-area-inset-top,0px)) + 68px);left:var(--railw,84px);right:0;padding-inline:12px;z-index:8;pointer-events:none}
+body.desk .ag-vbar>.cal-vseg{pointer-events:auto}
+body.deskcal .ag-vbar:not([hidden]){right:var(--bkw,420px)}
+/* Su hueco en la cabecera de cada página */
+body.desk #v-cal>.cal-top{padding-bottom:64px}
+body.desk:not(.deskcal) #v-blocks .bk-top{padding-bottom:64px}
+/* El panel de días no es la vista principal: el menú y las vistas son los del calendario */
+body.deskcal #bk-menu{display:none}
+/* El día del mes que enseña el panel */
+body.deskcal #cal-grid .mcell.bk-on{outline:1.5px solid color-mix(in srgb,var(--accent) 80%,transparent);outline-offset:-1.5px}
+/* El botón de «ahora» del calendario va en su columna, no debajo del zoom del panel */
+body.deskcal #cal-nowc{right:calc(var(--bkw,420px) + 16px);bottom:24px}
+/* Las motas del rayo y las animaciones no pueden abrir una barra horizontal en el calendario */
+body.desk #v-cal{overflow-x:hidden}
+/* En columnas estrechas (el panel de días) el resumen no cabe junto al título y lo partía en tres líneas */
+@container (max-width:420px){.bk-band .bk-sumt,.bk-sumd{display:none}}
 /* Una sola cápsula de cristal y la gota marca la vista elegida, como el selector de iOS */
 body.desk .cal-vseg{padding:3px;gap:0;border-radius:24px;background:color-mix(in srgb,var(--surface-3) 46%,transparent);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 -1px 0 var(--lg-low);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%)}
 body.desk .cal-vseg button,body.desk .cal-vseg button[aria-pressed="true"]{background:transparent!important;box-shadow:none!important;color:var(--fg)}
@@ -1329,6 +1345,7 @@ body.desknotes .ob-list,body.desknotes .ob-foot{padding-left:14px;padding-right:
 body.desknotes .vn-ribbon{display:flex;flex-direction:column;align-items:center;gap:4px;grid-row:1/-1;grid-column:1;padding:14px 0;border-right:1px solid color-mix(in srgb,var(--outline) 50%,transparent);background:color-mix(in srgb,var(--surface) 60%,transparent)}
 .vn-ribbon button{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--muted)}
 .vn-ribbon button:hover{background:var(--surface-2);color:var(--fg)}
+body.desknotes #vn-ribbon.lg-host [data-rib]:not(:hover){background:transparent}
 #v-notes[data-panel="files"] [data-rib="files"],#v-notes[data-panel="search"] [data-rib="search"],#v-notes[data-panel="star"] [data-rib="star"],#v-notes[data-panel="tags"] [data-rib="tags"],#v-notes[data-panel="props"] [data-rib="props"],#v-notes[data-panel="git"] [data-rib="git"]{background:var(--surface-2);color:var(--fg);box-shadow:inset 0 1px 0 var(--lg-rim,transparent)}
 .rib-sep{width:22px;height:1px;background:var(--outline);margin:6px 0}
 body.desknotes .vn-head{padding:14px 12px 6px}
@@ -1409,6 +1426,7 @@ body.deskcal #v-cal{width:auto;max-width:none;margin:0 var(--bkw,420px) 0 0}
 #v-blocks>*{flex:none}
 body.deskcal #v-blocks{position:fixed;top:0;right:0;bottom:0;width:var(--bkw,420px);max-width:none;margin:0;padding:16px 16px 40px;border-left:1px solid color-mix(in srgb,var(--outline) 60%,transparent);background:color-mix(in srgb,var(--surface) 35%,var(--bg));z-index:2}
 body.deskcal #v-blocks .bk-top .cal-month{font-size:24px}
+.has-bg body.deskcal #v-blocks{background:color-mix(in srgb,var(--bg) 42%,transparent)}
 
 /* Bloques = día del calendario */
 .bk-headwrap{position:sticky;top:-12px;z-index:6;background:var(--bg);margin:-12px -16px 0;padding:12px 16px 6px}
@@ -2091,6 +2109,7 @@ body.desk #v-reg{padding-bottom:84px}
 body.desk:not(.desknotes) #noteview{display:none!important}
 /* Horizontal en el móvil: barra lateral fina y todo el ancho para el contenido */
 @media (orientation:landscape) and (max-height:520px){
+  body.desk{--railw:calc(60px + var(--sal,env(safe-area-inset-left,0px)))}
   body.desk .app{margin-left:calc(60px + var(--sal,env(safe-area-inset-left,0px)))}
   body.desk .nav{width:calc(60px + var(--sal,env(safe-area-inset-left,0px)));padding:calc(var(--sat,env(safe-area-inset-top,0px)) + 4px) 0 4px var(--sal,env(safe-area-inset-left,0px))}
   body.desk .nav-in{grid-auto-rows:minmax(0,1fr);height:100%;gap:2px}
@@ -2736,7 +2755,7 @@ html.ag-carpet::view-transition-new(agvn){animation:agIN .82s var(--sp-sheet,cub
 html.ag-carpet::view-transition-group(agvo){animation:agGO .82s var(--sp-sheet,cubic-bezier(.2,.9,.25,1)) both}
 html.ag-carpet::view-transition-old(agvo){animation:agIO .82s var(--sp-sheet,cubic-bezier(.2,.9,.25,1)) both}
 html.ag-carpet::view-transition-new(agroll){animation:agRoll .82s var(--sp-sheet,cubic-bezier(.2,.9,.25,1)) both}
-@keyframes agGN{from{transform:translate(var(--agl,0px),calc(var(--agt,0px) - var(--agh,600px)))}to{transform:translate(var(--agl,0px),var(--agt,0px))}}
+@keyframes agGN{from{transform:translate(var(--agln,var(--agl,0px)),calc(var(--agt,0px) - var(--agh,600px)))}to{transform:translate(var(--agln,var(--agl,0px)),var(--agt,0px))}}
 @keyframes agIN{from{transform:translateY(var(--agh,600px))}to{transform:none}}
 @keyframes agGO{from{transform:translate(var(--agl,0px),var(--agt,0px))}to{transform:translate(var(--agl,0px),calc(var(--agt,0px) + var(--agh,600px)))}}
 @keyframes agIO{from{transform:none;filter:brightness(1)}to{transform:translateY(calc(var(--agh,600px) * -1));filter:brightness(.6)}}
@@ -2981,8 +3000,7 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
         <button class="avatar" id="cal-settings" aria-label="Temas y ajustes" style="width:44px;height:44px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7" r="1.2"/></svg></button>
       </div>
     </div>
-    <div class="seg cal-vseg" id="cal-vseg" role="tablist" aria-label="Vista del calendario"><button data-cv="day" aria-pressed="false">Día</button><button data-cv="3d" aria-pressed="false">3 días</button><button data-cv="week" aria-pressed="false">Semana</button><button data-cv="month" aria-pressed="false">Mes</button><button data-cv="year" aria-pressed="false">Año</button><button data-cv="sched" aria-pressed="false">Programación</button></div>
-    <div class="wk-head wk-hd" id="wk-hd" hidden><div class="wk-gut" id="wk-gut"></div><div class="wk-tv" id="wk-tv"><div class="wk-track" id="wk-trk"></div></div></div>
+        <div class="wk-head wk-hd" id="wk-hd" hidden><div class="wk-gut" id="wk-gut"></div><div class="wk-tv" id="wk-tv"><div class="wk-track" id="wk-trk"></div></div></div>
     <div class="cal-grid" id="cal-grid"></div>
     <div id="cal-alt" hidden></div>
     <div class="legend" id="cal-legend" style="margin:12px 4px 4px"><span><i class="d-ev" style="border-radius:3px"></i>Eventos</span><span><i class="d-task" style="border-radius:3px;background:var(--surface-3);outline:1px solid var(--muted)"></i>Tareas</span><span><i class="d-act" style="border-radius:3px"></i>Actividad</span><span><i style="border-radius:3px;border:1px solid var(--accent)"></i>Notas</span></div>
@@ -3034,13 +3052,13 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
         <button class="icon-btn" id="bk-cats" aria-label="Categorías"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.3"/></svg></button>
       </div>
     </div>
-    <div class="seg cal-vseg" id="bk-vseg" role="tablist" aria-label="Vista de la agenda"><button data-cv="day" aria-pressed="true">Día</button><button data-cv="3d" aria-pressed="false">3 días</button><button data-cv="week" aria-pressed="false">Semana</button><button data-cv="month" aria-pressed="false">Mes</button><button data-cv="year" aria-pressed="false">Año</button><button data-cv="sched" aria-pressed="false">Programación</button></div>
     <div class="bk-week" id="bk-week"></div></div>
     <div class="bk-filter" id="bk-filter"></div>
     <div class="bk-sum" id="bk-sum"></div>
     <div class="bk-tl" id="bk-tl"></div>
   </div>
   <!-- Controles flotantes de la agenda: fuera de las vistas, así la animación de entrada de la vista (y su copia) no los mueve -->
+  <div class="ag-vbar" id="ag-vbar" hidden><div class="seg cal-vseg" id="cal-vseg" role="tablist" aria-label="Vista de la agenda"><button data-cv="day" aria-pressed="false">Día</button><button data-cv="3d" aria-pressed="false">3 días</button><button data-cv="week" aria-pressed="false">Semana</button><button data-cv="month" aria-pressed="false">Mes</button><button data-cv="year" aria-pressed="false">Año</button><button data-cv="sched" aria-pressed="false">Programación</button></div></div>
   <div class="bk-zoom cal-nowc" id="cal-nowc" hidden><button id="cal-nowb" aria-label="Ir al momento actual" title="Ahora"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button></div>
   <div class="bk-zoom" id="bk-zoomc"><button id="bk-nowb" aria-label="Ir a la hora actual" title="Hora actual"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button><i class="bk-zsep"></i><button id="bk-zout" aria-label="Alejar">−</button><span id="bk-zv">1×</span><button id="bk-zin" aria-label="Acercar">＋</button></div>
   <!-- ASISTENTE -->
@@ -4564,7 +4582,7 @@ function agGo(v,fn){const from=view,was=S.calView,ag=from==='cal'||from==='block
     const tgt=agV();if(view!==tgt||!ag){show(tgt);if(anim)$('v-'+tgt).style.animation='none'}else if(tgt==='cal')renderCal();else renderBlocks();if(fn)fn();agSeg()};
   if(!anim){run();return}
   if(v==='day'&&document.startViewTransition){agCarpet(run);return}
-  const g=agGhost();run();requestAnimationFrame(()=>agIn(v,g))}
+  const pan=document.body.classList.contains('deskcal'),g=agGhost();run();requestAnimationFrame(()=>{agIn(v,g);if(!pan&&document.body.classList.contains('deskcal'))$('v-blocks').animate(spSeries(.5,.82,.8).map(u=>({transform:`translate3d(${(u*$('v-blocks').offsetWidth).toFixed(1)}px,0,0)`})),{duration:800,easing:'linear',fill:'backwards'})})}
 /* ---------- Entrada de cada vista ----------
    Día: una alfombra que se desenrolla desde arriba sobre la vista anterior (transición de vista: la anterior queda quieta debajo como imagen).
    Semana y 3 días: dominó, cada columna cae desde justo encima de la pantalla de derecha a izquierda y las burbujas de los días de izquierda a derecha.
@@ -4584,7 +4602,9 @@ function agFade(g,ms,delay,more){if(!g)return;const a=g.animate([{opacity:1,tran
 function agCarpet(run){const root=document.documentElement,old=[$('v-cal'),$('v-blocks')].find(x=>!x.hidden);if(!old){run();return}const r=old.getBoundingClientRect(),nw=$('v-blocks');
   [['--agh',r.height],['--agt',r.top],['--agl',r.left]].forEach(([k,v])=>root.style.setProperty(k,Math.round(v)+'px'));old.style.viewTransitionName='agvo';root.classList.add('ag-carpet');let roll=null;
   const done=()=>{root.classList.remove('ag-carpet');old.style.viewTransitionName='';nw.style.viewTransitionName='';if(roll)roll.remove()};
-  try{const t=document.startViewTransition(()=>{old.style.viewTransitionName='';run();nw.style.viewTransitionName='agvn';roll=document.createElement('i');roll.className='ag-roll';roll.setAttribute('aria-hidden','true');Object.assign(roll.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px'});document.body.appendChild(roll)});t.finished.finally(done)}
+  try{const t=document.startViewTransition(()=>{old.style.viewTransitionName='';run();nw.style.viewTransitionName='agvn';
+      /* Con el panel de días la vista anterior es más estrecha y está en otro sitio: la alfombra se desenrolla donde queda la vista Día */
+      const n=nw.getBoundingClientRect();root.style.setProperty('--agln',Math.round(n.left)+'px');roll=document.createElement('i');roll.className='ag-roll';roll.setAttribute('aria-hidden','true');Object.assign(roll.style,{left:n.left+'px',top:r.top+'px',width:n.width+'px'});document.body.appendChild(roll)});t.finished.finally(done)}
   catch(e){done();run()}}
 function agIn(v,g){const sc=$('v-cal'),R=sc.getBoundingClientRect();
   if(v==='week'||v==='3d'){const bs=$('v-blocks'),B=bs.getBoundingClientRect(),f=spSeries(.5,.6,1),wk=$('bk-week'),Rg=bkWkRange();
@@ -4618,9 +4638,9 @@ function agDrop(el){if(agRM()||!el.animate)return;const f=spSeries(.3,.22,.9,44)
 $('wk-hd').addEventListener('click',e=>{const b=e.target.closest('[data-day]');if(!b)return;agDrop(b);setTimeout(()=>openDay(b.dataset.day),agRM()?0:170)});
 /* En Bloques la tira se vuelve a pintar al elegir el día: la gota tiembla en la burbuja nueva */
 $('bk-week').addEventListener('click',e=>{const b=e.target.closest('[data-bkday]');if(b){const k=b.dataset.bkday;requestAnimationFrame(()=>{const nb=$('bk-week').querySelector(`[data-bkday="${k}"]`);if(nb)agDrop(nb)})}},true);
-function agSeg(){document.querySelectorAll('#cal-vseg [data-cv],#bk-vseg [data-cv]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cv===(S.calView||'month')))}
+function agSeg(){document.querySelectorAll('#cal-vseg [data-cv]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cv===(S.calView||'month')))}
 /* En PC las vistas están a la vista, debajo de la cabecera: sin ellas no se veía cómo volver al mes */
-$('cal-vseg').onclick=$('bk-vseg').onclick=e=>{const b=e.target.closest('[data-cv]');if(b)setCalView(b.dataset.cv)};
+$('cal-vseg').onclick=e=>{const b=e.target.closest('[data-cv]');if(b)setCalView(b.dataset.cv)};
 function openCalDrawer(){renderCalDrawer();$('cal-drawer').hidden=false}
 function renderCalDrawer(){const SH=S.calShow,ccName=(HOL_CC.find(c=>c[0]===holCC())||['',''])[1];
   const row=(attr,on,c,name,more)=>`<div class="cdr-row"><button class="cdr-main" ${attr}>${ckBox(on,c)}<span>${esc(name)}</span></button>${more?`<button class="cdr-more" ${more} aria-label="Opciones">${OB_IC.dots}</button>`:''}</div>`;
@@ -4926,7 +4946,7 @@ function renderBlocks(){if(bkWkN()){if(bkWkBusy||bkWkG&&bkWkG.on)return;const tv
   if(!bkDays.length||$('bk-tl').classList.contains('bk-wkm')){bkJump(bkDay);return}if(bkColsN())bkDays=bkColDays(bkDay);else if(!bkDays.includes(bkDay)){bkJump(bkDay);return}const sc=$('v-blocks'),top=sc.scrollTop;bkHead();
   $('bk-tl').innerHTML=bkDays.map(secBk).join('');bkAlign();sc.scrollTop=top}
 function bkJump(k,toTime){if(bkWkN()){if(S.calView==='3d'&&!DESK.matches){S.calView='week';save();agSeg()}bkDay=k;bkReady=false;bkWkRender(false);requestAnimationFrame(()=>{bkWkScroll();requestAnimationFrame(()=>bkReady=true)});return}
-  bkDay=k;bkDays=bkColsN()?bkColDays(k):[addDays(k,-1),k,addDays(k,1)];bkReady=false;bkHead();$('bk-tl').innerHTML=bkDays.map(secBk).join('');bkAlign();
+  bkDay=k;bkDays=bkColsN()?bkColDays(k):[addDays(k,-1),k,addDays(k,1)];bkReady=false;bkHead();$('bk-tl').innerHTML=bkDays.map(secBk).join('');bkAlign();agMark();
   requestAnimationFrame(()=>{const sec=$('bk-tl').querySelector(`[data-bksec="${k}"]`);if(!sec)return;const sc=$('v-blocks'),grid=sec.querySelector('.bk-grid'),isT=k===dk(new Date());
     /* Posición dentro del contenedor que se desplaza: offsetTop de la cuadrícula es relativo a su sección */
     const top=x=>x.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop,gT=top(grid);
@@ -4956,7 +4976,7 @@ function bkCenterNow(){const sc=$('v-blocks'),ln=sc.querySelector('.bk-now');if(
  $('bk-tl').addEventListener('touchmove',e=>{if(pd&&e.touches.length===2){const [a,b]=e.touches,d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);if(d/pd>1.35){bkZoom(1);pd=d}else if(d/pd<.74){bkZoom(-1);pd=d}}},{passive:true});
  $('bk-tl').addEventListener('touchend',()=>{pd=null},{passive:true})}
 $('bk-tl').addEventListener('wheel',e=>{if(e.ctrlKey){e.preventDefault();bkZoom(e.deltaY<0?1:-1)}},{passive:false});
-function goBlocksDay(k){if(view!=='blocks'){agGo('day',()=>bkJump(k));return}bkJump(k)}
+function goBlocksDay(k){if(document.body.classList.contains('deskcal')){bkJump(k);return}if(view!=='blocks'){agGo('day',()=>bkJump(k));return}bkJump(k)}
 /* ===================== Semana y 3 días, hechas con la vista Día =====================
    Las mismas tarjetas, el mismo arrastre, zoom y rayo que Día, en columnas. Una sola fuente de verdad: el día elegido (bkDay) decide la semana.
    Las columnas van en una cinta con la semana anterior, la actual y la siguiente; al cambiar de semana, la cinta y los números de la tira
@@ -5443,7 +5463,7 @@ document.addEventListener('mouseup',e=>{if((e.button===3||e.button===4)&&documen
   nl.addEventListener('dblclick',()=>{delete S.nLW;root.style.removeProperty('--nlw');save()});
   ag.addEventListener('dblclick',()=>{delete S.bkW;setW('--bkw',defAg());save();reflow();renderBlocks()});
   nt.addEventListener('dblclick',()=>{delete S.nW;root.style.removeProperty('--nw');save()});
-  let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{setW('--bkw',S.bkW?Math.min(S.bkW,Math.max(320,innerWidth-84-480)):defAg());syncN3();reflow()},120)});
+  let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{setW('--bkw',S.bkW?Math.min(S.bkW,Math.max(320,innerWidth-84-480)):defAg());syncN3();reflow();if(view==='cal'&&deskPanel()!==document.body.classList.contains('deskcal'))applyAgenda()},120)});
   setTimeout(()=>{lastCols=bkColsN()},0)})();
 
 /* ================= TOUR DE BIENVENIDA ================= */
@@ -5482,8 +5502,18 @@ if(!S.tourDone&&!location.search.includes('notour'))setTimeout(start,900);
 })();
 
 /* ---------- Agenda: calendario ⇄ bloques ---------- */
-/* Ya no hay dos páginas (calendario ⇄ bloques) ni panel de Bloques al lado en PC: una sola sección, también en PC */
-function applyAgenda(){document.body.classList.remove('deskcal');$('pg-to-blocks').hidden=$('pg-to-cal').hidden=true;$('bk-zoomc').hidden=view!=='blocks';$('cal-nowc').hidden=view!=='cal';agSeg()}
+/* Una sola sección. En la app de PC, junto a Mes, Año y Programación van las líneas de los días en un panel a la derecha; Día, 3 días y Semana ya son líneas.
+   En móvil y tableta, nunca */
+const deskPanel=()=>!!window.VTDesktop&&DESK.matches&&innerWidth>=900&&view==='cal';
+function applyAgenda(){const on=deskPanel(),was=document.body.classList.contains('deskcal'),vb=$('ag-vbar'),x0=on!==was&&!vb.hidden&&DESK.matches?$('cal-vseg').getBoundingClientRect().left:null;document.body.classList.toggle('deskcal',on);
+  /* El panel cambia el ancho disponible: el mes se vuelve a medir antes de pintarse */
+  if(view==='cal'&&on!==was)renderCal();
+  if(on){$('v-blocks').hidden=false;renderBlocks()}else if(was&&view==='cal')$('v-blocks').hidden=true;
+  vb.hidden=view!=='cal'&&view!=='blocks';$('pg-to-blocks').hidden=$('pg-to-cal').hidden=true;$('bk-zoomc').hidden=view!=='blocks'&&!on;$('cal-nowc').hidden=view!=='cal';agSeg();agMark();
+  /* La barra cambia de centro al abrirse o cerrarse el panel: se desliza hasta su sitio con el mismo muelle */
+  if(x0!=null&&!agRM()){const dx=x0-$('cal-vseg').getBoundingClientRect().left;if(Math.abs(dx)>1)vb.animate(spSeries(.5,.82,.8).map(u=>({transform:`translate3d(${(u*dx).toFixed(1)}px,0,0)`})),{duration:800,easing:'linear'})}}
+/* Marca en el mes los días que enseña el panel */
+function agMark(){document.querySelectorAll('#cal-grid .mcell.bk-on').forEach(c=>c.classList.remove('bk-on'));if(!document.body.classList.contains('deskcal'))return;bkDays.forEach(k=>{const c=document.querySelector('#cal-grid .mcell[data-day="'+k+'"]');if(c)c.classList.add('bk-on')})}
 /* Centrar el momento actual en cada vista: semana con la línea de la hora a un tercio de la pantalla, mes y año en el actual (el año baja hasta el mes de hoy) y la programación arriba en hoy */
 function calNow(){const v=S.calView,sc=$('v-cal'),now=new Date(),go=y=>spFly(sc.scrollTop,Math.max(0,Math.min(sc.scrollHeight-sc.clientHeight,y)),0,.5,1,x=>{sc.scrollTop=x});
   if(v==='week'||v==='3d'){const a=viewStart(),w=wkStart;wkStart=null;const b=viewStart(),diff=Math.round((b-a)/864e5),n=v==='week'?7:3;wkStart=w;
@@ -6210,7 +6240,8 @@ function renderCal(){if(S.calView==='3d'&&!DESK.matches){S.calView='week';save()
   const weeks=Math.ceil((startOff+new Date(y,m+1,0).getDate())/7);
   // Altura de celda para que el mes llene la pantalla
   const sc=$('v-cal'),grid=$('cal-grid');sc.classList.add('cal-fit');grid.hidden=false;$('cal-alt').hidden=true;const desk=document.body.classList.contains('desk'),gapY=parseFloat(getComputedStyle(grid).rowGap)||4,wdH=!desk&&matchMedia('(max-width:600px)').matches?18:28;
-  const fitH=()=>{const gTop=grid.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop;
+  /* Con offsetTop y no con la posición en pantalla: mientras el mes entra animado (al volver a hoy con el botón de centrar) está encogido y salían filas de la mitad de alto */
+  const fitH=()=>{const gTop=grid.offsetTop-sc.offsetTop;
   // En móvil se mide contra la ventana: al cambiar de vista la cabecera anterior aún encoge el contenedor
   const avail=desk?sc.clientHeight-gTop-30:sc.clientHeight?document.querySelector('.nav').getBoundingClientRect().top-gTop-4:0;
   return Math.max(52,Math.floor((avail-wdH-gapY*weeks)/weeks))},cellH=fitH();
@@ -6252,6 +6283,7 @@ function renderCal(){if(S.calView==='3d'&&!DESK.matches){S.calView='week';save()
     <span class="ag-ic${e.kind==='hol'?' hol':''}" style="background:${e.kind==='event'?'var(--accent)':'var(--surface-3)'};color:${e.kind==='event'?'var(--on-accent)':'var(--fg)'};${e.kind==='hol'?'':evCss(e)}">${e.kind==='hol'?HOL_IC:ICONS[e.kind]}</span>
     <span class="txt"><span class="t1" style="display:block">${esc(e.title)}</span><span class="t2" style="display:block">${k===todayK?'Hoy':cap(d.toLocaleDateString(LOC,{weekday:'long',day:'numeric'}))} · ${e.kind==='hol'?'Festivo':e.allDay||!e.start?'Todo el día':e.start}</span></span></button>`).join('')
     :'<div class="row last"><div class="txt empty">Nada en los próximos 7 días. Pulsa + para añadir un evento o una tarea.</div></div>';
+  agMark();
 }
 $('cal-grid').onclick=e=>{if(suppressClick)return;const b=e.target.closest('[data-day]');if(b)openDay(b.dataset.day)};
 /* Mantener pulsado (o clic derecho) un día del mes: crear ahí un bloque, evento o tarea; hoy a la hora siguiente y otro día a las 9:00 */
@@ -6270,7 +6302,7 @@ $('cal-prev').onclick=()=>calStep(-1);
 $('cal-next').onclick=()=>calStep(1);
 $('ag-btn').onclick=agendaMenu;$('ag-btn-b').onclick=agendaMenu;renderAgBtn();
 $('cal-menu').onclick=$('bk-menu').onclick=openCalDrawer;
-$('cal-today').onclick=()=>{calMonth=new Date();calMonth.setDate(1);wkStart=null;schedDays=45;renderCal()};
+$('cal-today').onclick=()=>{calMonth=new Date();calMonth.setDate(1);wkStart=null;schedDays=45;renderCal();if(document.body.classList.contains('deskcal'))bkJump(dk(new Date()))};
 
 const ZOOMS=[60,120,240,480,900];let zi=0,HH=60;let dvDays=[],dvReady=false;
 const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return dk(d)};
@@ -8793,12 +8825,12 @@ $('nd-set').onclick=()=>{$('notes-drawer').hidden=true;$('ob-settings').click()}
 $('nd-new').onclick=()=>{$('notes-drawer').hidden=true;setCompMode('note');$('vn-in').focus()};
 /* Bóvedas: desde el botón de Notas de la barra inferior, con la misma hoja deslizable que los demás menús */
 function openVaultSheet(){const list=S.vaults;obSheet('Bóvedas',[...list.map(v=>({t:v.name,s:v.id===S.curVault?'Abierta ahora':'',on:v.id===S.curVault,ic:vBadge(v)})),{t:'Nueva bóveda',ic:MI2.plus,sep:true},{t:'Administrar bóvedas…',ic:MI.base}],i=>{if(i<list.length)switchVault(list[i].id);else if(i===list.length)openVaultNew();else openVaultMgr()})}
-document.querySelector('.nav [data-view=notes]').addEventListener('click',e=>{if(view==='notes'&&!DESK.matches&&$('noteview').hidden){e.stopImmediatePropagation();e.preventDefault();openVaultSheet()}},true);
-/* Como en Notas: en el móvil, tocar el icono de Time o de Agenda estando ya en esa sección abre su menú: los relojes o las agendas */
+document.querySelector('.nav [data-view=notes]').addEventListener('click',e=>{if(view==='notes'&&(DESK.matches||$('noteview').hidden)){e.stopImmediatePropagation();e.preventDefault();openVaultSheet()}},true);
+/* Como en Notas: tocar el icono de Time o de Agenda estando ya en esa sección abre su menú: los relojes o las agendas */
 const TIMEV=['timer','circ','stop','alarm','laps','clock'],navFree=()=>$('settings').hidden&&['dayview','tasksview','searchview'].every(i=>!$(i)||$(i).hidden);
 function openClockSheet(){obSheet(T('Relojes'),TIMEV.map(k=>{const b=$('tab-'+k);return {t:b.getAttribute('aria-label'),s:view===k?T('Abierto ahora'):'',on:view===k,ic:(b.querySelector('svg')||{}).outerHTML||''}}),i=>{if(TIMEV[i]!==view)$('tab-'+TIMEV[i]).click()})}
-document.querySelector('.nav [data-view=time]').addEventListener('click',e=>{if(TIMEV.includes(view)&&!DESK.matches&&navFree()){e.stopImmediatePropagation();e.preventDefault();openClockSheet()}},true);
-document.querySelector('.nav [data-view=cal]').addEventListener('click',e=>{if((view==='cal'||view==='blocks')&&!DESK.matches&&navFree()){e.stopImmediatePropagation();e.preventDefault();agendaMenu()}},true);
+document.querySelector('.nav [data-view=time]').addEventListener('click',e=>{if(TIMEV.includes(view)&&navFree()){e.stopImmediatePropagation();e.preventDefault();openClockSheet()}},true);
+document.querySelector('.nav [data-view=cal]').addEventListener('click',e=>{if((view==='cal'||view==='blocks')&&navFree()){e.stopImmediatePropagation();e.preventDefault();agendaMenu()}},true);
 /* Selector + del campo de escritura */
 let compMode='note';const COMP={note:'Escribe una nota…',folder:'Nombre de la carpeta…',canvas:'Nombre del lienzo…'};
 function setCompMode(m){compMode=m;$('vn-in').placeholder=COMP[m];$('vn-plus').classList.toggle('on',m!=='note')}
@@ -8822,7 +8854,7 @@ $('v-cal').addEventListener('scroll',()=>{if(S.calView!=='year'||view!=='cal')re
   if(sc.scrollTop+sc.clientHeight>sc.scrollHeight-900&&yrN<200){yrN++;$('cal-alt').insertAdjacentHTML('beforeend',yearCard(calMonth.getFullYear()+yrN-1))}
   /* El título dice el año que se está viendo */
   const top=sc.getBoundingClientRect().top+90,c=[...sc.querySelectorAll('#cal-alt .yr-card')].find(x=>x.getBoundingClientRect().bottom>top);if(c){const y=c.querySelector('.yr-h b').textContent;if($('cal-title').textContent!==y)$('cal-title').textContent=y}},{passive:true});
-bindCompact($('v-cal'),null,()=>S.calView==='week'||S.calView==='3d');bindCompact($('v-blocks'),null,()=>bkWkN()>0);if($('dv-scroll'))bindCompact($('dv-scroll'),$('dayview'));
+bindCompact($('v-cal'),null,()=>DESK.matches||S.calView==='week'||S.calView==='3d');bindCompact($('v-blocks'),null,()=>DESK.matches||bkWkN()>0);if($('dv-scroll'))bindCompact($('dv-scroll'),$('dayview'));
 /* Temáticas con foto guardadas */
 if(!S.themes)S.themes=[];
 function renderThemes(){$('th-box').hidden=!S.themes.length;$('th-list').innerHTML=S.themes.map(t=>`<div class="th-it"><button data-th="${t.id}"><span style="background-image:url(${t.thumb})"></span><em>${esc(t.name)}</em></button><button class="nd-x" data-thdel="${t.id}" aria-label="Quitar ${esc(t.name)}">×</button></div>`).join('')}
@@ -9212,6 +9244,9 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
   /* Al compactarse o abrirse la cabecera de Bloques los días cambian de tamaño: la gota se vuelve a medir */
   if(BW)new MutationObserver(()=>BW.kick(500)).observe($('v-blocks'),{attributes:true,attributeFilter:['class']});
   lens($('vn-tabs'),'[data-vtab]',()=>$('vn-tabs').querySelector('[data-vtab][aria-selected="true"]'),el=>el,false);
+  /* La cinta de Notas del PC: la gota marca el panel abierto y viaja de uno a otro, como en las demás barras */
+  const RB=lens($('vn-ribbon'),'button[data-rib]',()=>$('vn-ribbon').querySelector('[data-rib="'+$('v-notes').dataset.panel+'"]'),el=>el,false);
+  if(RB)new MutationObserver(()=>RB.kick(700)).observe($('v-notes'),{attributes:true,attributeFilter:['data-panel','hidden']});
 
   /* ---------- Física del cristal ---------- */
   /* Curvas CSS calculadas con el mismo muelle, para que lo que anima CSS se mueva igual que lo que anima JS */
@@ -9366,10 +9401,12 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
       const glow=document.createElement('i'),veil=document.createElement('i'),ring=document.createElement('i');glow.className='lg-hglow';veil.className='lg-hole';ring.className='lg-hring';
       [glow,veil,ring].forEach(e=>{e.setAttribute('aria-hidden','true');document.body.appendChild(e)});
       let f=null,dm=null,M=null,cx=0,cy=0,sx=1,sy=1,raf=0,last=0,t0=performance.now(),dead=false,ck='',scl=0,trk=null,trkQ=null;const st={v:0,vv:0,t:0};
-      const clr=()=>{const E=Math.max(w,h)/2+R+6,q=v=>Math.min(Math.ceil(E/6)*6,Math.max(0,Math.floor(v/6)*6));return [q(cy),q(innerWidth-cx),q(innerHeight-cy),q(cx)].join(',')};
+      /* Al múltiplo más cercano y no hacia abajo: el centro de la barra lateral del PC cae justo en un múltiplo de 6 y por una décima de píxel ese lado se quedaba sin curvar */
+      const cap=()=>Math.ceil((Math.max(w,h)/2+R+6)/6)*6,clr=()=>{const c=cap(),q=v=>Math.min(c,Math.max(0,Math.round(v/6)*6));return [q(cy),q(innerWidth-cx),q(innerHeight-cy),q(cx)].join(',')};
       const shape=(W2,H2,r2,R2,s2)=>{w=W2;h=H2;rad=Math.min(r2,w/2,h/2);if(R2)R=R2;sph=!!s2;ring.classList.toggle('sph',sph);glow.classList.toggle('sph',sph);[glow,ring].forEach(e=>{e.style.width=w+'px';e.style.height=h+'px';e.style.setProperty('--hr',rad+'px');e.style.setProperty('--hR',R+'px');e.style.setProperty('--hw',w+'px')});
         if(cx||cy)remap()};
-      const remap=()=>{if(lite())return;ck=clr();M=holeMap(w,h,rad,R,sph,ck);veil.style.width=M.TW+'px';veil.style.height=M.TH+'px';
+      /* Junto a un borde de la pantalla ese lado coge el fondo más cerca de la esfera: sin recortar el halo, se veía una mancha de color y una raya solo en ese lado */
+      const remap=()=>{if(lite())return;ck=clr();M=holeMap(w,h,rad,R,sph,ck);glow.style.clipPath=sph?`inset(${ck.split(',').map(v=>+v<cap()?'0':'-99px').join(' ')})`:'';veil.style.width=M.TW+'px';veil.style.height=M.TH+'px';
         if(!hdefs){const sv=document.createElementNS(NS,'svg');sv.setAttribute('width','0');sv.setAttribute('height','0');sv.setAttribute('aria-hidden','true');sv.style.cssText='position:fixed;width:0;height:0';hdefs=document.createElementNS(NS,'defs');sv.appendChild(hdefs);document.body.appendChild(sv)}
         if(!f){f=document.createElementNS(NS,'filter');f.id=id;f.setAttribute('color-interpolation-filters','sRGB');f.setAttribute('filterUnits','userSpaceOnUse');['x','y'].forEach(a=>f.setAttribute(a,'0'));hdefs.appendChild(f)}
         f.setAttribute('width',M.TW);f.setAttribute('height',M.TH);f.innerHTML=`<feImage href="${M.url}" x="0" y="0" width="${M.TW}" height="${M.TH}" preserveAspectRatio="none" result="m"/><feDisplacementMap in="SourceGraphic" in2="m" scale="${scl}" xChannelSelector="R" yChannelSelector="G"/>`;
