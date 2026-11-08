@@ -2235,7 +2235,7 @@ body.desk:not(.desknotes) #noteview{display:none!important}
 /* ===== Liquid Glass: lente de cristal que se desliza, botones que crecen y menús que nacen de donde tocas ===== */
 .lg-host{position:relative}
 .lg-host>button,.lg-host>.tab{position:relative;z-index:1}
-.lg-lens{position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:999px;transform-origin:50% 50%;will-change:transform,width;
+.lg-lens{position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:999px;transform-origin:50% 50%;
   background:color-mix(in srgb,var(--container) 62%,transparent);border:1px solid color-mix(in srgb,#fff 12%,transparent);
   box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 22%,transparent),0 2px 10px color-mix(in srgb,var(--container) 45%,transparent);
   transition:background-color .3s,border-color .3s,opacity .2s}
@@ -2591,7 +2591,7 @@ body.desknotes .ne-tools,.ob-tools,.bk-zoom{background:color-mix(in srgb,var(--s
 .lg-gel{background-image:radial-gradient(circle at var(--px,50%) var(--py,50%),rgba(255,255,255,calc(var(--lg-g,0)*.36)),transparent 74%)}
 @media (hover:hover){.lg-hov:not(.lg-gel){background-image:radial-gradient(140px circle at var(--hx,50%) var(--hy,50%),var(--lg-hi),transparent)}}
 .lg-landing{z-index:8}
-.lg-lens,#drag-chip,.ob-ghost,.bk-b.dragging,.lg-float,.sheet-back>.sheet,.g3 canvas{will-change:transform}
+#drag-chip,.ob-ghost,.bk-b.dragging,.lg-float,.sheet-back>.sheet,.g3 canvas{will-change:transform}
 .bk-sec,.mcell,.card,.row{contain:layout paint}
 /* Agujero negro al pulsar: halo de luz (debajo, lo curva el velo), velo que curva la luz y anillo del horizonte (encima) */
 .lg-hglow,.lg-hole,.lg-hring{position:fixed;left:0;top:0;pointer-events:none;z-index:70;transform-origin:50% 50%;will-change:transform,opacity}
@@ -4268,8 +4268,9 @@ const TEMPLATES={
   fuerza:()=>({name:'Fuerza',rounds:4,roundRest:0,steps:[W('Press banca',45),R(90),W('Remo con barra',45),R(90)]}),
   abs:()=>({name:'Abdominales',rounds:2,roundRest:45,steps:[W('Crunch',30),R(15),W('Elevación de piernas',30),R(15),W('Plancha lateral',30),R(15),W('Bicicleta',30)]})
 };
-const TPL_NAMES=[['full','Cuerpo completo'],['tabata','Tabata 20/10'],['hiit','HIIT 40/20'],['fuerza','Fuerza'],['abs','Abdominales']];
-if(!S.circuit)S.circuit=TEMPLATES.full();if(!S.hidTpl)S.hidTpl=[];if(!S.myTpl)S.myTpl=[];
+/* La app no trae plantillas ni circuito de ejemplo: las plantillas son solo las que crea cada uno */
+const TPL_NAMES=[];
+if(!S.circuit)S.circuit={name:'',rounds:1,roundRest:0,steps:[]};if(!S.hidTpl)S.hidTpl=[];if(!S.myTpl)S.myTpl=[];
 const C_=()=>(S.curMine&&S.myCircuits.find(c=>c.id===S.curMine))||S.circuit;
 let delArmed=false;
 function newCircuit(){
@@ -4553,7 +4554,7 @@ function renderHolSet(){if(!S.hol)S.hol={cc:'auto',rg:'auto',we:true};const auto
 
 /* ===================== Calendario: motor de repeticiones, calendarios y vistas ===================== */
 if(!S.cals)S.cals=[{id:'personal',name:'Personal',color:'',on:true}];
-if(!S.calShow)S.calShow={tasks:true,blocks:true,notes:true,act:true,bday:true,hol:true,moon:false};
+if(!S.calShow)S.calShow={tasks:true,blocks:true,notes:true,act:true,bday:true,hol:false,moon:false};
 if(!S.subs)S.subs=[];if(!S.appts)S.appts=[];if(!S.work)S.work={on:false,days:[1,2,3,4,5],start:'09:00',end:'17:00'};
 if(!S.calView)S.calView='month';if(S.weekNum==null)S.weekNum=false;
 const calOf=e=>S.cals.find(c=>c.id===(e.cal||'personal'))||S.cals[0];
@@ -4882,7 +4883,7 @@ function renderCalAlt(){const v=S.calView,month=v==='month';$('wk-hd').hidden=v!
   if(first&&(v==='week'||v==='3d'))requestAnimationFrame(()=>{const b=$('cal-alt').querySelector('.wk-body');if(b)$('v-cal').scrollTop=b.offsetTop+7*WH-20})}
 
 /* ===================== Bloques de trabajo ===================== */
-if(!S.blockCats)S.blockCats=[{id:'gym',name:'Gimnasio',emoji:'🏋️',color:'#f2622e'},{id:'work',name:'Trabajo',emoji:'💼',color:'#3d8bfd'},{id:'study',name:'Estudio',emoji:'📚',color:'#8b6cf6'},{id:'rest',name:'Descanso',emoji:'🧘',color:'#2fb35b'}];
+if(!S.blockCats)S.blockCats=[];
 let bkDay=dk(new Date()),bkFilter='all';
 const bkCat=id=>S.blockCats.find(c=>c.id===id)||{name:'Bloque',emoji:'🧩',color:'var(--accent)'};
 const bkMins=e=>e.start&&e.end?Math.max(0,toMin(e.end)-toMin(e.start)):0;
@@ -4916,7 +4917,7 @@ function tplSave(k){const f=bkFilter;bkFilter='all';const bl=blocksOn(k).filter(
 function tplApply(k){if(!S.dayTpls.length){toast(T('Aún no tienes plantillas: guarda un día con bloques desde su resumen'));return}const mins=t=>t.items.reduce((a,b)=>a+Math.max(0,toMin(b.end)-toMin(b.start)),0);
   obSheet(T('Aplicar al')+' '+fromKey(k).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'short'}),[...S.dayTpls.map(t=>({t:t.name,s:t.items.length+' '+(t.items.length===1?T('bloque'):T('bloques'))+' · '+fmtMins(mins(t))})),{t:T('Administrar plantillas…'),sep:true}],i=>{
     if(i>=S.dayTpls.length){tplManage();return}const t=S.dayTpls[i],f=bkFilter;bkFilter='all';const have=blocksOn(k);bkFilter=f;let n=0;
-    t.items.forEach(it=>{if(have.some(b=>b.cat===it.cat&&b.start===it.start))return;S.events.push({id:'bk'+Date.now().toString(36)+(n++),kind:'event',cat:S.blockCats.some(c=>c.id===it.cat)?it.cat:(S.blockCats[0]||{}).id,title:it.title,date:k,start:it.start,end:it.end,allDay:false,notes:it.notes,remind:it.remind,done:false})});
+    t.items.forEach(it=>{if(have.some(b=>b.cat===it.cat&&b.start===it.start))return;S.events.push({id:'bk'+Date.now().toString(36)+(n++),kind:'event',cat:S.blockCats.some(c=>c.id===it.cat)?it.cat:((S.blockCats[0]||{}).id||'bloque'),title:it.title,date:k,start:it.start,end:it.end,allDay:false,notes:it.notes,remind:it.remind,done:false})});
     if(!n){toast(T('Esos bloques ya están en este día'));return}logDo('block',t.name,'Plantilla aplicada · '+regDayTxt(k));save();renderBlocks();if(view==='cal')renderCal();toast(n+' '+(n===1?T('bloque'):T('bloques'))+' · '+t.name)})}
 function tplManage(){obSheet(T('Plantillas de día'),S.dayTpls.map(t=>({t:t.name,s:t.items.map(b=>bkCat(b.cat).emoji+' '+b.start).join('  '),more:true})),i=>{const t=S.dayTpls[i];
   obSheet(t.name,[{t:T('Cambiar nombre')},{t:T('Eliminar plantilla'),danger:true,sep:true}],j=>{if(j===0)askName(T('Nombre de la plantilla'),t.name,n=>{t.name=n||t.name;save();tplManage()});else{S.dayTpls=S.dayTpls.filter(x=>x!==t);save();toast(T('Plantilla eliminada'))}})})}
@@ -5148,7 +5149,7 @@ $('bks-cancel').onclick=()=>$('bk-sheet').hidden=true;
 $('bks-save').onclick=()=>{const title=$('bks-title').value.trim()||bkCat(bkSel).name,start=$('bks-start').value,end=$('bks-end').value,date=$('bks-date').value;
   if(!date||!start||!end){toast('Elige día y horas');return}if(end<=start){toast('La hora de fin debe ser después del inicio');return}
   const rec=bkRep.length===7?{f:'d',i:1}:bkRep.length?{f:'w',i:1,days:bkRep.slice()}:undefined;
-  const data={kind:'event',cat:bkSel,title,date,start,end,allDay:false,notes:$('bks-notes').value.trim(),remind:+$('bks-remind').value,rec,hideCal:$('bks-cal').getAttribute('aria-checked')!=='true'||undefined};
+  const data={kind:'event',cat:bkSel||'bloque',title,date,start,end,allDay:false,notes:$('bks-notes').value.trim(),remind:+$('bks-remind').value,rec,hideCal:$('bks-cal').getAttribute('aria-checked')!=='true'||undefined};
   const bid=bkEdit?bkEdit.id:'bk'+Date.now().toString(36);
   if(bkEdit){if(JSON.stringify(bkEdit.rec)!==JSON.stringify(rec))delete bkEdit.ex;Object.assign(bkEdit,data);delete bkEdit.notified}else S.events.push(Object.assign({id:bid,done:false},data));
   logDo('block',title,bkEdit?'Bloque editado':'Bloque creado · '+regDayTxt(date)+' '+start+'–'+end,bid);
@@ -5593,7 +5594,10 @@ function lgLand(sel,from){if(lgRM.matches)return;setTimeout(()=>{const el=docume
 function bkStamp(x,y){const d=bkDrag;if(!d||!d.ev||d.mode==='new'||d.mode==='rs')return false;const t=dropTargetAt(x,y);if(!t){toast(T('Suelta la copia sobre un día o una franja'));return false}
   const ev=d.ev,len=d.len||(ev.end&&ev.start?bkMins(ev):0);let m=null;if(t.type==='grid')m=Math.max(0,Math.min(1440-(len||60),snap15(gridMin(t.g,y)-(d.grab||0))));else if(t.type==='wcol')m=t.min;
   const c=JSON.parse(JSON.stringify(ev));c.id=(isBlk(ev)?'bk':'e')+Date.now().toString(36)+Math.floor(Math.random()*99);delete c.rec;delete c.ex;delete c.doneOn;delete c.notified;delete c.notif;delete c.img;c.done=false;c.date=t.k;
-  if(m!=null){c.start=mHM(m);c.allDay=false;if(ev.end||len)c.end=mHM(Math.min(1439,m+(len||60)))}S.events.push(c);save();document.querySelectorAll('.bk-ghost.far,.wk-ghost').forEach(x=>x.remove());renderBlocks();renderCal();
+  if(m!=null){c.start=mHM(m);c.allDay=false;if(ev.end||len)c.end=mHM(Math.min(1439,m+(len||60)))}
+  /* Un dedo que rebota o varios a la vez dejaban la misma copia varias veces en el mismo sitio */
+  if(S.events.some(x=>x.title===c.title&&x.date===c.date&&(x.start||'')===(c.start||'')&&(x.end||'')===(c.end||'')&&(x.cat||'')===(c.cat||'')&&(x.ag||'')===(c.ag||'')))return false;
+  S.events.push(c);save();document.querySelectorAll('.bk-ghost.far,.wk-ghost').forEach(x=>x.remove());renderBlocks();renderCal();
   d.stamped=(d.stamped||0)+1;d.moved=true;d.g=null;d.el=null;lgSettle(lgSel(c.id));return true}
 function lgStamp(x,y){const ok=bkDrag?bkStamp(x,y):drag?obStamp():tmDrag?tmStamp(x,y):LG_SORT?LG_SORT.stamp(x,y):false;if(ok&&navigator.vibrate)navigator.vibrate(12);return ok}
 {let rb=false,t0=0,px=0,py=0;const act=()=>!!(bkDrag||drag||tmDrag||LG_SORT);
@@ -8676,6 +8680,20 @@ if((S.uiV||0)<10){S.uiV=10;const BAD=['IMG20261103163037.jpg','IMG20261103163046
     (D.notes||[]).forEach(x=>{if(x.body&&BAD.some(nm=>x.body.includes(nm))){x.body=strip(x.body);x.updated=Date.now()}})};
   const cur={atts:S.atts,notes:S.notes};clean(cur);S.atts=cur.atts;Object.keys(S.vaultData||{}).forEach(k=>{if(k!==S.curVault)clean(S.vaultData[k])});
   save();if(n){renderNotes();setTimeout(()=>toast(n===1?'Borrada de Notas 1 foto de prueba':'Borradas de Notas '+n+' fotos de prueba'),1900)}}
+/* Copias repetidas de una misma tarea y objetos que la app creaba por defecto. El orden por id hace que todos los dispositivos conserven la misma y no se recreen al sincronizar */
+if((S.uiV||0)<11){S.uiV=11;const fuera=new Set(),vistos=new Set(),ord=[...(S.events||[])].sort((a,b)=>String(a.id)<String(b.id)?-1:1);
+  ord.forEach(e=>{const k=JSON.stringify([e.kind,e.title,e.date,e.start||'',e.end||'',!!e.allDay,e.cat||'',e.ag||'',e.cal||'',e.notes||'',e.rec||'']);if(vistos.has(k))fuera.add(e.id);else vistos.add(k)});
+  /* Ráfaga de copias: bloques sin nombre propio creados el mismo día con segundos de diferencia */
+  const ts=e=>{const m=/^bk([0-9a-z]{8})/.exec(String(e.id));return m?parseInt(m[1],36):0},grp={};
+  ord.forEach(e=>{const c=e.cat&&(S.blockCats||[]).find(x=>x.id===e.cat);if(fuera.has(e.id)||!c||e.title!==c.name||e.rec||e.notes||!ts(e))return;(grp[e.date+'|'+e.cat]=grp[e.date+'|'+e.cat]||[]).push(e)});
+  Object.values(grp).forEach(a=>{a.sort((x,y)=>ts(x)-ts(y));let t0=ts(a[0]);a.slice(1).forEach(e=>{if(ts(e)-t0<=3e4)fuera.add(e.id);else t0=ts(e)})});
+  if(fuera.size)S.events=S.events.filter(e=>!fuera.has(e.id));
+  /* De lo creado por defecto solo se quita lo que no se ha usado */
+  const POR={gym:'Gimnasio',work:'Trabajo',study:'Estudio',rest:'Descanso'},usa=id=>(S.events||[]).some(e=>e.cat===id)||(S.habits||[]).some(h=>h.cat===id)||(S.dayTpls||[]).some(t=>(t.items||[]).some(i=>i.cat===id))||(S.regs||[]).some(r=>r.cat===id);
+  if(S.blockCats)S.blockCats=S.blockCats.filter(c=>POR[c.id]!==c.name||usa(c.id));
+  const d=(S.regs||[]).find(r=>r.kind==='diary');if(d&&d.name==='Diario'&&!Object.keys(d.days||{}).length){S.regs=S.regs.filter(r=>r!==d);S.noDiary=true}
+  if(S.circuit&&!S.curMine&&!S.circuit._tpl&&Object.values(TEMPLATES).some(t=>cSig(t())===cSig(S.circuit)))S.circuit={name:'',rounds:1,roundRest:0,steps:[]};
+  save();if(fuera.size)setTimeout(()=>toast(fuera.size===1?'Quitada 1 tarea repetida':'Quitadas '+fuera.size+' tareas repetidas'),1900)}
 /* Deslizar para cerrar: cada menú se cierra en sentido contrario al que se abrió (hojas hacia abajo, paneles laterales hacia la izquierda) */
 (()=>{let g=null;
   const scrolled=(el,top)=>{for(;el&&el!==top.parentElement;el=el.parentElement)if(el.scrollTop>0&&getComputedStyle(el).overflowY!=='visible')return true;return false};
@@ -8911,7 +8929,7 @@ const REG_TYPES={
   steps:[{k:'cols',q:'¿Cuántas columnas quieres?',o:[['2','2'],['3','3'],['4','4'],['5','5']]}],
   build:a=>({rows:[],cols:Array.from({length:+a.cols||2},(_,i)=>i?'Columna '+(i+1):'Elemento')})}
 };
-if(!S.regs)S.regs=[];
+if(!S.regs){S.regs=[];S.noDiary=true}
 let regCur=null,regT=0,regFn=null;
 const today=()=>dk(new Date());
 const regDayTxt=k=>{const d=fromKey(k);return REG_DAY[d.getDay()]+' '+d.getDate()+(k.slice(0,7)===today().slice(0,7)?'':' '+d.toLocaleDateString(LOC,{month:'short'}).replace('.',''))};
@@ -9191,9 +9209,10 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
     /* Primero se mide y luego se escribe, y solo lo que cambia: escribir el tamaño de la gota y después leer la posición de las opciones
        obligaba a recalcular la maquetación en cada fotograma, y reescribir --li en todas las opciones rehacía sus estilos aunque no cambiara */
     const PW=new WeakMap(),put=(el,k,v)=>{let m=PW.get(el);if(!m){m={};PW.set(el,m)}if(m[k]!==v){m[k]=v;el.style.setProperty(k,v)}};
+    /* Sin translate3d ni will-change: en una capa propia, el móvil pintaba los iconos de al lado encogidos y fuera de su sitio */
     function paint(sx,sy){const vert=V(),c=vert?o.y+o.h/2:o.x+o.w/2,sz=vert?o.h:o.w,sp=Math.min(1,Math.hypot(o.vx,o.vy)/1400);
       const its=[...root.querySelectorAll(itemSel)].map(el=>[el,vert?el.offsetTop+el.offsetHeight/2:el.offsetLeft+el.offsetWidth/2]);
-      put(L,'width',o.w.toFixed(1)+'px');put(L,'height',o.h.toFixed(1)+'px');L.style.transform=`translate3d(${o.x.toFixed(2)}px,${o.y.toFixed(2)}px,0) scale(${sx.toFixed(4)},${sy.toFixed(4)})`;put(L,'--lv',sp.toFixed(2));
+      put(L,'width',o.w.toFixed(1)+'px');put(L,'height',o.h.toFixed(1)+'px');L.style.transform=`translate(${o.x.toFixed(2)}px,${o.y.toFixed(2)}px) scale(${sx.toFixed(4)},${sy.toFixed(4)})`;put(L,'--lv',sp.toFixed(2));
       its.forEach(([el,m])=>{const d=m-c,li=Math.max(0,1-Math.abs(d)/(sz*2.6));put(el,'--li',(li*li*1.25).toFixed(2));put(el,'--lx',vert?'50%':d>0?'0%':'100%')})}
     function step(now){raf=0;if(!on()||!aim()){L.style.opacity='0';/* Oculta, su agujero no puede quedarse sobre la vista siguiente; al volver a verse se coloca sin viajar */
         if(hole){on()?hole.str(0):hole.kill();hole=null}if(!on())init=false;return}L.style.opacity='';
