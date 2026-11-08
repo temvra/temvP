@@ -17,8 +17,10 @@ Exec="$d/temvra/temvra" %U
 Icon=temvra
 Terminal=false
 Categories=Utility;
-MimeType=application/json;text/calendar;application/zip;
+MimeType=application/json;text/calendar;application/zip;x-scheme-handler/temvra;
 StartupWMClass=temvra
 DESKTOP
 command -v update-desktop-database >/dev/null && update-desktop-database "$d/applications" || true
+# Los enlaces temvra:// (los abre la página de los enlaces compartidos) los abre Temvra
+command -v xdg-mime >/dev/null && xdg-mime default temvra.desktop x-scheme-handler/temvra || true
 echo "Temvra instalada en $d/temvra"

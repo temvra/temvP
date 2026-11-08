@@ -33,6 +33,13 @@
                 <data android:mimeType="application/zip" />
                 <data android:mimeType="application/json" />
             </intent-filter>
+            <!-- Enlaces de otro Temvra: la página de GitHub Pages abre temvra://a?d=… -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="temvra" />
+            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />

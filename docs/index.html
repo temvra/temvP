@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0f">
+<title>Temvra Personal</title>
+<meta name="description" content="Temporizador en bucle, agenda, notas y registros. Para Android, Linux y Windows.">
+<style>
+:root{--bg:#0b0b0f;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--fg:#f4f4f6;--muted:#a3a3ad;--accent:#c6c4f4;--on-accent:#1b1a33;color-scheme:dark}
+@media (prefers-color-scheme:light){:root{--bg:#f6f5fb;--card:#fff;--line:rgba(0,0,0,.1);--fg:#18181c;--muted:#5c5c66;--accent:#5e43c3;--on-accent:#fff;color-scheme:light}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(120% 60% at 80% 0%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 60%),var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:max(32px,env(safe-area-inset-top)) 16px 32px}
+main{max-width:520px;margin:0 auto}
+.logo{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:var(--accent);color:var(--on-accent);font-weight:800;font-size:28px;margin-bottom:16px}
+h1{font-size:30px;margin:0 0 6px}p{color:var(--muted);margin:0 0 22px}
+.btn{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;padding:0 18px;border-radius:16px;text-decoration:none;font-weight:650;margin-bottom:10px;background:var(--card);color:var(--fg);border:1px solid var(--line)}
+.btn small{color:var(--muted);font-weight:500}.pri{background:var(--accent);color:var(--on-accent);border:0}.pri small{color:inherit;opacity:.75}
+</style></head><body><main>
+<div class="logo">T</div>
+<h1>Temvra Personal</h1>
+<p>Temporizador en bucle, circuitos, alarmas, agenda con bloques de trabajo, notas en Markdown y registros. Funciona sin conexión.</p>
+<a class="btn pri" href="https://github.com/temvra/temvP/releases/latest">Descargar <small>Android · Linux · Windows</small></a>
+<a class="btn" href="https://github.com/temvra/temvP">Código fuente <small>GitHub</small></a>
+</main></body></html>

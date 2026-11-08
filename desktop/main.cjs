@@ -145,7 +145,10 @@ ipcMain.on('widget-state',e=>{e.returnValue=!!wcfg().on});
 ipcMain.on('widget-hide',e=>{if(!fromApp(e))return;widgetShow(false);if(win)win.webContents.send('widget-closed')});
 ipcMain.on('widget-open',(e,a)=>{if(!fromApp(e))return;showWin();if(win)win.webContents.send('widget-action',String(a||'agenda'))});
 // «Abrir con Temvra»: el archivo llega como argumento al arrancar o, con la app abierta, a la segunda instancia. Se lee aquí y se pasa a la ventana
-let pendingFiles=[];
+let pendingFiles=[],pendingLinks=[];
+// Enlaces de otro Temvra (temvra://a?d=…): llegan igual que los archivos, como argumento
+const linkArgs=argv=>argv.slice(1).filter(a=>/^temvra:\/\//i.test(a)).map(a=>a.slice(0,20000));
+function sendLinks(list){if(!list.length)return;if(!win||win.isDestroyed()||win.webContents.isLoading()){pendingLinks=pendingLinks.concat(list);return}list.forEach(u=>win.webContents.send('vt-link',u))}
 function fileArgs(argv){return argv.slice(1).map(a=>{try{return a.startsWith('file://')?decodeURIComponent(new URL(a).pathname):a}catch(e){return a}})
   .filter(a=>/\.(json|ics|zip)$/i.test(a)&&!a.startsWith('-')&&fs.existsSync(a)&&fs.statSync(a).isFile()&&fs.statSync(a).size<60e6)}
 function sendFiles(list){if(!list.length)return;if(!win||win.isDestroyed()||win.webContents.isLoading()){pendingFiles=pendingFiles.concat(list);return}
@@ -161,13 +164,13 @@ function open(hidden){
   wc.on('context-menu',(_,p)=>{
     const t=p.isEditable?[{role:'cut',label:'Cortar'},{role:'copy',label:'Copiar'},{role:'paste',label:'Pegar'},{type:'separator'},{role:'selectAll',label:'Seleccionar todo'}]:p.selectionText?[{role:'copy',label:'Copiar'}]:[];
     if(t.length)Menu.buildFromTemplate(t).popup({window:win})});
-  wc.on('did-finish-load',()=>{if(!pendingFiles.length)return;const l=pendingFiles;pendingFiles=[];setTimeout(()=>sendFiles(l),1500)});
+  wc.on('did-finish-load',()=>{const l=pendingFiles,k=pendingLinks;pendingFiles=[];pendingLinks=[];if(l.length||k.length)setTimeout(()=>{sendFiles(l);sendLinks(k)},1500)});
   win.loadURL(ORIGIN+'/index.html');
 }
 if(!app.requestSingleInstanceLock())app.quit();
 else{
-  app.on('second-instance',(e,argv)=>{if(!argv.includes('--hidden'))showWin();sendFiles(fileArgs(argv))});
-  pendingFiles=fileArgs(process.argv);
+  app.on('second-instance',(e,argv)=>{if(!argv.includes('--hidden'))showWin();sendFiles(fileArgs(argv));sendLinks(linkArgs(argv))});
+  pendingFiles=fileArgs(process.argv);pendingLinks=linkArgs(process.argv);
   app.on('before-quit',()=>{quitting=true});
   app.whenReady().then(()=>{
     Menu.setApplicationMenu(null);
@@ -176,6 +179,8 @@ else{
       if(f!==www&&!f.startsWith(www+path.sep))return new Response('',{status:403});
       return net.fetch(pathToFileURL(f).toString());
     });
+    // En Windows el instalador y esto registran temvra:// para que la página de los enlaces abra la app
+    if(process.platform==='win32'&&app.isPackaged)app.setAsDefaultProtocolClient('temvra');
     if(useTray){setupTray();firstRunLogin()}
     open(useTray&&process.argv.includes('--hidden'));
     if(wcfg().on)widgetOpen();

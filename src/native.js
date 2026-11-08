@@ -12,6 +12,8 @@
   /* ---------- Archivos ---------- */
   window.VTNative={
     async share(name,blob,title,text){try{const r=await FS.writeFile({path:safe(name),data:await b64(blob),directory:'CACHE'});await SH.share({title:title||name,text:text||undefined,files:[r.uri],dialogTitle:'Compartir'})}catch(e){if(!/cancel/i.test(String(e&&e.message)))api()&&api().toast('No se pudo compartir: '+(e.message||e))}},
+    /* Texto (un enlace de Temvra) con el menú de compartir del sistema */
+    async shareText(title,text){try{await SH.share({title:title||'Temvra',text,dialogTitle:'Compartir'})}catch(e){}},
     async save(name,blob){try{await FS.writeFile({path:'Temvra/'+safe(name),data:await b64(blob),directory:'DOCUMENTS',recursive:true});api()&&api().toast('Guardado en Documentos/Temvra/'+safe(name))}catch(e){this.share(name,blob,name)}},
     /* Plugin propio (TemvraPlugin.java): música de otras apps, notificación del temporizador y widgets */
     hasPlugin:!!TV,
@@ -29,7 +31,9 @@
   };
   if(TV){TV.addListener('action',e=>{const go=()=>api()?api().timerAction(e.action):setTimeout(go,300);go()});
     /* Un .ics o una bóveda abiertos desde WhatsApp u otra app */
-    TV.addListener('file',e=>{const go=()=>api()?api().importFile(e):setTimeout(go,300);go()})}
+    TV.addListener('file',e=>{const go=()=>api()?api().importFile(e):setTimeout(go,300);go()});
+    /* Un enlace de otro Temvra (temvra://a?d=…) */
+    TV.addListener('link',e=>{const go=()=>api()?api().openLink(e.url):setTimeout(go,300);go()})}
   const pushWidgets=()=>{const a=api();if(a&&a.widgetData)window.VTNative.widgets(a.widgetData())};
   setInterval(()=>{if(!window.VTNative.bg)pushWidgets()},60000);
 

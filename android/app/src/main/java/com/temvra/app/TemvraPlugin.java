@@ -126,6 +126,13 @@ public class TemvraPlugin extends Plugin {
         if (uri == null) return false;
         intent.setAction(Intent.ACTION_MAIN);
         intent.setData(null);
+        // Enlace de otro Temvra (temvra://a?d=…): no es un archivo, lo lee la app
+        if ("temvra".equalsIgnoreCase(uri.getScheme())) {
+            JSObject l = new JSObject();
+            l.put("url", uri.toString());
+            notifyListeners("link", l, true);
+            return true;
+        }
         String name = "archivo";
         try (Cursor cur = getContext().getContentResolver().query(uri, null, null, null, null)) {
             if (cur != null && cur.moveToFirst()) {

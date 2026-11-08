@@ -2018,6 +2018,43 @@ body.desk .compact>.cal-top .cal-nav,body.desk .compact .bk-headwrap .cal-nav{di
 .reg-head,.reg-day,.reg-t,#rd-body{-webkit-touch-callout:none}
 .reg-head input:not(:focus),.reg-day textarea:not(:focus),.reg-t input:not(:focus),.reg-day h3,.reg-t .dc,#rd-body .nd-row{-webkit-user-select:none;user-select:none}
 .reg-chips{display:flex;gap:5px;flex-wrap:wrap;margin:4px 0}
+/* Actividad del día en el Diario: lo hecho en Notas, Agenda y Time, plegable */
+.reg-actsw{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:10px 12px;margin-bottom:6px}
+.reg-actsw>div{flex:1;min-width:0}.reg-actsw b{display:block;font-size:14px;font-weight:600;color:var(--fg)}.reg-actsw small{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.reg-act{margin:6px 0 2px;border-top:1px solid color-mix(in srgb,var(--fg) 8%,transparent);padding-top:6px}
+.reg-act>summary{cursor:pointer;list-style:none;font-size:12.5px;font-weight:600;color:var(--muted);padding:2px 0;display:flex;align-items:center;gap:6px}
+.reg-act>summary::-webkit-details-marker{display:none}.reg-act>summary::after{content:'›';margin-left:auto;font-size:16px;transition:rotate .2s}.reg-act[open]>summary::after{rotate:90deg}
+.ra-list{display:flex;flex-direction:column;gap:1px;margin-top:4px}
+.ra-it{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:6px 4px;border-radius:10px;color:var(--fg);font-size:13.5px;background:none}
+.ra-it>i{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--surface-2);color:var(--accent);font-style:normal}
+.ra-it>i svg{width:15px;height:15px}.ra-it>b{flex:none;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);font-size:12.5px;width:40px}
+.ra-it>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Hábitos, resumen de la semana, cierre del día y plantillas de día */
+.rv-head{display:flex;align-items:center;gap:6px;margin:0 0 10px}.rv-head h1{flex:1;margin:0;font-size:22px;font-weight:650;color:var(--fg)}
+.rmap-top .rmap-x{display:flex;gap:6px;flex-wrap:wrap}
+.hab-c{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:16px;padding:10px 12px;margin-bottom:8px}
+.hab-main{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;background:none;color:var(--fg);padding:0}
+.hab-e{font-size:24px;flex:none}.hab-n{flex:1;min-width:0}.hab-n b{display:block;font-size:15.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hab-n small{display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hab-s{flex:none;font-size:13px;font-weight:650;color:var(--fg)}
+.hab-w{display:flex;gap:4px;flex:none}.hab-w i{width:9px;height:9px;border-radius:50%;background:color-mix(in srgb,var(--fg) 10%,transparent)}.hab-w i.o{background:none;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--hc,var(--accent)) 75%,transparent)}.hab-w i.d{background:var(--hc,var(--accent))}
+.hab-tg{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px;background:var(--surface-2);color:var(--muted)}.hab-tg[aria-pressed="true"]{background:var(--hc,var(--accent));color:#fff}
+@media (max-width:600px){.hab-w{display:none}}
+.hab-today{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}.hab-today button{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;background:var(--surface-2);color:var(--fg);font-size:13px}
+.hab-today button[aria-pressed="true"]{background:color-mix(in srgb,var(--hc,var(--accent)) 28%,var(--surface-2));box-shadow:inset 0 0 0 1.5px var(--hc,var(--accent))}.hab-today em{font-style:normal;color:var(--muted);font-size:12px}
+.wk-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}@media (min-width:700px){.wk-tiles{grid-template-columns:repeat(4,1fr)}}
+.wk-tile{background:var(--card);border-radius:16px;padding:10px 12px}.wk-tile small{display:block;font-size:12.5px;color:var(--muted)}.wk-tile b{display:block;font-size:22px;font-weight:650;color:var(--fg);margin-top:2px}
+.wk-card{background:var(--card);border-radius:16px;padding:12px;margin-bottom:10px}.wk-card h2{margin:0 0 10px;font-size:13.5px;font-weight:600;color:var(--muted)}
+.wkc-cols{display:flex;gap:4px;height:170px;border-bottom:1px solid color-mix(in srgb,var(--fg) 14%,transparent)}
+.wkc-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;background:none;color:var(--fg);padding:0;min-width:0}
+.wkc-val{font-size:11.5px;color:var(--muted);min-height:14px;white-space:nowrap}
+.wkc-bar{width:min(24px,70%);display:flex;flex-direction:column-reverse;gap:2px;border-radius:4px 4px 0 0;overflow:hidden}.wkc-bar i{display:block;width:100%;min-height:2px}
+.wkc-labs{display:flex;gap:4px;margin-top:5px}.wkc-labs span{flex:1;text-align:center;font-size:12px;color:var(--muted)}.wkc-labs span.t{color:var(--accent);font-weight:650}
+.wk-leg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:13px;color:var(--fg)}.wk-leg span{display:flex;align-items:center;gap:6px}.wk-leg em{width:10px;height:10px;border-radius:3px;flex:none}
+.wk-hab{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0;font-size:14px;color:var(--fg)}.wk-hab .hab-w{display:flex}
+.wk-lnk{background:none;color:var(--accent);padding:0;font:inherit}
+.dc-head{display:flex;justify-content:space-around;padding:14px 8px}.dc-n{text-align:center}.dc-n b{display:block;font-size:26px;font-weight:650;color:var(--ob-text)}.dc-n small{font-size:13px;color:var(--muted)}
+.obg>button[aria-pressed="false"] .obg-ck{opacity:0}.obg>button.dc-done{opacity:.6}
+.bk-tpl{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.bk-tpl button{padding:6px 12px;border-radius:999px;background:var(--surface-2);color:var(--fg);font-size:13px}
 .reg-chips button{padding:4px 10px;border-radius:10px;background:var(--surface-2);font-size:12.5px;color:var(--fg)}
 /* Registros: textos largos con «…», casillas en Hecho y Comprado, «Deshacer» en el aviso y tabla más alta en el PC */
 .reg-t input:not(:focus),.reg-head input.rn:not(:focus){text-overflow:ellipsis}
@@ -3199,6 +3236,13 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
       </div>
     </div>
 
+    <div class="label">Registros</div>
+    <div class="stack">
+      <div class="row first"><div class="txt"><div class="t1">Actividad del día</div><div class="t2">Lo que haces en Notas, Agenda y Time aparece cada día en el Diario de Registros. Solo se guarda en este dispositivo.</div></div><button class="switch" role="switch" id="sw-act" aria-label="Actividad del día"></button></div>
+      <div class="row"><div class="txt"><div class="t1">Cierre del día</div><div class="t2">Un aviso por la noche con lo hecho y lo pendiente, para pasarlo a mañana</div></div><input type="time" id="close-t" class="bmf-in" style="width:auto;margin-right:8px" aria-label="Hora del cierre del día"><button class="switch" role="switch" id="sw-close" aria-label="Cierre del día"></button></div>
+      <div class="row last"><div class="txt"><div class="t1">Borrar la actividad guardada</div><div class="t2" id="act-n"></div></div><button class="btn tonal" id="act-clear">Borrar</button></div>
+    </div>
+
     <div class="label">Copia de seguridad</div>
     <div class="card">
       <div class="t1">Tus datos viven en este dispositivo</div>
@@ -3692,7 +3736,7 @@ if(!S.uiV){S.uiV=2;if(S.mode==='auto')S.mode='dark'}
 S.bg=Object.assign({},DEF.bg,S.bg||{});S.tts=Object.assign({},DEF.tts,S.tts||{});
 let bgImg=LS.get('bgimg',null),ownAudio=LS.get('own',null),ownName=LS.get('ownname','');
 let wT=0;
-const save=()=>{if(S.events&&S.agendas)S.events.forEach(e=>{if(!e.ag)e.ag=agNew()});calDirty=true;if(window.apDirty)window.apDirty();clearTimeout(wT);wT=setTimeout(()=>{if(typeof pushWidgets==='function')pushWidgets()},1500);return LS.set('state',S)};
+const save=()=>{if(S.events&&S.agendas)S.events.forEach(e=>{if(!e.ag)e.ag=agNew()});calDirty=true;if(window.apDirty)window.apDirty();if(window.ghDirty)window.ghDirty();clearTimeout(wT);wT=setTimeout(()=>{if(typeof pushWidgets==='function')pushWidgets()},1500);return LS.set('state',S)};
 
 /* ================= IDIOMA ================= */
 const LANGS=[['es-ES','Español (España)'],['es-MX','Español (México)'],['ca-ES','Català'],['en-US','English (US)'],['en-GB','English (UK)'],['pt-BR','Português (Brasil)'],['pt-PT','Português (Portugal)'],['fr-FR','Français'],['de-DE','Deutsch'],['it-IT','Italiano'],['ja-JP','日本語'],['zh-CN','中文 (简体)'],['ko-KR','한국어']];
@@ -4336,7 +4380,14 @@ const pad=n=>String(n).padStart(2,'0');const cap=t=>t?t[0].toUpperCase()+t.slice
 const dk=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const fromKey=k=>{const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
 const hm=d=>pad(d.getHours())+':'+pad(d.getMinutes());
-function logAct(type,title,detail,note){S.log.unshift({type,title,detail,at:Date.now(),note:note||undefined});S.log=S.log.slice(0,1500)}
+function logAct(type,title,detail,note){if(S.actOff)return;S.log.unshift({type,title,detail,at:Date.now(),note:note||undefined});S.log=S.log.slice(0,1500)}
+/* Actividad del día para Registros: también lo que se hace en Notas y Agenda. Se desactiva en Ajustes o en el Diario y solo vive en este dispositivo.
+   Las ediciones seguidas de lo mismo en menos de 30 min se juntan en una línea */
+function logDo(type,title,detail,ref){if(S.actOff)return;const l=S.log[0];if(l&&ref&&l.ref===ref&&l.detail===detail&&Date.now()-l.at<18e5){l.at=Date.now();l.title=title||l.title;return}
+  S.log.unshift({type,title:title||'',detail,at:Date.now(),ref:ref||undefined});S.log=S.log.slice(0,1500)}
+/* El calendario y la búsqueda siguen enseñando solo la actividad de Time */
+const isTimeLog=l=>['timer','circuit','alarm','stopwatch'].includes(l.type);
+function logDone(ev,done){if(done)logDo(ev.kind==='task'?'task':ev.cat?'block':'event',ev.title,ev.kind==='task'?'Tarea hecha':ev.cat?'Bloque completado':'Hecho',ev.id)}
 if(!S.events){const t=new Date(),tm=new Date(Date.now()+864e5);
   S.events=[];save()}
 /* ---------- Varias agendas (como las bóvedas de Notas) ----------
@@ -4391,7 +4442,7 @@ function dayItems(key){
     const rep=a.days.length?a.days.includes(d0.getDay()):(()=>{const n=nextAlarm();return n&&n.a.id===a.id&&dk(n.d)===key})();
     if(rep&&!(key===todayK&&a.t<=hm(new Date())))items.push({kind:'plan',time:a.t,title:a.label||'Alarma',sub:'Alarma programada · '+daysTxt(a.days),icon:'alarm'});
   });
-  const logs=(S.calShow.act===false?[]:S.log.filter(l=>dk(new Date(l.at))===key)).reverse(),groups={};
+  const logs=(S.calShow.act===false?[]:S.log.filter(l=>isTimeLog(l)&&dk(new Date(l.at))===key)).reverse(),groups={};
   logs.forEach(l=>{
     if(l.type==='timer'){const g=groups['t'+l.title];if(g){g.n++;g.last=l.at;g.item.sub=`${g.n} vueltas · ${hm(new Date(g.first))} – ${hm(new Date(l.at))}`;return}
       const it={kind:'act',time:hm(new Date(l.at)),title:'Temporizador · '+l.title,sub:'1 vuelta · '+l.detail,icon:'timer',noteRef:l.note};groups['t'+l.title]={n:1,first:l.at,last:l.at,item:it};items.push(it);return}
@@ -4401,7 +4452,7 @@ function dayItems(key){
 }
 function dayKinds(key){
   const s=new Set();agEvents().forEach(e=>{if(e.date===key)s.add(e.kind==='task'?'task':'ev')});
-  if(S.log.some(l=>dk(new Date(l.at))===key))s.add('act');return s;
+  if(S.log.some(l=>isTimeLog(l)&&dk(new Date(l.at))===key))s.add('act');return s;
 }
 function leftTxt(ms){const h=Math.floor(ms/36e5),m=Math.floor(ms%36e5/6e4);return h?`${h} h ${m} min`:`${m} min`}
 function dayFrac(){const n=new Date(),s=new Date(n);s.setHours(0,0,0,0);return (n-s)/864e5}
@@ -4702,8 +4753,8 @@ function apSlots(a,k){const d=fromKey(k),rs=a.av[d.getDay()]||[],busy=calEvents(
 const mHM=m=>pad(Math.floor(m/60))+':'+pad(m%60);
 function shareAppt(a){const lines=[];for(let i=0;i<14&&lines.length<7;i++){const d=new Date();d.setDate(d.getDate()+i);const k=dk(d),sl=apSlots(a,k);if(sl.length)lines.push(`• ${cap(d.toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'short'}))}: ${sl.map(mHM).join(', ')}`)}
   const txt=`📅 ${a.title} (${a.dur} min)\nHuecos libres:\n${lines.join('\n')||'Ahora mismo no hay huecos libres.'}\n\nDime cuál te viene bien y te lo reservo.`;
-  obSheet('Compartir horarios',[Object.assign({},TVP_OPT,{s:'Le llega la página de citas; al abrirla se añade a su agenda'}),{t:'WhatsApp'},{t:'Correo'},{t:'Más apps…'},{t:'Copiar texto'}],i=>{
-    if(i===0){tvpShare(a.title||'Citas',{appts:[a]});return}i--;
+  obSheet('Compartir horarios',[Object.assign({},TVP_OPT,{s:'Le llega la página de citas; al abrirla se añade a su agenda'}),TVP_LINK,{t:'WhatsApp'},{t:'Correo'},{t:'Más apps…'},{t:'Copiar texto'}],i=>{
+    if(i===0){tvpShare(a.title||'Citas',{appts:[a]});return}if(i===1){tvpLinkShare(a.title||'Citas',{appts:[a]});return}i-=2;
     if(i===0)window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');else if(i===1)location.href='mailto:?subject='+encodeURIComponent(a.title)+'&body='+encodeURIComponent(txt);
     else if(i===2){if(navigator.share)navigator.share({title:a.title,text:txt}).catch(()=>{});else{copyText(txt)}}else copyText(txt)})}
 function copyText(t){(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copiado'),()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Copiado')}catch(e){}ta.remove()})}
@@ -4817,11 +4868,22 @@ function bkHead(){if(bkWkN()){bkWkHead();return}const d=fromKey(bkDay),todayK=dk
   $('bk-zv').textContent=(BH/72).toFixed(BH%72?1:0).replace('.0','')+'×'}
 /* El resumen y el filtro de categorías, que iban bajo los días, van en un desplegable de cada tarjeta de día */
 const bkSumOpen=new Set();
+/* Plantillas de día: los bloques de un día guardados para ponerlos en otro con un toque, desde el resumen de cada día */
+if(!S.dayTpls)S.dayTpls=[];
+function tplSave(k){const f=bkFilter;bkFilter='all';const bl=blocksOn(k).filter(b=>b.cat&&b.start&&b.end);bkFilter=f;if(!bl.length){toast(T('Este día no tiene bloques'));return}
+  askName(T('Nombre de la plantilla'),cap(fromKey(k).toLocaleDateString(LOC,{weekday:'long'}))+' '+T('tipo'),n=>{const name=n||T('Mi día');S.dayTpls.push({id:'tp'+Date.now().toString(36),name,items:bl.map(b=>({cat:b.cat,title:b.title,start:b.start,end:b.end,notes:b.notes||'',remind:b.remind==null?5:b.remind}))});save();toast(T('Plantilla guardada')+': '+name)})}
+function tplApply(k){if(!S.dayTpls.length){toast(T('Aún no tienes plantillas: guarda un día con bloques desde su resumen'));return}const mins=t=>t.items.reduce((a,b)=>a+Math.max(0,toMin(b.end)-toMin(b.start)),0);
+  obSheet(T('Aplicar al')+' '+fromKey(k).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'short'}),[...S.dayTpls.map(t=>({t:t.name,s:t.items.length+' '+(t.items.length===1?T('bloque'):T('bloques'))+' · '+fmtMins(mins(t))})),{t:T('Administrar plantillas…'),sep:true}],i=>{
+    if(i>=S.dayTpls.length){tplManage();return}const t=S.dayTpls[i],f=bkFilter;bkFilter='all';const have=blocksOn(k);bkFilter=f;let n=0;
+    t.items.forEach(it=>{if(have.some(b=>b.cat===it.cat&&b.start===it.start))return;S.events.push({id:'bk'+Date.now().toString(36)+(n++),kind:'event',cat:S.blockCats.some(c=>c.id===it.cat)?it.cat:(S.blockCats[0]||{}).id,title:it.title,date:k,start:it.start,end:it.end,allDay:false,notes:it.notes,remind:it.remind,done:false})});
+    if(!n){toast(T('Esos bloques ya están en este día'));return}logDo('block',t.name,'Plantilla aplicada · '+regDayTxt(k));save();renderBlocks();if(view==='cal')renderCal();toast(n+' '+(n===1?T('bloque'):T('bloques'))+' · '+t.name)})}
+function tplManage(){obSheet(T('Plantillas de día'),S.dayTpls.map(t=>({t:t.name,s:t.items.map(b=>bkCat(b.cat).emoji+' '+b.start).join('  '),more:true})),i=>{const t=S.dayTpls[i];
+  obSheet(t.name,[{t:T('Cambiar nombre')},{t:T('Eliminar plantilla'),danger:true,sep:true}],j=>{if(j===0)askName(T('Nombre de la plantilla'),t.name,n=>{t.name=n||t.name;save();tplManage()});else{S.dayTpls=S.dayTpls.filter(x=>x!==t);save();toast(T('Plantilla eliminada'))}})})}
 function bkSumHTML(k,open){const f=bkFilter;bkFilter='all';const all=blocksOn(k);bkFilter=f;const tot={};all.forEach(b=>tot[b.cat]=(tot[b.cat]||0)+bkMins(b));const E=Object.entries(tot).sort((a,b)=>b[1]-a[1]),sum=E.reduce((a,x)=>a+x[1],0);
   const lab=E.length?`${bkCat(E[0][0]).emoji} ${fmtMins(E[0][1])}${E.length>1?' +'+(E.length-1):''}`:T('Resumen');
   const chips=`<button data-bkf="all" aria-pressed="${bkFilter==='all'}">Todo</button><button data-bkf="ev" aria-pressed="${bkFilter==='ev'}" style="--bc:var(--accent)"><span>📅</span>Eventos y tareas</button>`+S.blockCats.map(c=>`<button data-bkf="${c.id}" aria-pressed="${bkFilter===c.id}" style="--bc:${c.color}"><span>${c.emoji}</span>${esc(c.name)}</button>`).join('')+`<button data-bkcat="new" aria-label="Nueva categoría">＋</button>`;
   return {btn:`<button class="bk-sumt" data-bksum="${k}" aria-expanded="${open}" aria-label="${T('Tiempo por categoría')}">${lab}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>`,
-    box:`<div class="bk-sumd"${open?'':' hidden'}>${sum?`<div class="bk-bar">${E.map(([c,m])=>`<i style="flex:${m};background:${bkCat(c).color}"></i>`).join('')}</div><div class="bk-leg">${E.map(([c,m])=>`<span><em style="background:${bkCat(c).color}"></em>${bkCat(c).emoji} ${esc(bkCat(c).name)} · ${fmtMins(m)}</span>`).join('')}<span class="bk-total">Total ${fmtMins(sum)}</span></div>`:`<div class="bk-empty">${T('Sin bloques este día.')} ${matchMedia('(pointer:coarse)').matches?'Mantén pulsada la línea de tiempo y arrastra para colocar uno, o toca una hora.':'Haz clic en una hora para crear un bloque, un evento o una tarea.'}</div>`}<div class="bk-filter bk-filter-in">${chips}</div></div>`}}
+    box:`<div class="bk-sumd"${open?'':' hidden'}>${sum?`<div class="bk-bar">${E.map(([c,m])=>`<i style="flex:${m};background:${bkCat(c).color}"></i>`).join('')}</div><div class="bk-leg">${E.map(([c,m])=>`<span><em style="background:${bkCat(c).color}"></em>${bkCat(c).emoji} ${esc(bkCat(c).name)} · ${fmtMins(m)}</span>`).join('')}<span class="bk-total">Total ${fmtMins(sum)}</span></div>`:`<div class="bk-empty">${T('Sin bloques este día.')} ${matchMedia('(pointer:coarse)').matches?'Mantén pulsada la línea de tiempo y arrastra para colocar uno, o toca una hora.':'Haz clic en una hora para crear un bloque, un evento o una tarea.'}</div>`}<div class="bk-filter bk-filter-in">${chips}</div><div class="bk-tpl"><button data-tplsave="${k}">${T('Guardar como plantilla')}</button><button data-tplapply="${k}">${T('Aplicar plantilla…')}</button></div></div>`}}
 /* wk: columna de Semana. Se compara con true porque secBk también se usa en map (el segundo argumento es el índice) */
 function secBk(k,wk){wk=wk===true;
   /* Semana no tiene el filtro de categorías de la tarjeta del día: se ve todo, aunque en Día haya un filtro puesto */
@@ -4996,6 +5058,7 @@ function bkCreate(k,s,len){obSheet(cap(fromKey(k).toLocaleDateString(LOC,{weekda
   else{openEvent(null,k,Math.floor(s/60),s%60,{kind:i===2?'task':'event'});if(i===1){$('ev-end').value=mHM(Math.min(1439,s+len))}}})}
 
 $('v-blocks').addEventListener('click',e=>{if(Date.now()-bkNoClick<400)return;const t=e.target;
+  const tps=t.closest('[data-tplsave]');if(tps){tplSave(tps.dataset.tplsave);return}const tpa=t.closest('[data-tplapply]');if(tpa){tplApply(tpa.dataset.tplapply);return}
   const sm=t.closest('[data-bksum]');if(sm){const k=sm.dataset.bksum,on=!bkSumOpen.has(k);on?bkSumOpen.add(k):bkSumOpen.delete(k);const dd=sm.closest('.bk-sec')&&sm.closest('.bk-sec').querySelector('.bk-sumd');if(dd){dd.hidden=!on;sm.setAttribute('aria-expanded',on);if(on&&dd.animate&&!agRM())dd.animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:220,easing:'ease-out'})}return}
   /* En Semana tocar un día lo elige (la gota viaja hasta él) y volver a tocarlo lo abre en Día */
   const day=t.closest('[data-bkday]');if(day){const k=day.dataset.bkday;if(bkWkN()){if(bkWkBusy)return;if(k===bkDay)agGo('day');else bkWkSelect(k);return}bkJump(k);return}
@@ -5004,7 +5067,7 @@ $('v-blocks').addEventListener('click',e=>{if(Date.now()-bkNoClick<400)return;co
   if(t.closest('[data-bkcat]')){openBkCat(null);return}
   const pl=t.closest('[data-bkplay]');if(pl){startBlock(pl.dataset.bkplay);return}
   const ck=t.closest('[data-check]');if(ck){const d=toggleTaskId(ck.dataset.check);renderBlocks();renderCal();toast(d?'Tarea hecha':'Tarea pendiente');return}
-  const dn=t.closest('[data-bkdone]');if(dn){const id=dn.dataset.bkdone,k=dn.dataset.day,ev=realEv(id);if(ev.rec){ev.doneOn=ev.doneOn||{};ev.doneOn[k]=!ev.doneOn[k]}else ev.done=!ev.done;save();renderBlocks();toast((ev.rec?ev.doneOn[k]:ev.done)?'Bloque completado 💪':'Bloque pendiente');return}
+  const dn=t.closest('[data-bkdone]');if(dn){const id=dn.dataset.bkdone,k=dn.dataset.day,ev=realEv(id);if(ev.rec){ev.doneOn=ev.doneOn||{};ev.doneOn[k]=!ev.doneOn[k]}else ev.done=!ev.done;logDone(ev,ev.rec?ev.doneOn[k]:ev.done);save();renderBlocks();toast((ev.rec?ev.doneOn[k]:ev.done)?'Bloque completado 💪':'Bloque pendiente');return}
   const nt=t.closest('[data-note]');if(nt){show('notes');openNote(nt.dataset.note);return}
   const dno=t.closest('[data-dnote]');if(dno){show('notes');openDaily(dno.dataset.dnote);return}
   const b=t.closest('[data-bk]');if(b){openBlock(b.dataset.bk);return}
@@ -5045,9 +5108,11 @@ $('bks-save').onclick=()=>{const title=$('bks-title').value.trim()||bkCat(bkSel)
   if(!date||!start||!end){toast('Elige día y horas');return}if(end<=start){toast('La hora de fin debe ser después del inicio');return}
   const rec=bkRep.length===7?{f:'d',i:1}:bkRep.length?{f:'w',i:1,days:bkRep.slice()}:undefined;
   const data={kind:'event',cat:bkSel,title,date,start,end,allDay:false,notes:$('bks-notes').value.trim(),remind:+$('bks-remind').value,rec,hideCal:$('bks-cal').getAttribute('aria-checked')!=='true'||undefined};
-  if(bkEdit){if(JSON.stringify(bkEdit.rec)!==JSON.stringify(rec))delete bkEdit.ex;Object.assign(bkEdit,data);delete bkEdit.notified}else S.events.push(Object.assign({id:'bk'+Date.now().toString(36),done:false},data));
+  const bid=bkEdit?bkEdit.id:'bk'+Date.now().toString(36);
+  if(bkEdit){if(JSON.stringify(bkEdit.rec)!==JSON.stringify(rec))delete bkEdit.ex;Object.assign(bkEdit,data);delete bkEdit.notified}else S.events.push(Object.assign({id:bid,done:false},data));
+  logDo('block',title,bkEdit?'Bloque editado':'Bloque creado · '+regDayTxt(date)+' '+start+'–'+end,bid);
   save();$('bk-sheet').hidden=true;if(bkDays.includes(date))renderBlocks();else bkJump(date);if(view==='cal')renderCal();toast('Bloque guardado'+(data.hideCal?'':' · también en el calendario'))};
-$('bks-del').onclick=()=>{const u=evUndo(),all=()=>{S.events=S.events.filter(x=>x!==bkEdit);save();$('bk-sheet').hidden=true;renderBlocks();toast('Bloque eliminado',u)};
+$('bks-del').onclick=()=>{const u=evUndo(),all=()=>{logDo('block',bkEdit.title,'Bloque borrado');S.events=S.events.filter(x=>x!==bkEdit);save();$('bk-sheet').hidden=true;renderBlocks();toast('Bloque eliminado',u)};
   if(bkEdit.rec&&bkOcc)obSheet('Bloque que se repite',[{t:'Quitar solo este día'},{t:'Eliminar todos',danger:true}],i=>{if(i===0){bkEdit.ex=(bkEdit.ex||[]).concat(bkOcc);save();$('bk-sheet').hidden=true;renderBlocks();toast('Quitado de este día',u)}else all()});else all()};
 $('bks-share').onclick=()=>{if(!bkEdit)return;const c=S.blockCats.find(x=>x.id===bkEdit.cat),k=bkOcc||bkEdit.date,nm=bkEdit.title||(c&&c.name)||'Bloque';
   shareText(nm,`${c?c.emoji+' ':''}${nm} · ${cap(fromKey(k).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'short'}))} · ${bkEdit.start}–${bkEdit.end}\n— Temvra`,{events:[Object.assign({},bkEdit,{date:k})],blockCats:c?[c]:[]})};
@@ -5080,7 +5145,7 @@ function noteShareText(n){if(isCanvas(n)){const c=cvParse(n);return `🧩 ${n.ti
 const mdFileOf=n=>({name:safeName(n.title||'Sin título')+(isCanvas(n)?'.canvas':'.md'),text:n.body,type:isCanvas(n)?'application/json':'text/markdown'});
 /* En la app de Android, WhatsApp recibe un archivo de verdad: la nota como PDF «Título.pdf» o la carpeta como ZIP con sus subcarpetas. En el navegador va el texto. */
 function shareSheet(title,opts){const nat=!!window.VTNative;
-  obSheet(title,[...(opts.tv?[TVP_OPT]:[]),{t:'WhatsApp',s:nat?(opts.zip?'Envía la carpeta en un ZIP, con sus subcarpetas':'Envía el PDF «'+(opts.pdfName||'nota.pdf')+'»'):'Envía el texto de la nota',ic:SHIC.wa},{t:'Drive, correo y más apps…',s:'Abre el menú de compartir del '+(nat?'móvil':'sistema'),ic:SHIC.more},{t:'PDF',s:opts.pdfName?'Guarda o envía «'+opts.pdfName+'»':'Documento listo para imprimir o enviar',ic:SHIC.pdf},{t:opts.zip?'ZIP con todos los archivos':'Archivo Markdown (.md)',s:opts.zip?'Para importar en Obsidian u otra app':'Se abre en Obsidian y cualquier editor',ic:SHIC.file},{t:'Correo',ic:SHIC.mail},{t:'Copiar texto',ic:SHIC.copy},...(opts.exp?[{t:'Exportar a Word y otros formatos…',s:'Word, OpenDocument, RTF, HTML, texto…',ic:SHIC.file}]:[])],i=>[...(opts.tv?[opts.tv]:[]),nat?(opts.zip?opts.file:opts.pdf):opts.wa,opts.more,opts.pdf,opts.file,opts.mail,()=>copyText(opts.text()),opts.exp][i]())}
+  obSheet(title,[...(opts.tv?[TVP_OPT,TVP_LINK]:[]),{t:'WhatsApp',s:nat?(opts.zip?'Envía la carpeta en un ZIP, con sus subcarpetas':'Envía el PDF «'+(opts.pdfName||'nota.pdf')+'»'):'Envía el texto de la nota',ic:SHIC.wa},{t:'Drive, correo y más apps…',s:'Abre el menú de compartir del '+(nat?'móvil':'sistema'),ic:SHIC.more},{t:'PDF',s:opts.pdfName?'Guarda o envía «'+opts.pdfName+'»':'Documento listo para imprimir o enviar',ic:SHIC.pdf},{t:opts.zip?'ZIP con todos los archivos':'Archivo Markdown (.md)',s:opts.zip?'Para importar en Obsidian u otra app':'Se abre en Obsidian y cualquier editor',ic:SHIC.file},{t:'Correo',ic:SHIC.mail},{t:'Copiar texto',ic:SHIC.copy},...(opts.exp?[{t:'Exportar a Word y otros formatos…',s:'Word, OpenDocument, RTF, HTML, texto…',ic:SHIC.file}]:[])],i=>[...(opts.tv?[opts.tv,opts.tvl]:[]),nat?(opts.zip?opts.file:opts.pdf):opts.wa,opts.more,opts.pdf,opts.file,opts.mail,()=>copyText(opts.text()),opts.exp][i]())}
 const SHIC={wa:'<svg width="22" height="22" viewBox="0 0 24 24" fill="#25d366"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.2-4.6-4.1-4.7-4.3-.1-.2-1.1-1.5-1.1-2.9s.7-2.1 1-2.3c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2 1.3 2.3 1.4.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>',
   more:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>',
   pdf:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e5484d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M8.5 15h1.5a1.2 1.2 0 0 0 0-2.4H8.5V17M13 12.6V17h1a2.2 2.2 0 0 0 0-4.4z"/></svg>',
@@ -5090,6 +5155,8 @@ const SHIC={wa:'<svg width="22" height="22" viewBox="0 0 24 24" fill="#25d366"><
   copy:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>'};
 /* Opción común de los menús de compartir (va detrás de SHIC: un const usado antes de definirse rompe el arranque) */
 const TVP_OPT={t:'Para otro Temvra',s:'Le llega un archivo; al abrirlo se añade a su app',ic:SHIC.tv};
+const LINK_IC='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
+const TVP_LINK={t:'Enlace para otro Temvra',s:'Un mensaje con un enlace; al abrirlo se añade a su app',ic:LINK_IC};
 const waOpen=t=>window.open('https://wa.me/?text='+encodeURIComponent(t.length>3500?t.slice(0,3500)+'…':t),'_blank');
 async function shareBlob(name,blob,title,text){if(window.VTNative)return VTNative.share(name,blob,title,text);const f=new File([blob],name,{type:blob.type||'application/octet-stream'});
   try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:title||name,text:text||undefined});return}}catch(e){if(e.name==='AbortError')return}
@@ -5104,6 +5171,24 @@ const tvpSum=d=>Object.keys(TVP_N).filter(k=>d[k]&&d[k].length).map(k=>d[k].leng
 const tvpB64=b=>new Promise((ok,ko)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]||'');r.onerror=ko;r.readAsDataURL(b)});
 /* Adjuntos que una nota usa: ![[foto.png]], [[documento.pdf]] o (foto.png) */
 const tvpAttsOf=notes=>S.atts.filter(a=>notes.some(n=>{const b=n.body||'';return b.includes('[['+a.name)||b.includes('('+a.name+')')||b.includes('('+encodeURI(a.name)+')')}));
+const tvpNoteData=n=>({notes:[Object.assign({},n,{folder:''})],atts:tvpAttsOf([n]).map(a=>Object.assign({},a,{folder:''}))});
+/* Enlaces: para lo pequeño, un mensaje con un enlace a la página de Temvra en GitHub Pages. Los datos van comprimidos en el propio enlace,
+   detrás de «#», así que no pasan por ningún servidor. La página enseña qué es y abre la app con temvra://a?d=… */
+const TVP_WEB='https://temvra.github.io/temvP/a/';
+const b64u=a=>{let t='';for(let i=0;i<a.length;i+=8192)t+=String.fromCharCode.apply(null,a.subarray(i,i+8192));return btoa(t).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const ub64u=t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';return Uint8Array.from(atob(t),c=>c.charCodeAt(0))};
+async function tvpLink(o){const raw=new TextEncoder().encode(JSON.stringify(o));let d;
+  if(window.CompressionStream){const z=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer());d='z'+b64u(z)}else d='j'+b64u(raw);
+  const url=TVP_WEB+'#'+d;return url.length>6000?null:url}
+async function tvpFromLink(u){u=String(u||'');let d=(u.match(/[?&]d=([^&#]+)/)||[])[1]||u.split('#')[1]||'';try{d=decodeURIComponent(d)}catch(e){}
+  let o=null;try{const by=ub64u(d.slice(1)),txt=d[0]==='z'?await new Response(new Blob([by]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text():new TextDecoder().decode(by);o=JSON.parse(txt)}catch(e){}
+  if(o&&o.temvra==='compartir')tvpOpen(o);else toast('Este enlace no es de Temvra o está incompleto')}
+async function tvpLinkShare(titulo,d){let o=null,url=null;try{o=await tvpMake(titulo,d);url=await tvpLink(o)}catch(e){}
+  if(!url){toast('Es demasiado grande para un enlace: va como archivo');tvpShare(titulo,d);return}
+  const txt=`📦 «${o.titulo}» · ${o.resumen}\nÁbrelo y se añade a tu Temvra:\n${url}`;
+  obSheet(T('Enviar el enlace'),[{t:'WhatsApp',ic:SHIC.wa},{t:T('Más apps…'),ic:SHIC.more},{t:T('Copiar el enlace'),ic:SHIC.copy}],i=>{
+    if(i===0)window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+    else if(i===1){if(window.VTNative&&VTNative.shareText)VTNative.shareText(o.titulo,txt);else if(navigator.share)navigator.share({title:o.titulo,text:txt}).catch(()=>{});else copyText(txt)}else copyText(url)})}
 /* Una carpeta se comparte desde su nombre: «Trabajo/Recetas» llega como «Recetas» con sus subcarpetas */
 function tvpFolder(p,notes,atts){const nm=baseName(p),re=f=>nm+String(f||'').slice(p.length);
   return {notes:notes.map(n=>Object.assign({},n,{folder:re(n.folder)})),atts:atts.map(a=>Object.assign({},a,{folder:re(a.folder)})),folders:S.folders.filter(f=>f===p||f.startsWith(p+'/')).map(re)}}
@@ -5153,16 +5238,17 @@ async function tvpAdd(o){const d=o.datos,uid=p=>p+Date.now().toString(36)+Math.r
     done.push(tvpSum({events:d.events}));cal=true;const f0=first[0];go=go||(()=>{if(f0&&f0.date)goBlocksDay(f0.date);else show('cal')})}
   if(d.appts&&d.appts.length){d.appts.forEach(a=>S.appts.push(Object.assign(JSON.parse(JSON.stringify(a)),{id:uid('p')})));done.push(tvpSum({appts:d.appts}));cal=true;go=go||(()=>show('cal'))}
   if(!done.length){toast('No había nada que añadir');return}
+  logDo('share',o.titulo,'Añadido desde otro Temvra · '+done.join(', '));
   if(cal)calChanged();else save();try{go&&go()}catch(e){}toast('✔ Añadido: '+done.join(', '))}
 function shareNote(n){if(!n)return;if(n===curNote&&neEdit)saveNote();const txt=()=>noteShareText(n);
-  shareSheet(n.title||'Sin título',{tv:()=>tvpShare(n.title||'Nota',{notes:[Object.assign({},n,{folder:''})],atts:tvpAttsOf([n]).map(a=>Object.assign({},a,{folder:''}))}),exp:()=>exportNote(n),text:txt,pdfName:safeName(n.title||'Nota')+'.pdf',wa:()=>waOpen(txt()),
+  shareSheet(n.title||'Sin título',{tv:()=>tvpShare(n.title||'Nota',tvpNoteData(n)),tvl:()=>tvpLinkShare(n.title||'Nota',tvpNoteData(n)),exp:()=>exportNote(n),text:txt,pdfName:safeName(n.title||'Nota')+'.pdf',wa:()=>waOpen(txt()),
     more:async()=>{const f=mdFileOf(n);try{const file=new File([f.text],f.name,{type:f.type});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:n.title,text:txt()});return}if(navigator.share){await navigator.share({title:n.title,text:txt()});return}}catch(e){if(e.name==='AbortError')return}shareBlob(f.name,new Blob([f.text],{type:f.type}),n.title)},
     pdf:()=>makePdf([n],safeName(n.title||'Nota')+'.pdf'),file:()=>{const f=mdFileOf(n);shareBlob(f.name,new Blob([f.text],{type:f.type}),n.title)},
     mail:()=>{location.href='mailto:?subject='+encodeURIComponent(n.title||'Nota')+'&body='+encodeURIComponent(txt().slice(0,1800))}})}
 function shareFolder(p){const inF=x=>(x.folder||'')===p||(x.folder||'').startsWith(p+'/'),notes=S.notes.filter(inF),atts=S.atts.filter(inF),name=baseName(p);
   if(!notes.length&&!atts.length){toast('La carpeta está vacía');return}
   const txt=()=>`📁 ${name}\n\n`+notes.map(noteShareText).join('\n\n———\n\n');
-  shareSheet(name+' · '+notes.length+' notas',{zip:true,tv:()=>tvpShare(name,tvpFolder(p,notes,atts)),text:txt,pdfName:safeName(name)+'.pdf',wa:()=>waOpen(txt()),more:()=>zipFolder(p,notes,atts,true),pdf:()=>makePdf(notes,safeName(name)+'.pdf'),file:()=>zipFolder(p,notes,atts,false),
+  shareSheet(name+' · '+notes.length+' notas',{zip:true,tv:()=>tvpShare(name,tvpFolder(p,notes,atts)),tvl:()=>tvpLinkShare(name,tvpFolder(p,notes,atts)),text:txt,pdfName:safeName(name)+'.pdf',wa:()=>waOpen(txt()),more:()=>zipFolder(p,notes,atts,true),pdf:()=>makePdf(notes,safeName(name)+'.pdf'),file:()=>zipFolder(p,notes,atts,false),
     mail:()=>{location.href='mailto:?subject='+encodeURIComponent(name)+'&body='+encodeURIComponent(txt().slice(0,1800))}})}
 async function zipFolder(p,notes,atts,share){toast('Preparando ZIP…');let Z;try{Z=await JSZipLib()}catch(e){toast('No se pudo cargar el compresor (sin conexión).');return}
   const z=new Z(),root=baseName(p),rel=x=>(x.folder||'').slice(p.length).replace(/^\//,'');
@@ -5562,7 +5648,7 @@ $('cal-alt').addEventListener('contextmenu',e=>{const it=e.target.closest('[data
 /* Acciones de un evento, tarea o bloque */
 function pickDay(k,fn){let i=$('pick-day');if(!i){i=document.createElement('input');i.type='date';i.id='pick-day';i.tabIndex=-1;i.setAttribute('aria-hidden','true');i.style.cssText='position:fixed;left:50%;bottom:30%;width:1px;height:1px;opacity:0;border:0;padding:0';document.body.appendChild(i)}
   i.value=k;i.onchange=()=>{if(i.value)fn(i.value)};try{i.showPicker()}catch(_){i.focus();i.click()}}
-function itemDone(ev,iid,k){if(ev.kind==='task')return toggleTaskId(iid);if(ev.rec){ev.doneOn=ev.doneOn||{};ev.doneOn[k]=!ev.doneOn[k];save();return ev.doneOn[k]}ev.done=!ev.done;save();return ev.done}
+function itemDone(ev,iid,k){if(ev.kind==='task')return toggleTaskId(iid);if(ev.rec){ev.doneOn=ev.doneOn||{};ev.doneOn[k]=!ev.doneOn[k];logDone(ev,ev.doneOn[k]);save();return ev.doneOn[k]}ev.done=!ev.done;logDone(ev,ev.done);save();return ev.done}
 function itemDup(ev,k){const c=JSON.parse(JSON.stringify(ev));c.id=(isBlk(ev)?'bk':'e')+Date.now().toString(36);delete c.rec;delete c.ex;delete c.doneOn;delete c.notified;delete c.notif;delete c.img;c.done=false;c.date=k;
   if(ev.start&&ev.end&&!ev.allDay){const s=toMin(ev.end),len=bkMins(ev);if(s+len<=1440){c.start=mHM(s);c.end=mHM(Math.min(1439,s+len))}}S.events.push(c);save();refreshAll();toast(T('Duplicado')+(c.start&&!c.allDay?' · '+c.start:''))}
 /* Copia de la Agenda antes de mover o borrar: el aviso ofrece «Deshacer» (sin imagen, porque esa ya se ha borrado) */
@@ -5657,7 +5743,7 @@ function renderPresets(){const loose=S.timers.filter(p=>!p.f||!tmFolder(p.f));
   $('presets').innerHTML=h;if(typeof apBadge==='function')try{apBadge()}catch(e){}}
 function useTimer(p){setPeriod(p.s);S.name=p.t;$('name').value=p.t;setLoop(!!p.loop);save();if(!running)tReset();renderPresets();show('timer')}
 const tmShareTxt=p=>`⏱ ${p.t} · ${fmt(p.s*1000)}${p.loop?' en bucle':''}${p.d?'\n'+p.d:''}\n— Temvra`;
-function shareText(title,txt,pack){obSheet('Compartir',[...(pack?[TVP_OPT]:[]),{t:'WhatsApp',ic:SHIC.wa},{t:'Más apps…',ic:SHIC.more},{t:'Copiar texto',ic:SHIC.copy}],i=>{if(pack){if(i===0){tvpShare(title,pack);return}i--}if(i===0)waOpen(txt);else if(i===1){if(navigator.share&&!window.VTNative)navigator.share({title,text:txt}).catch(()=>{});else if(window.VTNative)VTNative.share(safeName(title)+'.txt',new Blob([txt],{type:'text/plain'}),title,txt);else copyText(txt)}else copyText(txt)})}
+function shareText(title,txt,pack){obSheet('Compartir',[...(pack?[TVP_OPT,TVP_LINK]:[]),{t:'WhatsApp',ic:SHIC.wa},{t:'Más apps…',ic:SHIC.more},{t:'Copiar texto',ic:SHIC.copy}],i=>{if(pack){if(i===0){tvpShare(title,pack);return}if(i===1){tvpLinkShare(title,pack);return}i-=2}if(i===0)waOpen(txt);else if(i===1){if(navigator.share&&!window.VTNative)navigator.share({title,text:txt}).catch(()=>{});else if(window.VTNative)VTNative.share(safeName(title)+'.txt',new Blob([txt],{type:'text/plain'}),title,txt);else copyText(txt)}else copyText(txt)})}
 function tmMenu(p){obSheet(p.t,[{t:'Duplicar'},{t:'Cambiar nombre'},{t:'Usar la duración actual',s:fmt(S.period*1000)+(S.loop?' · bucle':'')},{t:'Mover a un bloque…'},{t:'Compartir'},{t:'Eliminar',danger:true,sep:true}],i=>{
   if(i===0){const c={...p,id:'t'+Date.now().toString(36),t:p.t+' (copia)'};S.timers.splice(S.timers.indexOf(p)+1,0,c);save();renderPresets();toast('Duplicado')}
   else if(i===1)askName('Nombre',p.t,n=>{p.t=n;save();renderPresets()});
@@ -6144,7 +6230,7 @@ function renderCal(){if(S.calView==='3d'&&!DESK.matches){S.calView='week';save()
     const mo=moonOn(k);if(mo)chips.push(`<span class="mchip moon">${mo}</span>`);
     if(S.calShow.notes!==false)S.notes.filter(n=>n.date===k).forEach(n=>chips.push(`<span class="mchip note">${OB_IC.note} ${esc(n.title||'Sin título')}</span>`));
     CE.filter(e=>e.date===k).sort((a,b)=>(a.start||'').localeCompare(b.start||'')).forEach(e=>chips.push(`<span class="mchip ${e.kind==='task'?'task':'ev'}${e.done?' done':''}${e.type?' t-'+e.type:''}"${/^(nt|sb)\|/.test(e.id)?'':` data-evid="${e.id}"`} style="${evCss(e)}">${e.kind==='task'?TICK:''}${typeIc(e)}${esc(e.title)}</span>`));
-    const lg=S.calShow.act===false?[]:S.log.filter(l=>dk(new Date(l.at))===k),cnt={};lg.forEach(l=>{cnt[l.type]=(cnt[l.type]||0)+1});
+    const lg=S.calShow.act===false?[]:S.log.filter(l=>isTimeLog(l)&&dk(new Date(l.at))===k),cnt={};lg.forEach(l=>{cnt[l.type]=(cnt[l.type]||0)+1});
     if(cnt.circuit)lg.filter(l=>l.type==='circuit').forEach(l=>chips.push(`<span class="mchip act">${esc(l.title)}</span>`));
     if(cnt.timer)chips.push(`<span class="mchip act">${cnt.timer} vuelta${cnt.timer>1?'s':''}</span>`);
     if(cnt.stopwatch)chips.push(`<span class="mchip act">Crono${cnt.stopwatch>1?' ×'+cnt.stopwatch:''}</span>`);
@@ -6393,10 +6479,11 @@ $('ev-save').onclick=()=>{
   let imgWarn=false;if(evImgChanged){if(evImg){imgWarn=!setImg(id,evImg)}else delImg(id)}
   data.img=evImgChanged?!!evImg:(evEdit?!!evEdit.img:false);
   if(evEdit)Object.assign(evEdit,data);else S.events.push({id,done:false,...data});
+  {const nm=isTask?'Tarea':'Evento';logDo(isTask?'task':'event',title,evEdit?nm+(isTask?' editada':' editado'):nm+(isTask?' creada':' creado')+(date?' · '+regDayTxt(date)+(start?' '+start:''):''),id)}
   save();$('ev-sheet').hidden=true;refreshAll();
   toast(imgWarn?'Guardado · la imagen solo se mantendrá mientras la app esté abierta':(evKind==='task'?'Tarea guardada':evKind==='bday'?'Cumpleaños guardado':'Evento guardado')+(data.remind>=0?' · te avisaremos':''));
 };
-$('ev-del').onclick=()=>{const u=evUndo(),all=()=>{const im=evEdit.img;if(im)delImg(evEdit.id);S.events=S.events.filter(e=>e!==evEdit);save();$('ev-sheet').hidden=true;refreshAll();toast('Eliminado',im?null:u)};
+$('ev-del').onclick=()=>{const u=evUndo(),all=()=>{logDo(evEdit.kind==='task'?'task':'event',evEdit.title,evEdit.kind==='task'?'Tarea borrada':'Evento borrado');const im=evEdit.img;if(im)delImg(evEdit.id);S.events=S.events.filter(e=>e!==evEdit);save();$('ev-sheet').hidden=true;refreshAll();toast('Eliminado',im?null:u)};
   if(evEdit.rec&&evOcc)obSheet('Eliminar evento periódico',[{t:'Solo este evento'},{t:'Este y los siguientes'},{t:'Todos los eventos',danger:true}],i=>{
     if(i===0){evEdit.ex=(evEdit.ex||[]).concat(evOcc);save();$('ev-sheet').hidden=true;refreshAll();toast('Eliminado este día',u)}
     else if(i===1){const d=fromKey(evOcc);d.setDate(d.getDate()-1);if(dk(d)<evEdit.date)all();else{evEdit.rec.end={t:'date',d:dk(d)};save();$('ev-sheet').hidden=true;refreshAll();toast('Eliminados desde este día',u)}}else all()});
@@ -6426,8 +6513,8 @@ $('ev-map').onclick=()=>{const q=$('ev-loc').value.trim();if(!q){toast('Escribe 
 $('ev-meet').onclick=()=>{window.open('https://meet.google.com/new','_blank');toast('Copia el enlace de la reunión y pégalo aquí')};
 function evText(e){const d=e.date?fromKey(e.date):null;return `📅 ${e.title}\n${d?cap(d.toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long',year:'numeric'})):''}${e.allDay||!e.start?' · todo el día':' · '+e.start+(e.end?'–'+e.end:'')}${e.loc?'\n📍 '+e.loc:''}${e.video?'\n🎥 '+e.video:''}${e.notes?'\n'+e.notes:''}`}
 function curEvDraft(){const isTask=evKind==='task';return Object.assign({id:evEdit?evEdit.id:'e'+Date.now(),kind:isTask?'task':'event',title:$('ev-title').value.trim()||'Evento',date:$('ev-date').value,start:evAll?'':$('ev-start').value,end:evAll?'':$('ev-end').value,allDay:evAll,notes:$('ev-notes').value.trim(),remind:+$('ev-remind').value},evExtra())}
-function shareEv(e,emails){const txt=evText(e);obSheet('Compartir '+(e.kind==='task'?'tarea':'evento'),[Object.assign({},TVP_OPT,{s:'Le llega un archivo; al abrirlo se añade a su agenda'}),{t:'WhatsApp y otras apps',s:window.VTNative?'Envía el evento en un archivo: al abrirlo se añade a su calendario':'Envía los datos del evento'},{t:'Correo'+(emails?' a los invitados':'')},{t:'Archivo de calendario (.ics)',s:'Para añadirlo a Google Calendar, Outlook…'},{t:'Copiar texto'}],i=>{
-  if(i===0){tvpShare(e.title||'Evento',{events:[e],blockCats:e.cat?S.blockCats.filter(c=>c.id===e.cat):[]});return}i--;
+function shareEv(e,emails){const txt=evText(e);obSheet('Compartir '+(e.kind==='task'?'tarea':'evento'),[Object.assign({},TVP_OPT,{s:'Le llega un archivo; al abrirlo se añade a su agenda'}),TVP_LINK,{t:'WhatsApp y otras apps',s:window.VTNative?'Envía el evento en un archivo: al abrirlo se añade a su calendario':'Envía los datos del evento'},{t:'Correo'+(emails?' a los invitados':'')},{t:'Archivo de calendario (.ics)',s:'Para añadirlo a Google Calendar, Outlook…'},{t:'Copiar texto'}],i=>{
+  const evd={events:[e],blockCats:e.cat?S.blockCats.filter(c=>c.id===e.cat):[]};if(i===0){tvpShare(e.title||'Evento',evd);return}if(i===1){tvpLinkShare(e.title||'Evento',evd);return}i-=2;
   if(i===0){if(window.VTNative)VTNative.share(safeName(e.title)+'.ics',new Blob([toICS([e],e.title)],{type:'text/calendar'}),e.title,txt);else window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank')}else if(i===1)location.href='mailto:'+encodeURIComponent(emails||'')+'?subject='+encodeURIComponent(e.title)+'&body='+encodeURIComponent(txt);
   else if(i===2)shareFile(safeName(e.title)+'.ics',toICS([e],e.title),'text/calendar',e.title);else copyText(txt)})}
 $('ev-share').onclick=()=>shareEv(curEvDraft());
@@ -6469,7 +6556,7 @@ function renderTasks(){
 }
 $('tk-tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.newlist){openListSheet(null);return}S.curList=b.dataset.list;save();renderTasks()};
 function tkClick(e){
-  const c=e.target.closest('[data-tcheck]');if(c){const ev=S.events.find(x=>x.id===c.dataset.tcheck);ev.done=!ev.done;save();renderTasks();renderCal();toast(ev.done?'Tarea completada':'Tarea pendiente');return}
+  const c=e.target.closest('[data-tcheck]');if(c){const ev=S.events.find(x=>x.id===c.dataset.tcheck);ev.done=!ev.done;logDone(ev,ev.done);save();renderTasks();renderCal();toast(ev.done?'Tarea completada':'Tarea pendiente');return}
   const st=e.target.closest('[data-tstar]');if(st){const ev=S.events.find(x=>x.id===st.dataset.tstar);ev.star=!ev.star;save();renderTasks();return}
   const r=e.target.closest('[data-ev]');if(r)openEvent(r.dataset.ev);
 }
@@ -6511,7 +6598,7 @@ function runSearch(){
     const dt=e.rec&&e.date?occDates(e,todayK,addDays(todayK,800))[0]||occDates(e,e.date,addDays(todayK,-1)).pop()||e.date:e.date;
     res.push({g:dt?(dt>=todayK?'Próximos':'Pasados'):'Tareas sin fecha',k:dt||'',t:e.start||'',ic:e.kind==='task'?(e.done?ICONS.taskdone:ICONS.task):ICONS.event,cls:e.kind==='task'?'k-task':'k-event',
       title:hl(e.title,q),sub:(dt?cap(fromKey(dt).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+(e.start?' · '+e.start:''):'Sin fecha')+(e.rec?' · ↻':'')+(l?' · '+esc(l.name):'')+(e.notes&&norm(e.notes).includes(q)?' · '+hl(e.notes,q):''),act:dt?{day:dt}:{list:e.list||'default'},img:e.img?e.id:null})}});
-  S.log.forEach(l=>{if(norm(l.title).includes(q)||norm(l.detail).includes(q)||norm(ACT_NAMES[l.type]).includes(q)){const d=new Date(l.at);
+  S.log.forEach(l=>{if(isTimeLog(l)&&(norm(l.title).includes(q)||norm(l.detail).includes(q)||norm(ACT_NAMES[l.type]).includes(q))){const d=new Date(l.at);
     res.push({g:'Actividad registrada',k:dk(d),t:hm(d),ic:ICONS[l.type],cls:'k-act',title:esc(ACT_NAMES[l.type])+' · '+hl(l.title,q),sub:cap(d.toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long'}))+' · '+hm(d)+' · '+hl(l.detail,q),act:{day:dk(d)}})}});
   S.alarms.forEach(a=>{if(norm(a.label).includes(q)||a.t.includes(raw)){res.push({g:'Alarmas',k:'',t:a.t,ic:ICONS.alarm,cls:'k-act',title:a.t+' · '+hl(a.label||'Alarma',q),sub:daysTxt(a.days)+(a.on?'':' · desactivada'),act:{alarm:1}})}});
   S.notes.forEach(n=>{if(norm(n.title).includes(q)||norm(n.body).includes(q))res.push({g:'Notas',k:'',t:'',ic:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>',cls:'k-task',title:hl(n.title||'Sin título',q),sub:(n.folder?esc(n.folder)+' · ':'')+nAgo(n.updated),act:{note:n.id}})});
@@ -6540,11 +6627,15 @@ function checkReminders(){
       if(now>=fire&&now<at.getTime()+6e4*30){if(e.rec){e.notif=e.notif||{};e.notif[k]=true}else e.notified=true;save();
         const mins=Math.round((at-now)/6e4);
         showBanner(e.title,mins<=0?'Ahora':mins>=2880?'El '+fromKey(k).toLocaleDateString(LOC,{weekday:'long',day:'numeric'})+(e.start?' a las '+e.start:''):mins>=1440?'Mañana a las '+(e.start||'todo el día'):mins>=60?`En ${Math.round(mins/60)} h · a las ${e.start}`:`En ${mins} min · a las ${e.start}`,e)}})});
+  /* Cierre del día y recordatorios de hábitos, también con la app abierta (en Android además salen como notificación) */
+  const kT=dk(new Date(now)),atT=hm=>{const d=fromKey(kT),[h,m]=hm.split(':').map(Number);d.setHours(h,m,0,0);return +d};
+  if(S.dayClose&&S.dayClose.on&&S.dayCloseSeen!==kT){const a=atT(S.dayClose.t||'21:30');if(now>=a&&now<a+3*36e5){S.dayCloseSeen=kT;save();const c=closeItems(kT);showBanner('🌙 '+T('Cierre del día'),c.done.length+' '+T('hechas')+' · '+c.pending.length+' '+T('pendientes'),{id:'_close',date:kT},null,'close')}}
+  (S.habits||[]).forEach(hb=>{if(!hb.remind||!habOn(hb,kT)||habDone(hb,kT)||(S.habSeen||{})[hb.id]===kT)return;const a=atT(hb.remind);if(now>=a&&now<a+2*36e5){(S.habSeen=S.habSeen||{})[hb.id]=kT;save();showBanner((hb.emoji||'🔥')+' '+hb.name,T('¿Ya lo has hecho hoy?')+' · 🔥 '+habStreak(hb),{id:'_hab',hid:hb.id,date:kT},null,'habit')}});
 }
 let bnKind='event';
 function showBanner(t,s,e,imgData,kind){
   bnEv=e;bnKind=kind||(e&&e.id==='_test'?'test':'event');if(window.VTDesktop)VTDesktop.attention('aviso');
-  $('bn-view').hidden=bnKind!=='event';$('bn-snooze').hidden=bnKind==='test'||bnKind==='done';$('bn-snooze').textContent='Posponer '+S.snooze+' min';$('bn-title').textContent=t;$('bn-sub').textContent=s;$('banner').hidden=false;
+  $('bn-view').hidden=!['event','close','habit'].includes(bnKind);$('bn-view').textContent=bnKind==='habit'?T('Hecho ✓'):bnKind==='close'?T('Repasar'):T('Ver');$('bn-snooze').hidden=['test','done','close','habit'].includes(bnKind);$('bn-snooze').textContent='Posponer '+S.snooze+' min';$('bn-title').textContent=t;$('bn-sub').textContent=s;$('banner').hidden=false;
   const im=imgData||(e&&e.img?getImg(e.id):null);$('bn-img').hidden=!im;if(im)$('bn-img').src=im;
   buzz([200,100,200]);if(S.aviso!=='none'){duckMusic();if(S.aviso!=='duckOnly')tone(880,0,.15,'sine',.25),tone(1175,.18,.25,'sine',.25)}
   clearTimeout(bnT);if(bnKind!=='timer')bnT=setTimeout(()=>$('banner').hidden=true,15000);
@@ -6553,7 +6644,8 @@ $('bn-close').onclick=()=>{$('banner').hidden=true;try{speechSynthesis.cancel()}
 $('bn-snooze').onclick=()=>{$('banner').hidden=true;
   if(bnKind==='timer'){ac();running=true;endAt=Date.now()+S.snooze*6e4;lastTick=-1;requestWake();renderFabs();toast('Te lo recordaremos en '+S.snooze+' min');return}
   if(bnEv){bnEv.snoozeUntil=Date.now()+S.snooze*6e4;save();toast('Te lo recordaremos en '+S.snooze+' min')}};
-$('bn-view').onclick=()=>{$('banner').hidden=true;if(bnEv&&bnEv.id!=='_test'&&bnEv.date){$('settings').hidden=true;$('ev-sheet').hidden=true;show('cal');openDay(bnEv.date)}};
+$('bn-view').onclick=()=>{$('banner').hidden=true;if(bnKind==='close'&&bnEv){$('settings').hidden=true;openDayClose(bnEv.date);return}
+  if(bnKind==='habit'&&bnEv){const hb=S.habits.find(x=>x.id===bnEv.hid);if(hb&&!habDone(hb,bnEv.date)){habSet(hb,bnEv.date,true);toast((hb.emoji||'🔥')+' '+hb.name+' · 🔥 '+habStreak(hb))}if(view==='reg')renderRegs();return}if(bnEv&&bnEv.id!=='_test'&&bnEv.date){$('settings').hidden=true;$('ev-sheet').hidden=true;show('cal');openDay(bnEv.date)}};
 
 
 /* ================= NOTAS (estilo Obsidian) ================= */
@@ -6561,7 +6653,9 @@ const nid=()=>'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 if(!S.notes)S.notes=[];
 const nfind=t=>S.notes.find(n=>norm(n.title)===norm(t));
 const nget=id=>S.notes.find(n=>n.id===id);
-function newNote(title,folder,body){const n={id:nid(),title:title||'',folder:folder!=null?folder:(S.ntFilter&&S.ntFilter.startsWith('f:')?S.ntFilter.slice(2):''),pinned:false,created:Date.now(),updated:Date.now(),body:body||''};S.notes.unshift(n);save();return n}
+function newNote(title,folder,body){const n={id:nid(),title:title||'',folder:folder!=null?folder:(S.ntFilter&&S.ntFilter.startsWith('f:')?S.ntFilter.slice(2):''),pinned:false,created:Date.now(),updated:Date.now(),body:body||''};S.notes.unshift(n);
+  /* Las notas que genera Registros con su etiqueta no cuentan como actividad */
+  if(!(n.folder==='Registros'&&/^Registro · /.test(n.title)))logDo('note',n.title,'Nota creada',n.id);save();return n}
 const WL_RE=/\[\[([^\]\|#\n]+)(?:#[^\]\|\n]*)?(?:\|([^\]\n]+))?\]\]/g;
 const TAG_RE=/(^|[\s(])#([\p{L}\p{N}_\-\/]+)/gu;
 function linksOf(n){const out=new Set();let m;WL_RE.lastIndex=0;while((m=WL_RE.exec(n.body)))if(n.body[m.index-1]!=='!')out.add(m[1].trim());return [...out]}
@@ -7440,13 +7534,14 @@ async function ghPeek(L){const ref=await ghApi(`/repos/${L.repo}/git/ref/heads/$
   const c=await ghApi(`/repos/${L.repo}/git/commits/${ref.object.sha}`);return ghRem(L,c.tree.sha)}
 async function remoteTree(L){return (await ghHead(L)).rem}
 async function localMap(){const m={};for(const f of localFiles()){if(gitSkipRef(f.ref,f.kind==='n'))continue;m[f.path]={sha:await fileSha(f),f}}return m}
-let ghBusy=false;
+let ghBusy=false;const ghN=(k,s,p)=>k+' '+(k===1?s:p);
+/* fin: 1 terminó bien, 2 con conflictos (no se sube nada solo hasta que cambies algo), 0 con error */
 async function ghSync(L,mode,cmsg){if(window.__apBusy)await new Promise(r=>{const t0=Date.now(),iv=setInterval(()=>{if(!window.__apBusy||Date.now()-t0>8000){clearInterval(iv);r()}},150)});
-  if(ghBusy){ghPrint('Ya hay una sincronización en marcha…','dim');return}ghBusy=true;syncBtn();try{
+  if(ghBusy){ghPrint('Ya hay una sincronización en marcha…','dim');return}ghBusy=true;syncBtn();let fin=1;try{
   ghPrint(mode==='push'?'Leyendo el repositorio…':'Descargando cambios…','dim');
   let H=await ghHead(L);const base=L.base||{};
   const remoteChanged=Object.keys({...H.rem,...base}).some(p=>H.rem[p]!==base[p]);
-  if(mode==='pull'||remoteChanged){if(mode==='push')ghPrint('Hay cambios nuevos en GitHub: primero hago pull.','ask');const cf=await ghMerge(L,H.rem,base);
+  if(mode==='pull'||remoteChanged){if(mode==='push')ghPrint('Hay cambios nuevos en GitHub: primero hago pull.','ask');const cf=await ghMerge(L,H.rem,base);if(cf)fin=2;
     /* Con conflictos no se sube nada: antes hay que revisar las copias «(GitHub)» */
     if(cf&&mode==='push'){L.base=H.rem;L.at=Date.now();SCM.inc=[];save();ghPrint(`✖ ${cf===1?'Hay 1 conflicto':'Hay '+cf+' conflictos'} con GitHub: no se ha subido nada. Revisa ${cf===1?'la copia':'las copias'} «(GitHub)» y vuelve a pulsar Confirmar y subir.`,'err');toast(`GitHub: ${cf===1?'1 conflicto':cf+' conflictos'} · revísalo antes de subir`);return}}
   if(mode==='pull'){L.base=H.rem;L.at=Date.now();save();return}
@@ -7459,12 +7554,15 @@ async function ghSync(L,mode,cmsg){if(window.__apBusy)await new Promise(r=>{cons
   for(const p of Object.keys(H.rem))if(!loc[p]&&base[p]===H.rem[p]&&!gitSkipPath(p)){entries.push({path:p,mode:'100644',type:'blob',sha:null});del++;ghPrint('✕ '+esc(p),'dim')}
   if(!entries.length){L.base=H.rem;L.at=Date.now();save();ghPrint('Push: todo al día (Everything up-to-date)','ok');if(!ghQuiet)toast('GitHub: todo al día');return}
   const tree=await ghApi(`/repos/${L.repo}/git/trees`,{method:'POST',body:{base_tree:H.tree,tree:entries}});
-  const msg=(cmsg||'').trim()||`Temvra Notas: ${up?up+' cambios':''}${up&&del?', ':''}${del?del+' borrados':''} · ${new Date().toLocaleString(LOC)}`;
+  const msg=(cmsg||'').trim()||`Temvra Notas: ${up?ghN(up,'cambio','cambios'):''}${up&&del?', ':''}${del?ghN(del,'borrado','borrados'):''} · ${new Date().toLocaleString(LOC)}`;
   const cm=await ghApi(`/repos/${L.repo}/git/commits`,{method:'POST',body:{message:msg,tree:tree.sha,parents:[H.head]}});
   await ghApi(`/repos/${L.repo}/git/refs/heads/${ghPath(L.branch||'main')}`,{method:'PATCH',body:{sha:cm.sha}});
   const nrem={...H.rem};entries.forEach(e=>{if(e.sha)nrem[e.path]=e.sha;else delete nrem[e.path]});L.base=nrem;L.at=Date.now();save();
-  ghPrint(`✔ Push: 1 commit (${cm.sha.slice(0,7)}) · ${up} subidos${del?', '+del+' borrados':''}.`,'ok');toast('GitHub: '+[up?up+' subidos':'',del?del+' borrados':''].filter(Boolean).join(', '))
-}catch(e){ghErr(e)}finally{ghBusy=false;syncBtn();scmSoon(0)}}
+  ghPrint(`✔ Push: 1 commit (${cm.sha.slice(0,7)}) · ${ghN(up,'subido','subidos')}${del?', '+ghN(del,'borrado','borrados'):''}.`,'ok');toast('GitHub: '+[up?ghN(up,'subido','subidos'):'',del?ghN(del,'borrado','borrados'):''].filter(Boolean).join(', '))
+}catch(e){fin=0;ghTried='';ghErr(e)}finally{ghBusy=false;syncBtn();scmSoon(0);
+  /* Tras un conflicto no se sube nada solo hasta el siguiente push (a mano o al cerrar una nota): antes hay que revisar las copias «(GitHub)» */
+  if(fin===2){clearTimeout(ghDT);ghDT=0;if(!L.conf){L.conf=1;save()}}else if(fin===1&&mode==='push'&&L.conf){delete L.conf;save()}
+  if(fin===1)ghDirty('pendiente')}}
 /* Botón de sincronizar de Notas: sin GitHub vinculado lleva a conectarlo; con él, baja lo nuevo y sube lo tuyo */
 function syncBtn(){const L=ghLink(),on=!!(S.gh&&S.gh.token&&L),t=on?'Sincronizar con GitHub · '+L.repo:'Sincronizar entre dispositivos: conecta GitHub';
   ['ob-sync','vn-sync'].forEach(i=>{const b=$(i);if(!b)return;b.classList.toggle('spin',ghBusy);b.classList.toggle('off',!on);b.title=t;b.setAttribute('aria-label',t)})}
@@ -7493,6 +7591,22 @@ async function ghMerge(L,rem,base){const loc=await localMap();let down=0,gone=0,
   save();renderNotes();if(curNote)renderNoteMeta();
   ghPrint(down||gone||conf?`✔ Pull: ${down} actualizados${gone?', '+gone+' borrados':''}${conf?', '+conf+(conf===1?' conflicto':' conflictos'):''}.`:'Pull: todo al día (Already up to date)','ok');if(down||gone||conf)toast('GitHub: '+[down+gone?(down+gone)+(down+gone===1?' cambio':' cambios'):'',conf?conf+(conf===1?' conflicto':' conflictos'):''].filter(Boolean).join(' · '));else if(!ghQuiet)toast('GitHub: todo al día');return conf}
 const ghPush=(L,m)=>ghSync(L,'push',m),ghPull=L=>ghSync(L,'pull');
+/* Notas como Agenda y Time: lo que cambia fuera del editor (borrar, mover, renombrar, añadir desde un enlace…) se sube solo a los pocos segundos.
+   Antes esperaba a cerrar una nota o a salir de la app, y en Android la app se congela al salir sin llegar a subirlo. La nota que se está
+   escribiendo sigue subiendo al cerrarla o al parar de escribir. Lo pendiente es lo mismo que enseña Control de código (scmScan, con caché) */
+let ghDT=0,ghD0=0,ghDWhy='',ghTried='';
+function ghDirty(why){if(!why&&ghBusy)return;why=why||'cambio';const t=Date.now();if(!ghDT){ghD0=t;ghDWhy=why}else if(why!=='cambio')ghDWhy=why;
+  clearTimeout(ghDT);ghDT=setTimeout(()=>{ghDT=0;ghCheck(ghDWhy)},t-ghD0>8000?0:why==='cambio'?1500:400)}
+async function ghCheck(why){const L=ghLink(),a=S.ob.sync.auto||'both';
+  /* Una bóveda que nunca se ha sincronizado sigue como antes (la primera vez, a mano o al salir); con «al abrir y salir», no sube con cada cambio */
+  if(!S.gh||!S.gh.token||!L||!L.at||L.code||L.conf||a==='off'||why==='cambio'&&a!=='note'&&a!=='both')return;
+  if(ghBusy||window.__apBusy){clearTimeout(ghDT);ghDT=setTimeout(()=>{ghDT=0;ghCheck(why)},1500);return}
+  try{await scmScan()}catch(e){return}const cur=curNote&&neEdit?curNote.id:null;
+  const pend=(SCM.ch||[]).filter(c=>!c.un&&!(cur&&(c.id===cur||c.st==='D'))).map(c=>c.st+c.p).join('|');
+  /* Si tras subir sigue pendiente lo mismo (algo que el push no sabe subir), no se repite en bucle: espera a otro cambio */
+  if(!pend||ghBusy||why!=='cambio'&&pend===ghTried)return;ghTried=pend;
+  if(cur)saveNote();ghQuiet=true;window._lastAuto=Date.now();try{await ghPush(L)}finally{ghQuiet=false}}
+window.ghDirty=ghDirty;document.addEventListener('visibilitychange',()=>{if(!document.hidden)ghDirty('pendiente')});addEventListener('online',()=>ghDirty('pendiente'));setTimeout(()=>ghDirty('pendiente'),4000);
 /* ===================== Agenda y Time en GitHub =====================
    Cada evento, cita, temporizador, bloque, circuito, plantilla y alarma es un archivo JSON dentro de .temvra/ en el repositorio de la bóveda
    (Notas no ve esa carpeta: empieza por punto). Fusión de 3 vías por archivo como en Notas; si los dos lados cambiaron lo mismo, gana el
@@ -7598,7 +7712,8 @@ setInterval(()=>{if(!$('settings').hidden)apBadge()},30000);
     sw.onclick=()=>{VTDesktop.widgetShow(!VTDesktop.widgetState());st();setTimeout(pushPulse,600)};
     if(VTDesktop.onWidget)VTDesktop.onWidget(a=>{if(a==='closed'){st();return}if(window.VTAPI)VTAPI.timerAction(a)});setTimeout(pushPulse,1500)}
   /* «Abrir con Temvra» en el PC: el archivo llega desde el proceso principal */
-  if(window.VTDesktop&&VTDesktop.onFile)VTDesktop.onFile(x=>importIncoming(x))}
+  if(window.VTDesktop&&VTDesktop.onFile)VTDesktop.onFile(x=>importIncoming(x));
+  if(window.VTDesktop&&VTDesktop.onLink)VTDesktop.onLink(u=>tvpFromLink(u))}
 window.apDirty=apDirty;document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-apsync]')){apEtag='';appSync('manual').then(()=>{const A=apA();toast(A&&A.err?'GitHub: '+A.err:'✔ Bóveda sincronizada')})}});new MutationObserver(()=>{if(!$('settings').hidden)apBadge()}).observe($('settings'),{attributes:true,attributeFilter:['hidden']});setTimeout(apBadge,0);
 /* Solo mira GitHub (ghPeek no crea el README en un repositorio vacío) y respeta .gitignore y lo que está fuera del push, como el panel */
 async function ghStatus(L){try{const rem=await ghPeek(L),base=L.base||{};let mod=[],nw=[],rm=[],un=[];const lp=new Set();
@@ -7756,7 +7871,7 @@ function neDownBtn(){const b=neBody(),btn=$('ne-down');if(!btn)return;const t=$(
   const tl=$('ne-tools'),r=!btn.hidden&&document.body.classList.contains('desknotes')&&tl&&!tl.hidden?tl.getBoundingClientRect():null;btn.style.bottom=r&&r.height?innerHeight-r.top+12+'px':''}
 function neGoBottom(){const b=neBody();b.scrollTo({top:b.scrollHeight,behavior:'smooth'});if(neEdit){const t=$('ne-text');t.focus({preventScroll:true});t.setSelectionRange(t.value.length,t.value.length);setTimeout(()=>b.scrollTo({top:b.scrollHeight,behavior:'smooth'}),60)}}
 function neToBottom(){if(S.ob.bottomUp===false)return;const b=neBody();b.scrollTop=b.scrollHeight}
-function saveNote(){if(!curNote)return;curNote.body=$('ne-text').value;curNote.updated=Date.now();snapshot(curNote);save()}
+function saveNote(){if(!curNote)return;const was=curNote.body;curNote.body=$('ne-text').value;curNote.updated=Date.now();if(was!==curNote.body)logDo('note',curNote.title,'Nota editada',curNote.id);snapshot(curNote);save()}
 $('ne-text').addEventListener('input',()=>{const ta=$('ne-text'),nearEnd=ta.value.length-ta.selectionEnd<80;autoGrow();edHL();if(nearEnd)neToBottom();neDownBtn();clearTimeout(neSaveT);neSaveT=setTimeout(()=>{saveNote();renderNoteMeta();renderNoteCol();deskStatus()},350);suggest()});
 $('ne-title').addEventListener('input',e=>{if(!curNote)return;const old=curNote.title,nw=e.target.value;curNote.title=nw;curNote.updated=Date.now();clearTimeout(neSaveT);
   neSaveT=setTimeout(()=>{if(old&&nw&&old!==nw&&S.ob.autoLinks)S.notes.forEach(o=>{if(o!==curNote&&o.body.includes('[['+old)){o.body=o.body.split('[['+old+']]').join('[['+nw+']]').split('[['+old+'|').join('[['+nw+'|').split('[['+old+'#').join('[['+nw+'#')}});save();renderNoteMeta();if(document.body.classList.contains('desknotes')&&S.obPanel==='files')renderNotes();renderDeskTabs()},500)});
@@ -8097,7 +8212,7 @@ new MutationObserver(()=>{const o=S.ob,d=o.theme==='dark'||(o.theme!=='light'&&i
 function snapshot(n,force){if(!PL('recovery')||!n)return;const a=S.snaps[n.id]=S.snaps[n.id]||[];const last=a[a.length-1];
   if(!force&&last&&(Date.now()-last.t<S.ob.rec.mins*6e4||last.body===n.body))return;if(last&&last.body===n.body)return;
   a.push({t:Date.now(),title:n.title,body:n.body});const lim=Date.now()-S.ob.rec.days*864e5;S.snaps[n.id]=a.filter(x=>x.t>lim).slice(-15)}
-function trashNote(n){if(S.ob.trash)S.trash.unshift({t:Date.now(),note:JSON.parse(JSON.stringify(n))});S.trash=S.trash.filter(x=>x.t>Date.now()-S.ob.rec.days*864e5).slice(0,60);
+function trashNote(n){if(!ghBusy)logDo('note',n.title,'Nota borrada');if(S.ob.trash)S.trash.unshift({t:Date.now(),note:JSON.parse(JSON.stringify(n))});S.trash=S.trash.filter(x=>x.t>Date.now()-S.ob.rec.days*864e5).slice(0,60);
   S.notes=S.notes.filter(x=>x!==n);S.bookmarks=S.bookmarks.filter(b=>b.ref!==n.id);openTabs=openTabs.filter(x=>x!==n.id);save()}
 function showHistory(n){const a=(S.snaps[n.id]||[]).slice().reverse();if(!a.length){toast('Aún no hay versiones guardadas de esta nota');return}
   obSheet('Historial de versiones',a.map(x=>({t:new Date(x.t).toLocaleString(LOC,{dateStyle:'medium',timeStyle:'short'}),s:((x.body.match(/[\p{L}\p{N}]+/gu)||[]).length)+' palabras · '+x.body.replace(/\s+/g,' ').slice(0,60)})),i=>{
@@ -8125,7 +8240,7 @@ function noteTasks(){if(!PL('calendar')||!S.ob.cal.tasks)return [];const out=[];
     out.push({id:'nt|'+n.id+'|'+i,kind:'task',title:m[2].replace(dm[0],'').replace(tm?tm[0]:'','').replace(/\s+/g,' ').trim()||'Tarea',date:dm[1],start:tm?pad(tm[1].split(':')[0])+':'+tm[1].split(':')[1]:'',allDay:!tm,done:m[1]!==' ',fromNote:n.id,line:i,remind:-1})})});
   return out}
 function toggleTaskId(id){if(id.startsWith('nt|')){const [,nidp,li]=id.split('|');const n=nget(nidp);if(!n)return false;const L=n.body.split('\n');L[+li]=L[+li].replace(/\[( |x|X)\]/,m=>m==='[ ]'?'[x]':'[ ]');n.body=L.join('\n');n.updated=Date.now();save();if(curNote===n&&!neEdit)renderRead();return /\[x\]/i.test(L[+li])}
-  const ev=realEv(id);if(!ev)return false;if(String(id).includes('@')){const k=id.split('@')[1];ev.doneOn=ev.doneOn||{};ev.doneOn[k]=!ev.doneOn[k];save();return ev.doneOn[k]}ev.done=!ev.done;save();return ev.done}
+  const ev=realEv(id);if(!ev)return false;if(String(id).includes('@')){const k=id.split('@')[1];ev.doneOn=ev.doneOn||{};ev.doneOn[k]=!ev.doneOn[k];logDone(ev,ev.doneOn[k]);save();return ev.doneOn[k]}ev.done=!ev.done;logDone(ev,ev.done);save();return ev.done}
 function openNoteTask(id){const [,nidp,li]=id.split('|');const n=nget(nidp);if(!n)return;const line=(n.body.split('\n')[+li]||'').replace(/^[\s\-*+]+\[.\]\s*/,'');$('dayview').hidden=true;show('notes');openNote(n.id,false);flashLine(line.replace(ND_RE,'').trim())}
 
 /* Bloque ```agenda``` dentro de una nota */
@@ -8393,6 +8508,15 @@ $('close-settings').onclick=()=>{$('settings').hidden=true};
   $(id).setAttribute('aria-checked',S[k]);
   $(id).onclick=()=>{S[k]=!S[k];save();$(id).setAttribute('aria-checked',S[k]);if(k==='wake'){S.wake&&running?requestWake():releaseWake()}};
 });
+/* Actividad del día: el mismo interruptor en Ajustes y en el Diario */
+function actSettings(){const sw=$('sw-act');if(!sw)return;sw.setAttribute('aria-checked',String(!S.actOff));const n=S.log.length;$('act-n').textContent=n?n+' '+(n===1?'cosa apuntada':'cosas apuntadas'):'No hay nada apuntado'}
+$('sw-act').onclick=()=>{S.actOff=!S.actOff;save();actSettings();if(view==='reg')renderRegs()};
+$('act-clear').onclick=()=>{if(!S.log.length){toast('No hay nada que borrar');return}obConfirm('¿Borrar toda la actividad apuntada? También la del temporizador y las alarmas en el calendario.','Borrar',()=>{S.log=[];save();actSettings();if(view==='reg')renderRegs();calDirty=true;toast('Actividad borrada')})};
+actSettings();
+/* El cierre del día se crea aquí: Ajustes se pinta al arrancar, antes que la sección de Registros */
+if(!S.dayClose)S.dayClose={on:true,t:'21:30'};
+function closeSettings(){$('sw-close').setAttribute('aria-checked',String(!!S.dayClose.on));$('close-t').value=S.dayClose.t||'21:30';$('close-t').disabled=!S.dayClose.on}
+$('sw-close').onclick=()=>{S.dayClose.on=!S.dayClose.on;save();closeSettings()};$('close-t').onchange=e=>{S.dayClose.t=e.target.value||'21:30';S.dayCloseSeen='';save()};closeSettings();
 function renderNotifSeg(){document.querySelectorAll('#notif-seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.n===S.notif));$('pv-notif').hidden=S.notif==='never';$('pv-notif-off').hidden=S.notif!=='never'}
 document.querySelectorAll('#notif-seg button').forEach(b=>b.onclick=()=>{S.notif=b.dataset.n;save();renderNotifSeg();tNotif()});
 $('pv-n-play').onclick=()=>running?tPause():tStart();$('pv-n-reset').onclick=tReset;$('pv-n-skip').onclick=tSkip;$('pv-w-play').onclick=()=>running?tPause():tStart();
@@ -8670,6 +8794,11 @@ $('nd-new').onclick=()=>{$('notes-drawer').hidden=true;setCompMode('note');$('vn
 /* Bóvedas: desde el botón de Notas de la barra inferior, con la misma hoja deslizable que los demás menús */
 function openVaultSheet(){const list=S.vaults;obSheet('Bóvedas',[...list.map(v=>({t:v.name,s:v.id===S.curVault?'Abierta ahora':'',on:v.id===S.curVault,ic:vBadge(v)})),{t:'Nueva bóveda',ic:MI2.plus,sep:true},{t:'Administrar bóvedas…',ic:MI.base}],i=>{if(i<list.length)switchVault(list[i].id);else if(i===list.length)openVaultNew();else openVaultMgr()})}
 document.querySelector('.nav [data-view=notes]').addEventListener('click',e=>{if(view==='notes'&&!DESK.matches&&$('noteview').hidden){e.stopImmediatePropagation();e.preventDefault();openVaultSheet()}},true);
+/* Como en Notas: en el móvil, tocar el icono de Time o de Agenda estando ya en esa sección abre su menú: los relojes o las agendas */
+const TIMEV=['timer','circ','stop','alarm','laps','clock'],navFree=()=>$('settings').hidden&&['dayview','tasksview','searchview'].every(i=>!$(i)||$(i).hidden);
+function openClockSheet(){obSheet(T('Relojes'),TIMEV.map(k=>{const b=$('tab-'+k);return {t:b.getAttribute('aria-label'),s:view===k?T('Abierto ahora'):'',on:view===k,ic:(b.querySelector('svg')||{}).outerHTML||''}}),i=>{if(TIMEV[i]!==view)$('tab-'+TIMEV[i]).click()})}
+document.querySelector('.nav [data-view=time]').addEventListener('click',e=>{if(TIMEV.includes(view)&&!DESK.matches&&navFree()){e.stopImmediatePropagation();e.preventDefault();openClockSheet()}},true);
+document.querySelector('.nav [data-view=cal]').addEventListener('click',e=>{if((view==='cal'||view==='blocks')&&!DESK.matches&&navFree()){e.stopImmediatePropagation();e.preventDefault();agendaMenu()}},true);
 /* Selector + del campo de escritura */
 let compMode='note';const COMP={note:'Escribe una nota…',folder:'Nombre de la carpeta…',canvas:'Nombre del lienzo…'};
 function setCompMode(m){compMode=m;$('vn-in').placeholder=COMP[m];$('vn-plus').classList.toggle('on',m!=='note')}
@@ -8768,7 +8897,7 @@ function tableHTML(t,ctx){const tot=regTotals(t),byDay=!!ctx.byDay;return `<div 
   <tbody>${t.rows.map((x,i)=>`<tr class="${x.d===today()?'today':''}" data-i="${i}">${byDay?`<td class="dc">${regDayTxt(x.d)}${x.t?`<br>${esc(x.t)}`:''}</td>`:''}${t.cols.map((c,j)=>{const v=x.c[j]==null?'':String(x.c[j]);return /^(hecho|comprado)$/i.test(c.trim())?`<td class="ck"><input type="checkbox" data-c="${j}"${/^(|no|0)$/i.test(v.trim())?'':' checked'} aria-label="${esc(c)}"></td>`:`<td><input data-c="${j}" value="${esc(v)}"${v.length>14?` title="${esc(v)}"`:''} inputmode="text"></td>`}).join('')}<td class="ctl">${byDay?'':'<button class="rg-grip" data-rgrip aria-label="Mover fila" title="Arrastra para mover">⠿</button>'}<button data-delrow aria-label="Quitar fila">×</button></td></tr>`).join('')}</tbody>
   ${tot.some(v=>v!=='')?`<tfoot><tr>${byDay?'<td class="dc">Total</td>':''}${tot.map((v,j)=>`<td>${!byDay&&!j?'Total':v}</td>`).join('')}<td></td></tr></tfoot>`:''}</table></div>`}
 function regPh(r){return r?(r.kind==='diary'?'Escribe en el diario de hoy…':'Apunta en '+(r.name.length>20?r.name.slice(0,19).trim():r.name)+'…'):'Crea un registro con +'}
-function renderRegs(){ensureDiary();ensureRegs();if(!regCur||!S.regs.some(x=>x.id===regCur))regCur=S.regLast&&S.regs.some(x=>x.id===S.regLast)?S.regLast:(S.regs[0]||{}).id||null;const r=S.regs.find(x=>x.id===regCur);
+function renderRegs(){if(S.regView==='habits'||S.regView==='week'){$('rg-compose').hidden=true;if(S.regView==='habits')renderHabits();else renderWeek();return}if(view==='reg')$('rg-compose').hidden=false;ensureDiary();ensureRegs();if(!regCur||!S.regs.some(x=>x.id===regCur))regCur=S.regLast&&S.regs.some(x=>x.id===S.regLast)?S.regLast:(S.regs[0]||{}).id||null;const r=S.regs.find(x=>x.id===regCur);
   $('rg-in').placeholder=regPh(r);
   if(S.regMap&&S.regs.length){renderRegMap();return}
   if(r){S.regLast=r.id;renderReg(r);return}$('v-reg').innerHTML='<div class="reg-empty"><p>Aún no tienes registros.</p><button class="btn" id="reg-add">+ Nuevo registro</button></div>'}
@@ -8776,11 +8905,11 @@ function renderRegs(){ensureDiary();ensureRegs();if(!regCur||!S.regs.some(x=>x.i
 function renderRegMap(){const grp={},lab=r=>r.kind==='diary'?'Diario':(REG_TYPES[r.type]||{}).n||'Otros';S.regs.forEach(r=>{(grp[lab(r)]=grp[lab(r)]||[]).push(r)});const td=today();
   const card=r=>{const n=r.kind==='diary'?Object.keys(r.days||{}).length:[...new Set((r.rows||[]).map(x=>x.d))].length,hoy=r.kind==='diary'?((r.days||{})[td]||{}).text||'':regSummary(r,td).split('\n')[0];
     return `<button class="rcard${r.id===regCur?' on':''}" data-rcard="${r.id}" style="--rc:${r.color||'var(--accent)'}"><b><i>${r.icon||'🗂️'}</i>${esc(r.name)}</b><small>${hoy?esc(hoy):T('Hoy sin apuntar')}</small><em>${n} ${n===1?T('día'):T('días')}${r.tag?' · #'+esc(r.tag):''}</em></button>`};
-  $('v-reg').innerHTML=`<div class="rmap"><div class="rmap-top"><h1>${T('Registros')}</h1><button class="btn tonal" data-rmap="0">${T('Abrir')}</button></div>${Object.entries(grp).map(([k,v])=>`<section class="rmap-s"><h2>${esc(k)}</h2><div class="rmap-g">${v.map(card).join('')}</div></section>`).join('')}</div>`}
+  $('v-reg').innerHTML=`<div class="rmap"><div class="rmap-top"><h1>${T('Registros')}</h1><div class="rmap-x"><button class="btn tonal" data-rview="habits">🔥 ${T('Hábitos')}</button><button class="btn tonal" data-rview="week">📊 ${T('Semana')}</button><button class="btn tonal" data-rmap="0">${T('Abrir')}</button></div></div>${Object.entries(grp).map(([k,v])=>`<section class="rmap-s"><h2>${esc(k)}</h2><div class="rmap-g">${v.map(card).join('')}</div></section>`).join('')}</div>`}
 $('v-reg').addEventListener('click',e=>{const m=e.target.closest('[data-rmap]');if(m){S.regMap=m.dataset.rmap==='1';save();renderRegs();return}const c=e.target.closest('[data-rcard]');if(c&&Date.now()-(window._rcNo||0)>450){regCur=c.dataset.rcard;S.regMap=false;save();renderRegs()}});
 setTimeout(()=>sortable($('v-reg'),'rcard',{render:renderRegs,move:(f,t,af)=>{S.regs=moveIn(S.regs,x=>x.id,f,t,af)},menu:el=>{const r=S.regs.find(x=>x.id===el.dataset.rcard);if(r)regMenu(r)}}),0);
 function openRegDrawer(){const dayTxt=r=>r.kind==='diary'?((r.days[today()]||{}).text||'Hoy sin escribir'):regSummary(r,today()).split('\n')[0]||'Hoy sin apuntar';
-  $('rd-body').innerHTML=S.regs.map(r=>`<div class="nd-item"><button class="nd-row reg-r${r.id===regCur?' on':''}" data-pick="${r.id}" style="--rc:${r.color||'var(--accent)'}"><span class="ic2">${r.icon||'🗂️'}</span><span><b>${esc(r.name)}</b><small>${r.tag?'#'+esc(r.tag)+' · ':''}${esc(dayTxt(r))}</small></span></button></div>`).join('');$('reg-drawer').hidden=false}
+  $('rd-body').innerHTML=regSpecialRows()+S.regs.map(r=>`<div class="nd-item"><button class="nd-row reg-r${r.id===regCur?' on':''}" data-pick="${r.id}" style="--rc:${r.color||'var(--accent)'}"><span class="ic2">${r.icon||'🗂️'}</span><span><b>${esc(r.name)}</b><small>${r.tag?'#'+esc(r.tag)+' · ':''}${esc(dayTxt(r))}</small></span></button></div>`).join('');$('reg-drawer').hidden=false}
 const csvCell=v=>{const t=String(v==null?'':v);return /[",;\n]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t};
 const tableCsv=T=>{const day=T.rows.some(x=>x.d);return [(day?['Día']:[]).concat(T.cols).map(csvCell).join(';'),...T.rows.filter(x=>!rowEmpty(x)).map(x=>(day?[x.d+(x.t?' '+x.t:'')]:[]).concat(x.c).map(csvCell).join(';'))].join('\n')};
 const tableTxt=T=>T.rows.filter(x=>!rowEmpty(x)).map(x=>(x.d?regDayTxt(x.d)+': ':'')+x.c.filter(Boolean).join(' · ')).join('\n');
@@ -8821,7 +8950,8 @@ sortable($('rd-body'),'pick',{render:()=>{if(!$('reg-drawer').hidden)openRegDraw
     move:(f,t,af,el)=>{const g=rg(el);if(!g)return;const x=g.T.rows[+f];g.T.rows=moveIn(g.T.rows.map((y,i)=>[i,y]),p=>String(p[0]),f,t,af).map(p=>p[1]);saveReg(g.r)},
     dup:(f,t,af,el)=>{const g=rg(el);if(!g)return f;const c=JSON.parse(JSON.stringify(g.T.rows[+f])),at=+t+(af?1:0);g.T.rows.splice(at,0,c);saveReg(g.r);return at<=+f?String(+f+1):f}})}
 $('rg-menu').onclick=openRegDrawer;
-$('reg-drawer').addEventListener('click',e=>{if(e.target===$('reg-drawer')){$('reg-drawer').hidden=true;return}const p=e.target.closest('[data-pick]');if(p){regCur=p.dataset.pick;$('reg-drawer').hidden=true;if(S.regMap){S.regMap=false;save()}renderRegs();$('v-reg').scrollTop=0}});
+$('reg-drawer').addEventListener('click',e=>{if(e.target===$('reg-drawer')){$('reg-drawer').hidden=true;return}const rv=e.target.closest('[data-rview]');if(rv){S.regView=rv.dataset.rview||null;$('reg-drawer').hidden=true;save();renderRegs();$('v-reg').scrollTop=0;return}
+  const p=e.target.closest('[data-pick]');if(p){regCur=p.dataset.pick;S.regView=null;$('reg-drawer').hidden=true;if(S.regMap){S.regMap=false;save()}renderRegs();$('v-reg').scrollTop=0}});
 $('rd-new').onclick=()=>{$('reg-drawer').hidden=true;openRegWizard({})};
 $('rd-set').onclick=()=>{$('reg-drawer').hidden=true;$('open-settings').click()};
 $('rg-plus').onclick=()=>{const r=S.regs.find(x=>x.id===regCur),o=[{t:'Nuevo registro',s:'Te guía según el tipo',ic:MI2.plus,k:'new'}];if(r&&r.kind==='diary')o.push({t:'Añadir tabla al día de hoy',ic:MI.base,k:'tbl'});if(r&&r.kind!=='diary'){o.push({t:'Añadir fila de hoy',ic:MI.base,k:'row'});if(!(REG_TYPES[r.type]||{}).noBlock)o.push({t:'Pasar a la línea de tiempo',ic:MI.cal,k:'sess'});if(r.tag)o.push({t:'Ver la nota acumulada',ic:MI.newnote,k:'note'})}
@@ -8832,19 +8962,108 @@ $('rg-send').onclick=()=>{const ta=$('rg-in'),v=ta.value.trim();if(!v)return;con
 /* En el PC, Enter apunta y Mayús+Enter salta de línea */
 $('rg-in').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&document.body.classList.contains('desk')){e.preventDefault();$('rg-send').click()}});
 function renderReg(r){const B=$('v-reg'),head=`<div class="reg-head"><input class="rn" data-rname value="${esc(r.name)}" aria-label="Nombre"><button class="icon-btn" data-rmap="1" aria-label="Mapa de registros" title="Mapa"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></button><button class="icon-btn" data-rmenu aria-label="Opciones"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></div>`;
-  if(r.kind==='diary'){const days=Object.keys(r.days).sort().reverse();B.innerHTML=head+days.map(d=>{const e=r.days[d],fs=[...new Set(regFoldersPeek(e.text))];return `<div class="reg-day${d===today()?' today':''}" data-d="${d}"><h3>${esc(fromKey(d).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long'}))}</h3><textarea data-dtext placeholder="Escribe aquí. Usa /[carpeta] o /a/b/[carpeta] para enlazar carpetas.">${esc(e.text||'')}</textarea>${fs.length?`<div class="reg-chips">${fs.map(f=>`<button data-folder-go="${esc(f)}">📁 ${esc(f)}</button>`).join('')}</div>`:''}${(e.tables||[]).map((t,k)=>tableHTML(t,{key:'dt|'+d+'|'+k})+`<div class="reg-acts"><button class="btn tonal" data-trow="${d}|${k}">+ Fila</button><button class="btn tonal" data-tcolor="${d}|${k}">Color</button><button class="btn tonal" data-tmenu="${d}|${k}" aria-label="Opciones de la tabla"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button></div>`).join('')}<div class="reg-acts"><button class="btn tonal" data-tnew="${d}">+ Tabla</button></div></div>`}).join('');return}
+  if(r.kind==='diary'){const acts=actByDay(),days=[...new Set([...Object.keys(r.days),...Object.keys(acts)])].sort().reverse();
+    const sw=`<div class="reg-actsw"><div><b>${T('Actividad del día')}</b><small>${S.actOff?T('Desactivada: no se apunta lo que haces'):T('Lo que haces en Notas, Agenda y Time, solo en este dispositivo')}</small></div><button class="switch" role="switch" data-actsw aria-checked="${!S.actOff}" aria-label="${T('Actividad del día')}"></button></div>`;
+    B.innerHTML=head+sw+days.map(d=>{const e=r.days[d]||{text:'',tables:[]},fs=[...new Set(regFoldersPeek(e.text))];return `<div class="reg-day${d===today()?' today':''}" data-d="${d}"><h3>${esc(fromKey(d).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long'}))}</h3><textarea data-dtext placeholder="Escribe aquí. Usa /[carpeta] o /a/b/[carpeta] para enlazar carpetas.">${esc(e.text||'')}</textarea>${fs.length?`<div class="reg-chips">${fs.map(f=>`<button data-folder-go="${esc(f)}">📁 ${esc(f)}</button>`).join('')}</div>`:''}${(e.tables||[]).map((t,k)=>tableHTML(t,{key:'dt|'+d+'|'+k})+`<div class="reg-acts"><button class="btn tonal" data-trow="${d}|${k}">+ Fila</button><button class="btn tonal" data-tcolor="${d}|${k}">Color</button><button class="btn tonal" data-tmenu="${d}|${k}" aria-label="Opciones de la tabla"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button></div>`).join('')}<div class="reg-acts"><button class="btn tonal" data-tnew="${d}">+ Tabla</button></div>${d===today()?habTodayHTML():''}${actHTML(d,acts[d])}</div>`}).join('');return}
   const fs=[...new Set(r.rows.flatMap(x=>x.c.flatMap(regFoldersPeek)))];
   B.innerHTML=head+`<div class="t2" style="margin:0 2px 6px">${r.goal?esc(r.goal)+' · ':''}${r.tag?'#'+esc(r.tag):'Sin etiqueta'}</div>`+tableHTML(r,{key:'reg',byDay:true})+(fs.length?`<div class="reg-chips">${fs.map(f=>`<button data-folder-go="${esc(f)}">📁 ${esc(f)}</button>`).join('')}</div>`:'')+`<div class="reg-acts"><button class="btn" data-addrow>+ Fila hoy</button>${(REG_TYPES[r.type]||{}).noBlock?'':'<button class="btn tonal" data-sess>Pasar a la línea de tiempo</button>'}${r.tag?'<button class="btn tonal" data-tagnote>Nota acumulada</button>':''}</div>`;
   const w=B.querySelector('.reg-wrap');if(w)requestAnimationFrame(()=>{w.scrollTop=w.scrollHeight})}
+/* Actividad agrupada por día, de la mañana a la noche; cada línea abre lo que se tocó si todavía existe */
+function actByDay(){const m={};if(S.actOff)return m;S.log.forEach(l=>{const k=dk(new Date(l.at));(m[k]=m[k]||[]).push(l)});Object.values(m).forEach(a=>a.reverse());return m}
+const NOTE_IC='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>';
+function actLine(l){if(isTimeLog(l))return {ic:ICONS[l.type]||'',txt:ACT_NAMES[l.type]+(l.title&&l.type!=='stopwatch'?' · '+l.title:'')+(l.detail?' · '+l.detail:'')};
+  if(l.type==='share')return {ic:SHIC.tv,txt:l.detail+' · «'+l.title+'»'};
+  if(l.type==='habit'){const h=S.habits.find(x=>x.id===l.ref);return {ic:`<span style="font-size:15px">${esc((h&&h.emoji)||'🔥')}</span>`,txt:l.detail+' · «'+((h&&h.name)||l.title)+'»'}}
+  const cur=l.ref?(l.type==='note'?nget(l.ref):realEv(l.ref)):null,t=(cur&&cur.title)||l.title||T('Sin título');
+  return {ic:l.type==='note'?NOTE_IC:l.type==='task'?ICONS.task:l.type==='block'?ICONS.timer:ICONS.event,txt:l.detail+' · «'+t+'»'}}
+const actHTML=(d,list)=>!list||!list.length?'':`<details class="reg-act"${d===today()?' open':''}><summary>${T('Lo que hiciste')} · ${list.length}</summary><div class="ra-list">${list.map(l=>{const it=actLine(l);return `<button class="ra-it" data-acttype="${l.type}" data-actref="${esc(l.ref||l.note||'')}"><i>${it.ic}</i><b>${hm(new Date(l.at))}</b><span>${esc(it.txt)}</span></button>`}).join('')}</div></details>`;
+function actOpen(type,ref){const tv={timer:'timer',circuit:'circ',alarm:'alarm',stopwatch:'stop'};if(type==='habit'){S.regView='habits';save();renderRegs();return}
+  if(type==='note'||(tv[type]&&ref)){if(ref&&nget(ref)){show('notes');openNote(ref)}else if(tv[type])show(tv[type]);else toast(T('Esa nota ya no existe'));return}
+  if(tv[type]){show(tv[type]);return}if(ref&&realEv(ref)){VTAPI.open({type:'event',id:ref});return}if(type!=='share')toast(T('Ya no existe'))}
+/* ---------- Hábitos con rachas ----------
+   Cada hábito tiene sus días de la semana. Se marca a mano o, si va unido a una categoría, al completar ese día un bloque de ella.
+   La racha cuenta los días que tocaban, seguidos y hechos; hoy cuenta en cuanto se hace */
+if(!S.habits)S.habits=[];
+const BACK_IC='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
+const habOn=(h,k)=>!h.days||!h.days.length||h.days.includes(fromKey(k).getDay());
+const habBlock=(h,k)=>!!h.cat&&S.events.some(e=>e.cat===h.cat&&(e.rec?!!(e.doneOn||{})[k]&&occDates(e,k,k).includes(k):e.date===k&&e.done));
+const habDone=(h,k)=>!!(h.done&&h.done[k])||habBlock(h,k);
+function habStreak(h){let n=0;const d=new Date();d.setHours(12,0,0,0);if(!habDone(h,dk(d)))d.setDate(d.getDate()-1);
+  for(let i=0;i<400;i++){const k=dk(d);if(habOn(h,k)){if(habDone(h,k))n++;else break}d.setDate(d.getDate()-1)}return n}
+function habSet(h,k,on){h.done=h.done||{};if(on)h.done[k]=true;else delete h.done[k];if(on)logDo('habit',h.name,'Hábito hecho · 🔥 '+habStreak(h),h.id);save()}
+function habToggle(id,k){const h=S.habits.find(x=>x.id===id);if(!h)return;if(habBlock(h,k)&&!(h.done||{})[k]){toast('Ya está hecho: completaste un bloque de '+bkCat(h.cat).name);return}const on=!habDone(h,k);habSet(h,k,on);
+  if(on)toast((h.emoji||'🔥')+' '+h.name+' · racha de '+habStreak(h)+(habStreak(h)===1?' día':' días'))}
+const habDaysTxt=h=>h.days&&h.days.length&&h.days.length<7?daysTxt(h.days):T('Todos los días');
+function habTodayHTML(){const td=today(),hs=S.habits.filter(h=>habOn(h,td));if(!hs.length)return '';
+  return `<div class="hab-today">${hs.map(h=>`<button data-habt="${h.id}" aria-pressed="${habDone(h,td)}" style="--hc:${h.color||'var(--accent)'}">${esc(h.emoji||'🔥')} ${esc(h.name)} <em>🔥${habStreak(h)}</em></button>`).join('')}</div>`}
+function renderHabits(){const B=$('v-reg'),td=today(),last7=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return dk(d)});
+  B.innerHTML=`<div class="rv-head"><button class="icon-btn" data-rview="" aria-label="${T('Volver')}">${BACK_IC}</button><h1>${T('Hábitos')}</h1><button class="btn tonal" data-habnew>＋ ${T('Nuevo')}</button></div>`+(S.habits.length?S.habits.map(h=>{const c=h.cat?S.blockCats.find(x=>x.id===h.cat):null;
+    return `<div class="hab-c" style="--hc:${h.color||'var(--accent)'}"><button class="hab-main" data-habedit="${h.id}"><span class="hab-e">${esc(h.emoji||'🔥')}</span><span class="hab-n"><b>${esc(h.name)}</b><small>${esc(habDaysTxt(h))}${h.remind?' · ⏰ '+h.remind:''}${c?' · '+c.emoji+' '+esc(c.name):''}</small></span><span class="hab-s">🔥 ${habStreak(h)}</span></button><div class="hab-w" aria-hidden="true">${last7.map(k=>`<i class="${habDone(h,k)?'d':habOn(h,k)?'o':''}"></i>`).join('')}</div><button class="hab-tg" data-habt="${h.id}" aria-pressed="${habDone(h,td)}" aria-label="${T('Hecho hoy')}">✓</button></div>`}).join('')
+   :`<div class="reg-empty"><p>${T('Crea los hábitos que quieras repetir (leer, gimnasio, beber agua…) y sigue tu racha día a día.')}</p><button class="btn" data-habnew>＋ ${T('Nuevo hábito')}</button></div>`)}
+function openHabit(h){const isNew=!h;h=h||{id:'h'+Date.now().toString(36),name:'',emoji:'🔥',color:EV_COLORS[S.habits.length%EV_COLORS.length][0],days:[],remind:'',cat:'',done:{},created:Date.now()};let days=(h.days||[]).slice();
+  $('obs-title').textContent=isNew?T('Nuevo hábito'):h.name;$('obs-title').hidden=false;
+  $('obs-body').innerHTML=`<div class="obg" style="padding:14px;display:flex;flex-direction:column;gap:12px"><div style="display:flex;gap:10px"><input id="hb-emoji" class="bmf-in" maxlength="4" value="${esc(h.emoji||'🔥')}" aria-label="Emoji" style="width:58px;text-align:center"><input id="hb-name" class="bmf-in" value="${esc(h.name)}" placeholder="${T('Leer 20 minutos')}" style="flex:1;min-width:0"></div>
+    <div class="wkdays">${[1,2,3,4,5,6,0].map(d=>`<button data-hd="${d}" aria-pressed="${days.includes(d)}">${DAYN[d]}</button>`).join('')}</div><small style="color:var(--muted);margin-top:-6px">${T('Sin días marcados, todos los días')}</small>
+    <label style="display:flex;align-items:center;justify-content:space-between;gap:10px">${T('Recordatorio')}<input type="time" id="hb-rem" class="bmf-in" value="${h.remind||''}" style="width:auto"></label>
+    <label style="display:flex;flex-direction:column;gap:6px">${T('Se marca solo al completar un bloque de')}<select id="hb-cat" class="bmf-in"><option value="">${T('Ninguna categoría')}</option>${S.blockCats.map(c=>`<option value="${c.id}"${c.id===h.cat?' selected':''}>${c.emoji} ${esc(c.name)}</option>`).join('')}</select></label></div>
+    <div class="obg"><button id="hb-ok"><span class="obg-t" style="color:var(--accent)">${T('Guardar')}</span></button>${isNew?'':`<button id="hb-del" class="danger"><span class="obg-t">${T('Eliminar hábito')}</span></button>`}</div>`;
+  $('obs-body').onclick=e=>{const d=e.target.closest('[data-hd]');if(d){const v=+d.dataset.hd;days=days.includes(v)?days.filter(x=>x!==v):days.concat(v);d.setAttribute('aria-pressed',days.includes(v));return}
+    if(e.target.closest('#hb-ok')){const n=$('hb-name').value.trim();if(!n){toast('Ponle un nombre');$('hb-name').focus();return}Object.assign(h,{name:n,emoji:$('hb-emoji').value.trim()||'🔥',days:days.slice().sort((a,b)=>a-b),remind:$('hb-rem').value||'',cat:$('hb-cat').value});if(isNew)S.habits.push(h);save();$('ob-sheet').hidden=true;renderRegs();toast('Hábito guardado');return}
+    if(e.target.closest('#hb-del'))obConfirm('¿Eliminar «'+h.name+'» y su racha?','Eliminar',()=>{S.habits=S.habits.filter(x=>x!==h);save();renderRegs()})};
+  $('ob-sheet').hidden=false;if(isNew)setTimeout(()=>$('hb-name').focus(),80)}
+/* ---------- Resumen de la semana: horas de bloques hechos por categoría, tareas, notas, hábitos y temporizadores ----------
+   Columnas apiladas por categoría (el color es el de cada categoría, con leyenda); al tocar un día se ve su detalle */
+function renderWeek(){const B=$('v-reg'),ws=S.weekStart==='auto'?1:+S.weekStart||0,base=new Date();base.setHours(12,0,0,0);base.setDate(base.getDate()+7*(S.regWeekOff||0));base.setDate(base.getDate()-(base.getDay()-ws+7)%7);
+  const days=[...Array(7)].map((_,i)=>{const d=new Date(base);d.setDate(base.getDate()+i);return dk(d)}),k0=days[0],k6=days[6],t0=+fromKey(k0),t7=+fromKey(k6)+864e5,td=today();
+  const occ=expandEvents(S.events.filter(e=>e.cat||e.kind==='task'),k0,k6).filter(o=>o.date>=k0&&o.date<=k6);
+  const per=days.map(k=>{const m={};occ.filter(o=>o.cat&&o.done&&o.date===k).forEach(o=>{m[o.cat]=(m[o.cat]||0)+bkMins(o)});return m}),tot={};per.forEach(m=>Object.entries(m).forEach(([c,v])=>{tot[c]=(tot[c]||0)+v}));
+  const order=[...S.blockCats.filter(c=>tot[c.id]).map(c=>c.id),...Object.keys(tot).filter(c=>!S.blockCats.some(x=>x.id===c))],sum=Object.values(tot).reduce((a,b)=>a+b,0),dayT=per.map(m=>Object.values(m).reduce((a,b)=>a+b,0)),mx=Math.max(60,...dayT);
+  const tasks=occ.filter(o=>o.kind==='task'&&o.done).length,logs=S.log.filter(l=>l.at>=t0&&l.at<t7),laps=logs.filter(l=>l.type==='timer'||l.type==='circuit').length;
+  const inW=t=>t>=t0&&t<t7,nW=S.notes.filter(n=>inW(n.created)||inW(n.updated)).length;let hs=0,hd=0;S.habits.forEach(h=>days.forEach(k=>{if(k>td||!habOn(h,k))return;hs++;if(habDone(h,k))hd++}));
+  const tip=i=>{const m=per[i],E=order.filter(c=>m[c]);return regDayTxt(days[i])+': '+(E.length?E.map(c=>bkCat(c).emoji+' '+bkCat(c).name+' '+fmtMins(m[c])).join(', '):'sin bloques hechos')};
+  const tile=(l,v)=>`<div class="wk-tile"><small>${l}</small><b>${v}</b></div>`,rng=fromKey(k0).toLocaleDateString(LOC,{day:'numeric',month:'short'})+' – '+fromKey(k6).toLocaleDateString(LOC,{day:'numeric',month:'short'});
+  B.innerHTML=`<div class="rv-head"><button class="icon-btn" data-rview="" aria-label="${T('Volver')}">${BACK_IC}</button><h1>${T('Semana')}</h1><button class="icon-btn" data-wkoff="-1" aria-label="${T('Semana anterior')}">${BACK_IC}</button><button class="icon-btn" data-wkoff="1" aria-label="${T('Semana siguiente')}">${BACK_IC.replace('M15 5l-7 7 7 7','M9 5l7 7-7 7')}</button></div>
+   <div class="t2" style="margin:-4px 2px 10px">${rng}${S.regWeekOff?` · <button class="wk-lnk" data-wkoff="0">${T('Volver a esta semana')}</button>`:''}</div>
+   <div class="wk-tiles">${tile(T('Bloques hechos'),sum?fmtMins(sum):'0 h')}${tile(T('Tareas hechas'),tasks)}${tile(T('Notas escritas'),nW)}${S.habits.length?tile(T('Hábitos cumplidos'),hs?Math.round(hd/hs*100)+' %':'—'):tile(T('Vueltas de temporizador'),laps)}</div>
+   <div class="wk-card"><h2>${T('Horas de bloques hechos por día')}</h2><div class="wkc-cols" role="img" aria-label="${esc(days.map((k,i)=>tip(i)).join('. '))}">${days.map((k,i)=>`<button class="wkc-col" data-wkday="${esc(tip(i))}" title="${esc(tip(i))}"><span class="wkc-val">${dayT[i]?fmtMins(dayT[i]):''}</span><span class="wkc-bar" style="height:calc((100% - 22px) * ${(dayT[i]/mx).toFixed(3)})">${order.filter(c=>per[i][c]).map(c=>`<i style="flex:${per[i][c]} 1 0;background:${bkCat(c).color}"></i>`).join('')}</span></button>`).join('')}</div>
+    <div class="wkc-labs">${days.map(k=>`<span class="${k===td?'t':''}">${regDayTxt(k).split(' ')[0]} ${fromKey(k).getDate()}</span>`).join('')}</div>
+    ${order.length?`<div class="wk-leg">${order.map(c=>`<span><em style="background:${bkCat(c).color}"></em>${bkCat(c).emoji} ${esc(bkCat(c).name)} · ${fmtMins(tot[c])}</span>`).join('')}</div>`:`<p class="t2" style="margin:10px 0 0">${T('Marca los bloques como hechos y aquí verás tus horas de la semana.')}</p>`}</div>
+   ${S.habits.length?`<div class="wk-card"><h2>${T('Hábitos')}</h2>${S.habits.map(h=>`<div class="wk-hab" style="--hc:${h.color||'var(--accent)'}"><span>${esc(h.emoji||'🔥')} ${esc(h.name)}</span><div class="hab-w">${days.map(k=>`<i class="${habDone(h,k)?'d':habOn(h,k)&&k<=td?'o':''}"></i>`).join('')}</div></div>`).join('')}</div>`:''}
+   <div class="wk-card"><h2>${T('Time')}</h2><p class="t2" style="margin:0">${laps} ${laps===1?T('vuelta de temporizador o circuito'):T('vueltas de temporizador o circuitos')} · ${logs.filter(l=>l.type==='alarm').length} ${T('alarmas')}</p></div>`}
+/* Hábitos y resumen: arriba del mapa y del cajón de Registros */
+const regSpecialRows=()=>{const td=today(),hs=S.habits.filter(h=>habOn(h,td));return `<div class="nd-item"><button class="nd-row reg-r" data-rview="habits" style="--rc:#e8a317"><span class="ic2">🔥</span><span><b>${T('Hábitos')}</b><small>${S.habits.length?hs.filter(h=>habDone(h,td)).length+' / '+hs.length+' '+T('hoy'):T('Crea tu primer hábito')}</small></span></button></div><div class="nd-item"><button class="nd-row reg-r" data-rview="week" style="--rc:#3d8bfd"><span class="ic2">📊</span><span><b>${T('Resumen de la semana')}</b><small>${T('Horas, tareas, notas y hábitos')}</small></span></button></div><div class="nd-sep"></div>`};
+/* ---------- Cierre del día: por la noche, lo hecho y lo pendiente; lo pendiente pasa a mañana con un toque ---------- */
+if(!S.dayClose)S.dayClose={on:true,t:'21:30'};
+function closeItems(k){const occ=expandEvents(agEvents().filter(e=>e.kind==='task'||e.cat),k,k).filter(o=>o.date===k),wk=dk(new Date(+fromKey(k)-7*864e5));
+  const late=agEvents().filter(e=>e.kind==='task'&&!e.rec&&e.date&&e.date<k&&e.date>=wk&&!e.done);return {pending:occ.filter(o=>!o.done).concat(late),done:occ.filter(o=>o.done)}}
+function moveTomorrow(items,k){const t=dk(new Date(+fromKey(k)+864e5+36e5));let n=0;
+  items.forEach(o=>{const r=realEv(o.sid||o.id);if(!r)return;if(r.rec){r.ex=(r.ex||[]).concat(o.date);const c=JSON.parse(JSON.stringify(r));['rec','ex','doneOn','notified','notif'].forEach(x=>delete c[x]);Object.assign(c,{id:(c.cat?'bk':'e')+Date.now().toString(36)+n,date:t,done:false});S.events.push(c)}else{r.date=t;delete r.notified;delete r.notif}n++});
+  if(n)logDo('task',n+(n===1?' cosa':' cosas'),'Pasado a mañana');return n}
+function openDayClose(k){k=k||today();S.dayCloseSeen=k;const {pending,done}=closeItems(k),acts=S.log.filter(l=>dk(new Date(l.at))===k).length,sel=new Set(pending.map((_,i)=>i));
+  const when=o=>(o.date<k?regDayTxt(o.date)+' · ':'')+(o.cat?bkCat(o.cat).name+(o.start?' · '+o.start+'–'+o.end:''):o.start?o.start:T('Tarea'));
+  const icon=o=>o.cat?bkCat(o.cat).emoji:'☐',btnTxt=()=>sel.size?T('Pasar a mañana')+' ('+sel.size+')':T('Nada que pasar a mañana');
+  $('obs-title').textContent='🌙 '+T('Cierre del día');$('obs-title').hidden=false;
+  $('obs-body').innerHTML=`<div class="obg dc-head"><div class="dc-n"><b>${done.length}</b><small>${T('hechas')}</small></div><div class="dc-n"><b>${pending.length}</b><small>${T('pendientes')}</small></div><div class="dc-n"><b>${acts}</b><small>${T('en el diario')}</small></div></div>
+   ${pending.length?`<div class="obg">${pending.map((o,i)=>`<button data-dc="${i}" aria-pressed="true"><span class="obg-ic">${icon(o)}</span><span class="obg-t">${esc(o.title||T('Sin título'))}<small>${esc(when(o))}</small></span><span class="obg-ck">${OB_IC.check}</span></button>`).join('')}</div>`:`<div class="obg"><button disabled><span class="obg-t">${T('Nada pendiente. ¡Buen día!')} 🎉</span></button></div>`}
+   ${done.length?`<div class="obg">${done.map(o=>`<button class="dc-done" disabled><span class="obg-ic">✓</span><span class="obg-t">${esc(o.title||T('Sin título'))}<small>${esc(when(o))}</small></span></button>`).join('')}</div>`:''}
+   <div class="obg">${pending.length?`<button id="dc-move"><span class="obg-t" style="color:var(--accent)">${btnTxt()}</span></button>`:''}<button id="dc-diary"><span class="obg-t">${T('Ver lo que hiciste en el Diario')}</span></button></div>`;
+  $('obs-body').onclick=e=>{const b=e.target.closest('[data-dc]');if(b){const i=+b.dataset.dc;sel.has(i)?sel.delete(i):sel.add(i);b.setAttribute('aria-pressed',sel.has(i));const m=$('dc-move');if(m)m.querySelector('.obg-t').textContent=btnTxt();return}
+    if(e.target.closest('#dc-move')){if(!sel.size)return;const n=moveTomorrow(pending.filter((_,i)=>sel.has(i)),k);$('ob-sheet').hidden=true;save();refreshAll();if(view==='blocks')renderBlocks();toast(n+(n===1?' cosa pasada':' cosas pasadas')+' a mañana');return}
+    if(e.target.closest('#dc-diary')){$('ob-sheet').hidden=true;S.regView=null;regCur='diario';S.regMap=false;save();show('reg')}};
+  $('ob-sheet').hidden=false;save()}
 const regFoldersPeek=t=>{const o=[];String(t||'').replace(FOLD_RE,(m,p,n)=>{o.push((p+n).replace(/\/+$/,''));return m});return o};
 function regTable(r,key){if(key==='reg')return r;const [,d,k]=key.split('|');return r.days[d].tables[+k]}
-$('v-reg').addEventListener('click',e=>{const t=e.target,g=s=>t.closest(s);const op=g('[data-open]');if(op){regCur=op.dataset.open;renderRegs();$('v-reg').scrollTop=0;return}
+$('v-reg').addEventListener('click',e=>{const t=e.target,g=s=>t.closest(s);const ra=g('[data-acttype]');if(ra){actOpen(ra.dataset.acttype,ra.dataset.actref);return}
+  const rv=g('[data-rview]');if(rv){S.regView=rv.dataset.rview||null;save();renderRegs();$('v-reg').scrollTop=0;return}
+  const ht=g('[data-habt]');if(ht){habToggle(ht.dataset.habt,today());renderRegs();return}const he=g('[data-habedit]');if(he){openHabit(S.habits.find(x=>x.id===he.dataset.habedit));return}if(g('[data-habnew]')){openHabit(null);return}
+  const wo=g('[data-wkoff]');if(wo){S.regWeekOff=+wo.dataset.wkoff?(S.regWeekOff||0)+(+wo.dataset.wkoff):0;save();renderRegs();return}const wd=g('[data-wkday]');if(wd){toast(wd.dataset.wkday);return}
+  if(g('[data-actsw]')){S.actOff=!S.actOff;save();renderRegs();actSettings();toast(S.actOff?'Actividad del día desactivada':'Actividad del día activada');return}const op=g('[data-open]');if(op){regCur=op.dataset.open;renderRegs();$('v-reg').scrollTop=0;return}
   if(g('#reg-add')){openRegWizard({});return}
   const r=S.regs.find(x=>x.id===regCur);if(!r)return;const fo=g('[data-folder-go]');if(fo){S.obOpen[fo.dataset.folderGo]=true;show('notes');renderNotes();return}
   if(g('[data-rmenu]')){regMenu(r);return}
   if(g('[data-addrow]')){r.rows.push(blankRow(r,today()));saveReg(r);renderRegs();return}if(g('[data-sess]')){regSessionAsk(r);return}
   if(g('[data-tagnote]')){syncTagNote(r.tag);const n=S.notes.find(x=>x.regTag===r.tag);if(n){show('notes');openNote(n.id)}else toast('Aún no hay nada apuntado');return}
-  const tn=g('[data-tnew]');if(tn){const d=tn.dataset.tnew;(r.days[d].tables=r.days[d].tables||[]).push({cols:['Columna 1','Columna 2'],rows:[{c:['','']}],color:''});saveReg(r);renderRegs();return}
+  const tn=g('[data-tnew]');if(tn){const d=tn.dataset.tnew;r.days[d]=r.days[d]||{text:'',tables:[]};(r.days[d].tables=r.days[d].tables||[]).push({cols:['Columna 1','Columna 2'],rows:[{c:['','']}],color:''});saveReg(r);renderRegs();return}
   const tm=g('[data-tmenu]');if(tm){const [d,k]=tm.dataset.tmenu.split('|');obSheet('Tabla',dayTableItems(r,'dt|'+d+'|'+k).map(it=>({...it,sep:/^Eliminar/.test(it.t)})),(_,__,it)=>it.run());return}
   const tc=g('[data-tcolor]');if(tc){const [d,k]=tc.dataset.tcolor.split('|'),T=r.days[d].tables[+k];pickColor('Color de la tabla',T.color,c=>{T.color=c;saveReg(r);renderRegs()});return}
   const dc=g('[data-delcol]');if(dc){delRegCol(r,regTable(r,dc.closest('table').dataset.ctx),+dc.dataset.delcol);return}
@@ -8853,7 +9072,7 @@ $('v-reg').addEventListener('click',e=>{const t=e.target,g=s=>t.closest(s);const
   if(g('[data-addcol]')){askName('Nombre de la columna','',v=>{T.cols.push(v||'Columna');T.rows.forEach(x=>x.c.push(''));saveReg(r);renderRegs()});return}
   const dr=g('[data-delrow]');if(dr)delRegRow(r,T,+dr.closest('tr').dataset.i)});
 $('v-reg').addEventListener('change',e=>{const t=e.target,r=S.regs.find(x=>x.id===regCur);if(!r)return;if(t.dataset.rname!=null){r.name=t.value.trim()||r.name;t.value=r.name;$('rg-in').placeholder=regPh(r);saveReg(r);return}
-  if(t.dataset.dtext!=null){const d=t.closest('[data-d]').dataset.d;r.days[d].text=t.value;const nf=regFolders(t.value);saveReg(r);if(nf.length)renderRegs();return}
+  if(t.dataset.dtext!=null){const d=t.closest('[data-d]').dataset.d;(r.days[d]=r.days[d]||{text:'',tables:[]}).text=t.value;const nf=regFolders(t.value);saveReg(r);if(nf.length)renderRegs();return}
   const tb=t.closest('table[data-ctx]');if(!tb)return;const T=regTable(r,tb.dataset.ctx);
   if(t.dataset.col!=null){const j=+t.dataset.col,v=t.value.trim();if(!v&&T.cols.length>2){obConfirm('¿Eliminar la columna «'+T.cols[j]+'» y sus datos?','Eliminar',()=>{T.cols.splice(j,1);T.rows.forEach(x=>x.c.splice(j,1));saveReg(r);renderRegs()});t.value=T.cols[j];return}if(!v){t.value=T.cols[j];toast('Una tabla necesita al menos 2 columnas');return}T.cols[j]=v;saveReg(r);return}
   if(t.dataset.c!=null){const x=T.rows[+t.closest('tr').dataset.i];if(t.type==='checkbox'){x.c[+t.dataset.c]=t.checked?'✓':'';saveReg(r);return}x.c[+t.dataset.c]=t.value;t.title=t.value.length>14?t.value:'';const nf=regFolders(t.value);saveReg(r);renderRegsTotals(r,tb,T);if(nf.length)toast('Carpeta enlazada: '+nf.join(', '))}});
@@ -9384,6 +9603,8 @@ window.VTAPI={
   timerSnapshot(){return {running,endAt,remain:running?Math.max(0,endAt-Date.now()):remain,period:S.period*1000,lap,loop:!!S.loop,name:S.hide?'Temporizador':(S.name||'Temporizador'),show:S.notif!=='never',held:tHeld}},
   timerApply(t){if(!t||!t.active)return;running=!!t.running;tHeld=!running&&!!t.held;endAt=t.endAt||0;remain=t.running?Math.max(0,endAt-Date.now()):(t.remain||S.period*1000);lap=t.lap||1;$('clock').classList.toggle('running',running);if(running)requestWake();else releaseWake();renderFabs();tNotif()},
   importFile(f){importIncoming(f)},
+  /* Enlace de otro Temvra (temvra://a?d=… o la página de GitHub Pages) */
+  openLink(u){tvpFromLink(u)},
   /* Datos que pintan los widgets de la pantalla de inicio */
   widgetData(){const n=nextAlarm(),d=new Date();
     /* Una semana por delante: los widgets siguen al día aunque no se abra la app */
@@ -9408,10 +9629,14 @@ window.VTAPI={
     S.events.forEach(e=>{if(!e.date||e.remind==null||e.remind<0)return;const ds=e.rec?occDates(e,t0,t1):[e.date];
       ds.forEach(k=>{if(e.kind==='task'&&(e.rec?(e.doneOn||{})[k]:e.done))return;const at=fromKey(k);const [h,m]=(e.start||'09:00').split(':').map(Number);at.setHours(h,m,0,0);const fire=+at-e.remind*6e4;if(fire<=now||fire>lim)return;
         const c=e.cat?bkCat(e.cat):null;out.push({key:'ev|'+e.id+'|'+k,at:fire,title:(c?c.emoji+' ':e.kind==='task'?'☑️ ':'📅 ')+e.title,body:(e.remind?(e.remind>=1440?'Mañana':'En '+(e.remind>=60?Math.round(e.remind/60)+' h':e.remind+' min'))+' · ':'Ahora · ')+(e.start||'todo el día')+(e.loc?' · '+e.loc:''),channel:'reminders',extra:{type:'event',id:e.rec?e.id+'@'+k:e.id,date:k}})})});
+    /* Cierre del día y recordatorios de hábitos */
+    const at2=(k,hm)=>{const d=new Date();d.setDate(d.getDate()+k);const [h,m]=hm.split(':').map(Number);d.setHours(h,m,0,0);return d};
+    if(S.dayClose&&S.dayClose.on)for(let k=0;k<=(days||3);k++){const d=at2(k,S.dayClose.t||'21:30');if(+d<=now||+d>lim)continue;out.push({key:'close|'+dk(d),at:+d,title:'🌙 '+T('Cierre del día'),body:T('Repasa lo que has hecho y pasa lo pendiente a mañana'),channel:'reminders',extra:{type:'close',date:dk(d)}})}
+    (S.habits||[]).forEach(hb=>{if(!hb.remind)return;for(let k=0;k<=(days||3);k++){const d=at2(k,hb.remind),kk=dk(d);if(+d<=now||+d>lim||!habOn(hb,kk)||habDone(hb,kk))continue;out.push({key:'hab|'+hb.id+'|'+kk,at:+d,title:(hb.emoji||'🔥')+' '+hb.name,body:T('¿Ya lo has hecho hoy?')+' 🔥 '+habStreak(hb),channel:'reminders',extra:{type:'habit',id:hb.id,date:kk}})}});
     if(running&&endAt>now){let t=endAt,i=0;do{out.push({key:'tm|'+i,at:t,title:'⏱ '+(S.name||'Temporizador'),body:S.loop?'Vuelta '+(lap+i)+' terminada · empieza la siguiente':'Tiempo terminado',channel:'timer',extra:{type:'timer',lap:lap+i},liveOn:S.notif!=='never',name:S.hide?'Temporizador':(S.name||'Temporizador'),live:S.loop?T('Bucle')+' · '+fmt(S.period*1000):T('Una vez')});t+=S.period*1000;i++}while(S.loop&&i<30&&t<lim)}
     return out.sort((a,b)=>a.at-b.at).slice(0,150)},
   timer:()=>({running,endAt,loop:S.loop,period:S.period,name:S.name,lap}),
-  open(x){if(!x)return;if(x.type==='timer'){show('timer')}else if(x.type==='alarm'){show('alarm')}else if(x.type==='event'){const ev=realEv(x.id);if(ev){if(ev.cat){goBlocksDay(x.date||ev.date);setTimeout(()=>openBlock(x.id),300)}else{show('cal');openEvent(x.id)}}}},
+  open(x){if(!x)return;if(x.type==='close'){openDayClose(x.date);return}if(x.type==='habit'){S.regView='habits';save();show('reg');return}if(x.type==='timer'){show('timer')}else if(x.type==='alarm'){show('alarm')}else if(x.type==='event'){const ev=realEv(x.id);if(ev){if(ev.cat){goBlocksDay(x.date||ev.date);setTimeout(()=>openBlock(x.id),300)}else{show('cal');openEvent(x.id)}}}},
   snoozeEvent(id,min){const ev=realEv(id);if(ev){ev.snoozeUntil=Date.now()+min*6e4;save()}},
   back(esc){const vis=id=>$(id)&&!$(id).hidden;
     if(closeTopSheet())return true;

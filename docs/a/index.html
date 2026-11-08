@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0f"><meta name="robots" content="noindex">
+<title>Te han compartido algo de Temvra</title>
+<meta name="description" content="Algo compartido desde Temvra: ábrelo para añadirlo a tu app.">
+<style>
+/* Página de los enlaces de Temvra: lee lo compartido del propio enlace (detrás de «#», no llega a ningún servidor),
+   lo enseña y abre la app con temvra://a?d=… */
+:root{--bg:#0b0b0f;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--fg:#f4f4f6;--muted:#a3a3ad;--accent:#c6c4f4;--on-accent:#1b1a33;color-scheme:dark}
+@media (prefers-color-scheme:light){:root{--bg:#f6f5fb;--card:#fff;--line:rgba(0,0,0,.1);--fg:#18181c;--muted:#5c5c66;--accent:#5e43c3;--on-accent:#fff;color-scheme:light}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(120% 60% at 80% 0%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 60%),var(--bg);color:var(--fg);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:max(24px,env(safe-area-inset-top)) 16px 32px}
+main{max-width:520px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px;color:var(--muted);font-weight:600;font-size:14px;letter-spacing:.02em;margin-bottom:18px}
+.brand i{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--accent);color:var(--on-accent);font-style:normal;font-weight:800}
+h1{font-size:26px;line-height:1.2;margin:0 0 6px;font-weight:700}
+.sum{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 0;margin-bottom:18px;overflow:hidden}
+.it{display:flex;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}.it:first-child{border-top:0}
+.it .ic{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 18%,transparent);font-size:16px}
+.it b{display:block;font-weight:600;overflow-wrap:anywhere}.it small{display:block;color:var(--muted);font-size:13.5px;overflow-wrap:anywhere;white-space:pre-line}
+.more{padding:10px 16px;color:var(--muted);font-size:13.5px;border-top:1px solid var(--line)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;border-radius:16px;border:0;font:inherit;font-weight:650;cursor:pointer;text-decoration:none;margin-bottom:10px}
+.pri{background:var(--accent);color:var(--on-accent)}.sec{background:var(--card);color:var(--fg);border:1px solid var(--line)}
+.note{color:var(--muted);font-size:13px;margin:14px 2px 0}
+.err{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:18px}
+</style></head><body><main>
+<div class="brand"><i>T</i>Temvra</div>
+<div id="out"><h1>Abriendo…</h1></div>
+<a class="btn pri" id="open" href="#" hidden>Abrir en Temvra</a>
+<a class="btn sec" id="get" href="https://github.com/temvra/temvP/releases/latest">Descargar Temvra</a>
+<button class="btn sec" id="save" hidden>Guardar el archivo</button>
+<p class="note" id="hint" hidden>¿No se abre? Instala Temvra con «Descargar Temvra» y vuelve a tocar el enlace. También puedes guardar el archivo y abrirlo con la app.</p>
+<p class="note">Lo compartido va dentro del propio enlace: esta página no lo envía a ningún servidor.</p>
+</main>
+<script>
+(function(){
+  const $=id=>document.getElementById(id),out=$('out'),RELEASES='https://github.com/temvra/temvP/releases/latest';
+  const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e};
+  const ub64u=t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';return Uint8Array.from(atob(t),c=>c.charCodeAt(0))};
+  const pad=n=>String(n).padStart(2,'0'),dur=s=>{s=+s||0;const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?h+' h '+(m?m+' min':''):m?m+' min'+(x?' '+x+' s':''):x+' s'};
+  const DAYS=['dom','lun','mar','mié','jue','vie','sáb'],day=k=>{const [y,m,d]=String(k||'').split('-').map(Number);if(!y)return '';return new Date(y,m-1,d).toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long'})};
+  function fail(msg){out.textContent='';const b=el('div','err');b.append(el('h1',null,'No se puede abrir'),el('p','sum',msg));out.append(b)}
+  async function decode(d){const by=ub64u(d.slice(1));if(d[0]==='z'){if(!window.DecompressionStream)throw new Error('old');return JSON.parse(await new Response(new Blob([by]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text())}return JSON.parse(new TextDecoder().decode(by))}
+  /* Una línea por elemento: lo que verá al añadirlo */
+  function items(D){const L=[],add=(ic,t,s)=>L.push({ic,t,s});
+    (D.notes||[]).forEach(n=>add('📝',n.title||'Sin título',String(n.body||'').replace(/!?\[\[([^\]]+)\]\]/g,'$1').replace(/[#*_>`]/g,'').trim().slice(0,160)));
+    (D.atts||[]).forEach(a=>add('📎',a.name||'Adjunto','Adjunto'));
+    (D.timers||[]).forEach(t=>add('⏱️',t.t||'Temporizador',dur(t.s)+(t.loop?' · en bucle':'')));
+    (D.myCircuits||[]).concat(D.myTpl||[]).forEach(c=>add('🏋️',c.name||'Circuito',(c.rounds?c.rounds+' rondas · ':'')+((c.steps||[]).length)+' pasos'));
+    (D.alarms||[]).forEach(a=>add('⏰',(a.label||'Alarma')+' · '+a.t,(a.days&&a.days.length?a.days.map(d=>DAYS[d]).join(' '):'Una vez')));
+    (D.events||[]).forEach(e=>add(e.kind==='task'?'☑️':e.cat?'🧱':'📅',e.title||'Evento',[day(e.date),e.start?(e.start+(e.end?' – '+e.end:'')):(e.kind==='task'?'Tarea':'Todo el día')].filter(Boolean).join(' · ')));
+    (D.appts||[]).forEach(a=>add('🗓️',a.title||'Citas','Página de citas · '+(a.dur||60)+' min'));
+    return L}
+  async function run(){const d=decodeURIComponent((location.hash||'').slice(1));if(!d){fail('Este enlace está incompleto. Pide que te lo vuelvan a enviar.');return}
+    let o;try{o=await decode(d)}catch(e){fail(e.message==='old'?'Tu navegador es demasiado antiguo para leer este enlace. Ábrelo con Chrome, Firefox o Safari actualizados.':'Este enlace está dañado o incompleto.');return}
+    if(!o||o.temvra!=='compartir'||!o.datos){fail('Este enlace no es de Temvra.');return}
+    document.title='«'+(o.titulo||'Temvra')+'» · Temvra';out.textContent='';out.append(el('h1',null,'Te han compartido «'+(o.titulo||'Temvra')+'»'),el('p','sum',(o.resumen||'')+' · ábrelo para añadirlo a tu Temvra'));
+    const L=items(o.datos),c=el('div','card');L.slice(0,8).forEach(x=>{const r=el('div','it'),t=el('div');r.append(el('span','ic',x.ic),t);t.append(el('b',null,x.t));if(x.s)t.append(el('small',null,x.s));c.append(r)});if(L.length>8)c.append(el('div','more','y '+(L.length-8)+' más'));if(L.length)out.append(c);
+    /* Android: intent con el paquete de la app (si no está, Chrome lleva a las descargas). Resto: temvra:// lo abre la app de PC */
+    const app='temvra://a?d='+encodeURIComponent(d),and=/android/i.test(navigator.userAgent),open=$('open');
+    open.href=and?'intent://a?d='+encodeURIComponent(d)+'#Intent;scheme=temvra;package=com.temvra.app.personal;S.browser_fallback_url='+encodeURIComponent(RELEASES)+';end':app;
+    open.hidden=false;open.onclick=()=>setTimeout(()=>{$('hint').hidden=false},1500);
+    const sv=$('save');sv.hidden=false;sv.onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download=String(o.titulo||'Temvra').replace(/[\\/:*?"<>|]/g,'-')+'.temvra.json';document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}}
+  run();addEventListener('hashchange',run);
+})();
+</script>
+</body></html>
