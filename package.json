@@ -5,6 +5,7 @@
   "description": "Temvra: temporizador, agenda, bloques de trabajo y notas",
   "scripts": {
     "build": "node scripts/build-www.mjs",
+    "test": "node scripts/check-js.mjs && node scripts/pruebas.mjs",
     "sync": "npm run build && npx cap sync android",
     "apk": "npm run sync && cd android && ./gradlew assembleDebug",
     "desktop": "npm run build && cd desktop && npm run dist && npm run install-linux"

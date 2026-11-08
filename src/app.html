@@ -2634,6 +2634,8 @@ body.desknotes .ne-tools,.ob-tools,.bk-zoom{background:color-mix(in srgb,var(--s
   body.desk .nav .nav-in.lg-host>button[aria-current="page"]{background:transparent!important;box-shadow:none!important;color:#fff}
   body.desk .nav button[aria-current="page"] .ic{filter:drop-shadow(0 0 6px rgba(255,255,255,.7))}
   body.desk .nav-in>button:not([aria-current="page"]):hover{background-color:color-mix(in srgb,var(--fg) 9%,transparent)}
+  /* Al pulsar o arrastrar la gota, el círculo del icono bajo el puntero se veía deformado a través de ella como una mancha gris */
+  body.desk .nav-in:active>button:not([aria-current="page"]):hover{background-color:transparent}
   body.desk .nav button[aria-current="page"] .lb{letter-spacing:-.2px}
 }
 /* Horizontal en el móvil: la misma cápsula de cristal que en el PC, más estrecha y sin nombres */
@@ -3734,10 +3736,26 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
 <div class="toast" id="toast" hidden></div>
 
 <script>
-(()=>{
+(async()=>{
 const $=id=>document.getElementById(id);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const LS={get(k,d){try{const v=localStorage.getItem('vt2_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('vt2_'+k,JSON.stringify(v));return true}catch(e){return false}}};
+const LS={get(k,d){try{const v=localStorage.getItem('vt2_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){if(k==='state')return stSave(v);try{localStorage.setItem('vt2_'+k,JSON.stringify(v));return true}catch(e){return false}}};
+/* Token de GitHub: va al almacén cifrado del sistema (Android Keystore o el llavero del PC). Si el sistema no lo ofrece, sigue con los datos como antes */
+const SEC=window.VTSecret||(window.VTDesktop&&window.VTDesktop.secret)||null;let secOK=false,secLast='';try{secOK=!!SEC&&!!SEC.ok()}catch(e){}
+const secSync=t=>{if(!secOK)return false;if(t===secLast)return true;try{if(SEC.set('gh',t)){secLast=t;return true}}catch(e){}return false};
+const stJSON=v=>{const g=v.gh,t=g&&g.token||'',kept=secSync(t);if(t&&kept)g.token='';try{return JSON.stringify(v)}finally{if(t)g.token=t}};
+/* Los datos pasan a IndexedDB cuando no caben en localStorage (unos 5 MB, compartidos con fotos de tema y audios): antes fallaba sin avisar y lo nuevo se perdía al cerrar.
+   La marca vt2_stidb dice que están allí; entonces vt2_state se borra, para que nunca haya una copia vieja que parezca la buena */
+const ST_MAX=3e6,ST_FLAG='vt2_stidb';let stIdb=false,stMove=false,stBlock=false,stT=0,stBusy=0,stErr=0,stCur=null,stDb=null;try{stIdb=!!localStorage.getItem(ST_FLAG)}catch(e){}
+const stOpen=()=>stDb||(stDb=new Promise((ok,ko)=>{try{const r=indexedDB.open('vt-state',1);r.onupgradeneeded=()=>r.result.createObjectStore('s');r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)}catch(e){ko(e)}}));
+const stRead=()=>stOpen().then(d=>new Promise((ok,ko)=>{const q=d.transaction('s').objectStore('s').get('state');q.onsuccess=()=>ok(q.result?JSON.parse(q.result):null);q.onerror=()=>ko(q.error)}));
+const stPut=j=>stOpen().then(d=>new Promise((ok,ko)=>{const t=d.transaction('s','readwrite');t.objectStore('s').put(j,'state');t.oncomplete=()=>ok(true);t.onerror=t.onabort=()=>ko(t.error)}));
+const stFail=()=>{if(Date.now()-stErr<6e4)return;stErr=Date.now();toast('No se pueden guardar los cambios: falta espacio. Haz una copia en Ajustes → Copia de seguridad')};
+const stWrite=()=>{clearTimeout(stT);stT=0;if(stBusy){stBusy=2;return}stBusy=1;stPut(stJSON(stCur)).catch(stFail).finally(()=>{const a=stBusy===2;stBusy=0;if(a)stWrite()})};
+function stSave(v){stCur=v;if(stBlock){setTimeout(stFail);return false}if(stIdb){if(!stT)stT=setTimeout(stWrite,250);return true}
+  const j=stJSON(v);if(j.length<ST_MAX)try{localStorage.setItem('vt2_state',j);return true}catch(e){}
+  if(stMove)return true;stMove=true;stPut(j).then(()=>{try{localStorage.setItem(ST_FLAG,'1')}catch(e){localStorage.removeItem('vt2_state');localStorage.setItem(ST_FLAG,'1')}localStorage.removeItem('vt2_state');stIdb=true;if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});stWrite()}).catch(stFail).finally(()=>{stMove=false});return true}
+addEventListener('pagehide',()=>{if(stT)stWrite()});document.addEventListener('visibilitychange',()=>{if(document.hidden&&stT)stWrite()});
 
 const DEF={
   period:300,loop:false,name:'Temporizador',seed:'#7b78d8',mode:'dark',
@@ -3748,7 +3766,10 @@ const DEF={
   cities:[],laps:[],
   circuit:null,myCircuits:[],curMine:null,events:null,log:[],lists:[{id:'default',name:'Mis tareas'}],curList:'default',taskSort:'mine',showDone:false,lang:'auto',weekStart:'auto',snooze:5,notes:null,folders:[],ntFilter:'all',lastTime:'timer'
 };
-const S=Object.assign({},DEF,LS.get('state',{}));
+/* Solo se espera si los datos están en IndexedDB: sin la marca, la app arranca igual que siempre. Si no se pueden leer, no se guarda nada encima */
+let st0=null;if(stIdb)try{st0=await stRead();if(!st0){stIdb=false;localStorage.removeItem(ST_FLAG)}}catch(e){stBlock=true;setTimeout(stFail,1500)}
+const S=Object.assign({},DEF,st0||LS.get('state',{}));
+if(secOK)try{const g=S.gh;if(g&&g.token){if(secSync(g.token))LS.set('state',S)}else{const t=SEC.get('gh');if(t){if(!S.gh)S.gh={token:'',login:'',links:{}};S.gh.token=t;secLast=t}}}catch(e){}
 /* Rediseño: quien seguía en el modo automático pasa al tema negro; quien eligió claro lo conserva */
 if(!S.uiV){S.uiV=2;if(S.mode==='auto')S.mode='dark'}
 S.bg=Object.assign({},DEF.bg,S.bg||{});S.tts=Object.assign({},DEF.tts,S.tts||{});
@@ -9385,7 +9406,7 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
     const lite=()=>!REFR||document.documentElement.classList.contains('lg-lite');
     /* La escala del filtro es 2R: un valor 1 en el mapa desplaza R píxeles. Fuera, la luz se curva y gira; dentro de la esfera, el fondo se ve atraído hacia el centro */
     /* cl: distancia del centro a cada borde de la pantalla (arriba, derecha, abajo, izquierda). Fuera de la pantalla no hay fondo que coger y se vería negro */
-    function holeMap(w,h,rad,R,sph,cl){const key=[w,h,rad,R].map(v=>Math.round(v/2)).join('x')+(sph?'s':'')+cl;let m=HM.get(key);if(m)return m;const [T,Rt,B,Lf]=cl.split(',').map(v=>+v-4),D2=R*1.05;
+    function holeMap(w,h,rad,R,sph,cl){const key=[w,h,rad,R].map(v=>Math.round(v/2)).join('x')+(sph?'s':'')+cl;let m=HM.get(key);if(m)return m;const [T,Rt,B,Lf]=cl.split(',').map(v=>+v-2),D2=R*1.05;
       const TW=w+2*R,TH=h+2*R,sc=Math.min(Math.min(2,devicePixelRatio||1),240/Math.max(TW,TH)),W=Math.max(8,Math.round(TW*sc)),H=Math.max(8,Math.round(TH*sc)),c=document.createElement('canvas');c.width=W;c.height=H;
       const x=c.getContext('2d'),im=x.createImageData(W,H),hw=w/2,hh=h/2,r=Math.min(rad,hw,hh);
       for(let j=0;j<H;j++)for(let i=0;i<W;i++){const px=(i+.5)/W*TW-TW/2,py=(j+.5)/H*TH-TH/2,qx=Math.abs(px)-(hw-r),qy=Math.abs(py)-(hh-r),ox=Math.max(qx,0),oy=Math.max(qy,0),ol=Math.hypot(ox,oy),d=ol+Math.min(Math.max(qx,qy),0)-r;
@@ -9394,23 +9415,24 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
         if(d>0){const pull=(1-u)*(1-u)*(1+u*.6),sw=Math.pow(1-u,2.2)*.24;vx=nx*pull-ny*sw;vy=ny*pull+nx*sw;const l=Math.hypot(vx,vy);if(l>1){vx/=l;vy/=l}vx*=.62;vy*=.62}
         else if(sph){const t=Math.max(0,Math.min(1,1+d/Math.min(hw,hh))),q=.22*t+.68*Math.pow(t,2.4);vx=nx*q;vy=ny*q}
         if(vx||vy){let dx=vx*D2,dy=vy*D2;if(py+dy>B)dy=Math.max(Math.min(0,dy),B-py);if(py+dy<-T)dy=Math.min(Math.max(0,dy),-T-py);if(px+dx>Rt)dx=Math.max(Math.min(0,dx),Rt-px);if(px+dx<-Lf)dx=Math.min(Math.max(0,dx),-Lf-px);vx=dx/D2;vy=dy/D2}
-        im.data[k]=128+vx*127;im.data[k+1]=128+vy*127;im.data[k+2]=128;im.data[k+3]=255}
+        im.data[k]=128+vx*127;im.data[k+1]=128+vy*127;im.data[k+2]=Math.min(255,Math.hypot(vx,vy)*2550);im.data[k+3]=255}
       x.putImageData(im,0,0);m={url:c.toDataURL(),TW,TH};HM.set(key,m);if(HM.size>40)HM.delete(HM.keys().next().value);return m}
     /* Un agujero con forma w×h; at() lo coloca (centro y escala), str() lleva su fuerza con un muelle y al llegar a 0 desaparece */
     window.lgHole=(w,h,rad,R,sph)=>{if(RM.matches)return null;const id='lgh'+(++uid),bg=document.documentElement.classList.contains('has-bg');
       const glow=document.createElement('i'),veil=document.createElement('i'),ring=document.createElement('i');glow.className='lg-hglow';veil.className='lg-hole';ring.className='lg-hring';
       [glow,veil,ring].forEach(e=>{e.setAttribute('aria-hidden','true');document.body.appendChild(e)});
       let f=null,dm=null,M=null,cx=0,cy=0,sx=1,sy=1,raf=0,last=0,t0=performance.now(),dead=false,ck='',scl=0,trk=null,trkQ=null;const st={v:0,vv:0,t:0};
-      /* Al múltiplo más cercano y no hacia abajo: el centro de la barra lateral del PC cae justo en un múltiplo de 6 y por una décima de píxel ese lado se quedaba sin curvar */
-      const cap=()=>Math.ceil((Math.max(w,h)/2+R+6)/6)*6,clr=()=>{const c=cap(),q=v=>Math.min(c,Math.max(0,Math.round(v/6)*6));return [q(cy),q(innerWidth-cx),q(innerHeight-cy),q(cx)].join(',')};
+      /* Con 1,5 px de holgura al redondear: el centro de la barra lateral del PC cae justo en un múltiplo de 6 y por una décima de píxel ese lado se quedaba sin curvar */
+      const cap=()=>Math.ceil((Math.max(w,h)/2+R+6)/6)*6,clr=()=>{const c=cap(),q=v=>Math.min(c,Math.max(0,Math.floor((v+1.5)/6)*6));return [q(cy),q(innerWidth-cx),q(innerHeight-cy),q(cx)].join(',')};
       const shape=(W2,H2,r2,R2,s2)=>{w=W2;h=H2;rad=Math.min(r2,w/2,h/2);if(R2)R=R2;sph=!!s2;ring.classList.toggle('sph',sph);glow.classList.toggle('sph',sph);[glow,ring].forEach(e=>{e.style.width=w+'px';e.style.height=h+'px';e.style.setProperty('--hr',rad+'px');e.style.setProperty('--hR',R+'px');e.style.setProperty('--hw',w+'px')});
         if(cx||cy)remap()};
-      /* Junto a un borde de la pantalla ese lado coge el fondo más cerca de la esfera: sin recortar el halo, se veía una mancha de color y una raya solo en ese lado */
-      const remap=()=>{if(lite())return;ck=clr();M=holeMap(w,h,rad,R,sph,ck);glow.style.clipPath=sph?`inset(${ck.split(',').map(v=>+v<cap()?'0':'-99px').join(' ')})`:'';veil.style.width=M.TW+'px';veil.style.height=M.TH+'px';
+      /* Junto a un borde de la pantalla ese lado coge el fondo de una sola línea cercana: sin recortar el halo justo antes de ella, se veía una mancha de color y una raya solo en ese lado.
+         El recorte no llega a la esfera, porque el aro de arcoíris que se ve dentro de ella es este halo curvado */
+      const remap=()=>{if(lite())return;ck=clr();M=holeMap(w,h,rad,R,sph,ck);glow.style.clipPath=sph?`inset(${ck.split(',').map((v,i)=>+v<cap()?-Math.max(R*.26,+v-3-(i%2?w:h)/2)+'px':'-99px').join(' ')})`:'';veil.style.width=M.TW+'px';veil.style.height=M.TH+'px';
         if(!hdefs){const sv=document.createElementNS(NS,'svg');sv.setAttribute('width','0');sv.setAttribute('height','0');sv.setAttribute('aria-hidden','true');sv.style.cssText='position:fixed;width:0;height:0';hdefs=document.createElementNS(NS,'defs');sv.appendChild(hdefs);document.body.appendChild(sv)}
         if(!f){f=document.createElementNS(NS,'filter');f.id=id;f.setAttribute('color-interpolation-filters','sRGB');f.setAttribute('filterUnits','userSpaceOnUse');['x','y'].forEach(a=>f.setAttribute(a,'0'));hdefs.appendChild(f)}
-        f.setAttribute('width',M.TW);f.setAttribute('height',M.TH);f.innerHTML=`<feImage href="${M.url}" x="0" y="0" width="${M.TW}" height="${M.TH}" preserveAspectRatio="none" result="m"/><feDisplacementMap in="SourceGraphic" in2="m" scale="${scl}" xChannelSelector="R" yChannelSelector="G"/>`;
-        dm=f.lastElementChild;veil.style.backdropFilter=veil.style.webkitBackdropFilter=`url(#${id})`};
+        f.setAttribute('width',M.TW);f.setAttribute('height',M.TH);f.innerHTML=`<feImage href="${M.url}" x="0" y="0" width="${M.TW}" height="${M.TH}" preserveAspectRatio="none" result="m"/><feDisplacementMap in="SourceGraphic" in2="m" scale="${scl}" xChannelSelector="R" yChannelSelector="G" result="d"/>`+(devicePixelRatio<2?`<feGaussianBlur in="d" stdDeviation=".5" result="b"/><feColorMatrix in="m" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0" result="k"/><feComposite in="b" in2="k" operator="in" result="c"/><feMerge><feMergeNode in="d"/><feMergeNode in="c"/></feMerge>`:'');/* Con pocos píxeles (PC) el desplazamiento deja dientes en lo fino: un desenfoque mínimo solo donde el mapa mueve algo */
+        dm=f.querySelector('feDisplacementMap');veil.style.backdropFilter=veil.style.webkitBackdropFilter=`url(#${id})`};
       const put=()=>{const k=sph?1:1+st.v*.05;glow.style.transform=ring.style.transform=`translate(${(cx-w/2).toFixed(1)}px,${(cy-h/2).toFixed(1)}px) scale(${(sx*k).toFixed(4)},${(sy*k).toFixed(4)})`;
         if(M)veil.style.transform=`translate(${(cx-M.TW/2).toFixed(1)}px,${(cy-M.TH/2).toFixed(1)}px) scale(${sx.toFixed(4)},${sy.toFixed(4)})`};
       const kill=()=>{if(dead)return;dead=true;cancelAnimationFrame(raf);[glow,veil,ring].forEach(e=>e.remove());if(f)f.remove()};
@@ -9556,7 +9578,8 @@ const UPD_REPO='temvra/temvP';
 const updTV=()=>window.VTNative&&VTNative.hasPlugin&&window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Temvra||null;
 const updDesk=()=>window.VTDesktop&&VTDesktop.version?VTDesktop:null;
 const updOk=()=>!!(updTV()||updDesk());
-const updToken=()=>S.upd.token||(S.gh&&S.gh.token)||'';
+/* El token de GitHub no se pasa: el repositorio de versiones es público y el actualizador lo guardaría sin cifrar */
+const updToken=()=>S.upd.token||'';
 const updAgo=t=>{const m=Math.round((Date.now()-t)/60000);return m<1?T('ahora mismo'):m<60?T('hace')+' '+m+' min':m<1440?T('hace')+' '+Math.round(m/60)+' h':T('hace')+' '+Math.round(m/1440)+' d'};
 let updCur='',updBusy=false,updFound=null,updMsg='',updFile='';
 const vcmp=(a,b)=>{const x=String(a).replace(/[^0-9.]/g,'').split('.'),y=String(b).replace(/[^0-9.]/g,'').split('.');for(let i=0;i<Math.max(x.length,y.length);i++){const p=+x[i]||0,q=+y[i]||0;if(p!==q)return p<q?-1:1}return 0};
@@ -9700,8 +9723,9 @@ const idbAll=()=>new Promise(ok=>{try{const r=indexedDB.open('vt-files',1);r.onu
 const ago=t=>{const d=Math.floor((Date.now()-t)/DAY);return d<=0?'hoy':d===1?'ayer':'hace '+d+' días'};
 function bkpLabel(){const el=$('bkp-last');if(!el)return;const t=+lsGet(BK_KEY)||0;el.textContent=t?'Última copia: '+ago(t)+' ('+new Date(t).toLocaleDateString()+').':'Todavía no has guardado ninguna copia.'}
 async function bkpExport(){try{toast('Preparando la copia…');const JSZip=await JSZipLib(),zip=new JSZip(),ls={};
-  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!/^vt/.test(k)||SKIP.has(k))continue;let v=localStorage.getItem(k);
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!/^vt/.test(k)||SKIP.has(k)||k===ST_FLAG)continue;let v=localStorage.getItem(k);
     if(k==='vt2_state'){try{v=JSON.stringify(stripTokens(JSON.parse(v)))}catch(e){}}ls[k]=v}
+  if(stIdb)ls.vt2_state=JSON.stringify(stripTokens(S));
   const files=await idbAll(),meta=[];
   files.forEach(([id,blob],i)=>{if(!(blob instanceof Blob))return;const name='files/'+i;zip.file(name,blob);meta.push({id,name,type:blob.type||''})});
   zip.file('temvra-backup.json',JSON.stringify({app:'Temvra',format:1,created:new Date().toISOString(),localStorage:ls,files:meta}));
@@ -9713,11 +9737,12 @@ async function bkpRestore(file){try{const JSZip=await JSZipLib(),zip=await JSZip
   if(data.app!=='Temvra'||!data.localStorage){toast('Este archivo no es una copia de Temvra');return}
   const blobs=[];for(const f of data.files||[]){const z=zip.file(f.name);if(z)blobs.push([f.id,new Blob([await z.async('arraybuffer')],{type:f.type})])}
   // A partir de aquí la app no debe volver a guardar su estado viejo encima del restaurado
-  LS.set=()=>true;
+  LS.set=()=>true;stBlock=true;clearTimeout(stT);stT=0;
   const token=S.gh&&S.gh.token,login=S.gh&&S.gh.login;
   for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(/^vt/.test(k)&&!SKIP.has(k))localStorage.removeItem(k)}
-  for(const [k,v] of Object.entries(data.localStorage))localStorage.setItem(k,v);
-  if(token){try{const st=JSON.parse(localStorage.getItem('vt2_state')||'{}');st.gh=Object.assign({},st.gh||{},{token,login});localStorage.setItem('vt2_state',JSON.stringify(st))}catch(e){}}
+  const rs=data.localStorage;if(token&&rs.vt2_state){try{const st=JSON.parse(rs.vt2_state);st.gh=Object.assign({},st.gh||{},{token:secOK?'':token,login});rs.vt2_state=JSON.stringify(st)}catch(e){}}
+  /* Una copia que no cabe en localStorage vuelve a IndexedDB */
+  for(const [k,v] of Object.entries(rs)){if(k==='vt2_state'){let ok=false;if(v.length<ST_MAX)try{localStorage.setItem(k,v);ok=true}catch(e){}if(!ok){await stPut(v);localStorage.setItem(ST_FLAG,'1')}continue}localStorage.setItem(k,v)}
   for(const [id,b] of blobs){try{await FDB.put(id,b)}catch(e){}}
   lsSet(BK_KEY,String(Date.now()));toast('Copia restaurada. Recargando…');setTimeout(()=>location.reload(),900)}
   catch(e){console.error(e);toast('No se pudo leer la copia')}}

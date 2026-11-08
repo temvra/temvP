@@ -1,10 +1,12 @@
 // Temvra para escritorio: abre el mismo www/ que Android en una ventana propia.
-const {app,BrowserWindow,Menu,Tray,ipcMain,net,protocol,shell}=require('electron');
+const {app,BrowserWindow,Menu,Tray,ipcMain,net,protocol,safeStorage,shell}=require('electron');
 const fs=require('node:fs'),path=require('node:path'),{pathToFileURL}=require('node:url'),{execFile,execFileSync}=require('node:child_process');
 const www=path.join(__dirname,'www'),ORIGIN='app://temvra';
 // Origen propio y fijo: localStorage (los datos) no depende de dónde esté instalada la app
 protocol.registerSchemesAsPrivileged([{scheme:'app',privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true}}]);
 app.commandLine.appendSwitch('ozone-platform-hint','auto');
+// En escritorios que Chromium no reconoce (Hyprland, Sway…) usaría una clave fija y safeStorage no cifraría de verdad
+if(process.platform==='linux'&&!app.commandLine.hasSwitch('password-store'))app.commandLine.appendSwitch('password-store','gnome-libsecret');
 // Windows solo enseña las notificaciones de apps con este identificador
 if(process.platform==='win32')app.setAppUserModelId('com.temvra.app.personal.desktop');
 // El temporizador y las alarmas deben sonar sin haber tocado antes la ventana
@@ -90,6 +92,12 @@ ipcMain.on('attention',(e,kind)=>{
 // Actualizaciones: la web encuentra la versión nueva en GitHub y aquí se descarga e instala
 const fromApp=e=>e.senderFrame&&e.senderFrame.url.startsWith(ORIGIN+'/');
 ipcMain.on('app-version',e=>{e.returnValue=app.getVersion()});
+// Secretos (el token de GitHub), cifrados con el llavero del sistema. Sin un llavero de verdad, ok() dice que no y la web los guarda como antes
+const SECF=()=>path.join(app.getPath('userData'),'secretos.json'),secAll=()=>{try{return JSON.parse(fs.readFileSync(SECF(),'utf8'))}catch(e){return {}}};
+const secOk=()=>{try{return safeStorage.isEncryptionAvailable()&&(process.platform!=='linux'||safeStorage.getSelectedStorageBackend()!=='basic_text')}catch(e){return false}};
+ipcMain.on('sec-ok',e=>{e.returnValue=!!fromApp(e)&&secOk()});
+ipcMain.on('sec-get',(e,k)=>{let v='';try{const x=secAll()[k];if(fromApp(e)&&x)v=safeStorage.decryptString(Buffer.from(x,'base64'))}catch(err){}e.returnValue=v});
+ipcMain.on('sec-set',(e,k,v)=>{let ok=false;try{if(fromApp(e)&&secOk()){const a=secAll();if(v)a[k]=safeStorage.encryptString(String(v)).toString('base64');else delete a[k];fs.writeFileSync(SECF(),JSON.stringify(a),{mode:0o600});ok=true}}catch(err){}e.returnValue=ok});
 function fetchTo(url,token,file,hops=0){return new Promise((ok,ko)=>{
   const https=require('node:https'),h={'User-Agent':'Temvra',Accept:'application/octet-stream'};if(token)h.Authorization='Bearer '+token;
   https.get(url,{headers:h},res=>{

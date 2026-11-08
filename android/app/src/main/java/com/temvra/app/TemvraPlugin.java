@@ -86,6 +86,7 @@ public class TemvraPlugin extends Plugin {
 
     @Override
     public void load() {
+        getBridge().getWebView().addJavascriptInterface(new Secreto(getContext()), "VTSecret");
         getActivity().runOnUiThread(this::edgeToEdge);
         Updater.schedule(getContext());
         Intent it = getActivity() != null ? getActivity().getIntent() : null;
