@@ -49,10 +49,12 @@ Para firmar con tu clave, sigue las instrucciones del final de `clave-firma-vuel
 - Galería y archivos (clip de las notas, fondo con imagen) con el selector de Android.
 - Compartir notas, PDF, ZIP y calendarios `.ics` (WhatsApp, Drive, correo…) y guardar en `Documentos/Temvra`.
 - GitHub de las notas, festivos oficiales y suscripciones de calendario sin las restricciones del navegador.
+- Bóvedas de notas en una carpeta real del móvil o del PC (selector de carpetas del sistema): cada nota es un archivo `.md`
+  que otras apps (gestor de archivos, Obsidian…) pueden abrir y editar, y se sincroniza en los dos sentidos. GitHub sigue
+  funcionando a la vez: carpeta ⇄ Temvra ⇄ GitHub. Lo que se borra va a `.trash` dentro de la carpeta, como en Obsidian.
 
 ## Pendiente para próximas versiones
 
 - Bajar el volumen de Spotify mientras suena el aviso (necesita código nativo de audio).
 - Widget en la pantalla de inicio y notificación fija con el temporizador en marcha.
-- Guardar la bóveda de notas como archivos `.md` en una carpeta del móvil.
 - Publicar en Google Play (cuenta de desarrollador: pago único de 25 $).

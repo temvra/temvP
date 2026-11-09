@@ -22,7 +22,10 @@ import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
+
+import androidx.activity.result.ActivityResult;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -437,5 +440,97 @@ public class TemvraPlugin extends Plugin {
             call.reject(String.valueOf(e.getMessage()));
         }
     }
+    /* ---------------- Bóveda en una carpeta real (selector de carpetas del sistema) ---------------- */
+
+    /** Las operaciones de la carpeta van una tras otra y fuera del hilo de la interfaz. */
+    private static final java.util.concurrent.ExecutorService DIRX = java.util.concurrent.Executors.newSingleThreadExecutor();
+
+    @PluginMethod
+    public void dirPick(PluginCall call) {
+        Intent it = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+        startActivityForResult(call, it, "dirPicked");
+    }
+
+    @ActivityCallback
+    private void dirPicked(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        JSObject o = new JSObject();
+        Intent data = result.getData();
+        if (result.getResultCode() != android.app.Activity.RESULT_OK || data == null || data.getData() == null) {
+            o.put("cancelled", true);
+            call.resolve(o);
+            return;
+        }
+        Uri tree = data.getData();
+        // Sin esto, el acceso a la carpeta se perdería al cerrar la app
+        try {
+            getContext().getContentResolver().takePersistableUriPermission(tree, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        } catch (Exception ignored) {}
+        o.put("root", tree.toString());
+        o.put("name", VaultDir.name(getContext(), tree));
+        call.resolve(o);
+    }
+
+    private interface DirJob { Object run(Uri tree) throws Exception; }
+
+    private void dirDo(PluginCall call, DirJob job) {
+        String root = call.getString("root", "");
+        if (root == null || root.isEmpty()) {
+            call.reject("Falta la carpeta");
+            return;
+        }
+        final Uri tree = Uri.parse(root);
+        DIRX.execute(() -> {
+            try {
+                Object r = job.run(tree);
+                JSObject o = r instanceof JSONObject ? new JSObject(r.toString()) : new JSObject();
+                if (r instanceof JSONArray) o.put("items", r);
+                else if (r instanceof String) o.put("data", r);
+                call.resolve(o);
+            } catch (SecurityException e) {
+                call.reject("perm: sin permiso para la carpeta");
+            } catch (Exception e) {
+                call.reject(String.valueOf(e.getMessage()));
+            }
+        });
+    }
+
+    @PluginMethod
+    public void dirList(PluginCall call) { dirDo(call, t -> VaultDir.list(getContext(), t)); }
+
+    @PluginMethod
+    public void dirRead(PluginCall call) {
+        final String p = call.getString("path", "");
+        final boolean bin = Boolean.TRUE.equals(call.getBoolean("bin", false));
+        dirDo(call, t -> VaultDir.read(getContext(), t, p, bin));
+    }
+
+    @PluginMethod
+    public void dirWrite(PluginCall call) {
+        final String p = call.getString("path", ""), d = call.getString("data", "");
+        final boolean bin = Boolean.TRUE.equals(call.getBoolean("bin", false));
+        dirDo(call, t -> VaultDir.write(getContext(), t, p, d, bin));
+    }
+
+    @PluginMethod
+    public void dirTrash(PluginCall call) {
+        final String p = call.getString("path", "");
+        dirDo(call, t -> { VaultDir.trash(getContext(), t, p); return null; });
+    }
+
+    @PluginMethod
+    public void dirMove(PluginCall call) {
+        final String a = call.getString("from", ""), b = call.getString("to", "");
+        dirDo(call, t -> VaultDir.move(getContext(), t, a, b));
+    }
+
+    @PluginMethod
+    public void dirMkdir(PluginCall call) {
+        final String p = call.getString("path", "");
+        dirDo(call, t -> { VaultDir.ensureDir(getContext(), t, p); return null; });
+    }
 }
+
 

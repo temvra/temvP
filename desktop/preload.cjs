@@ -10,4 +10,8 @@ contextBridge.exposeInMainWorld('VTDesktop',{canDuck:process.platform==='linux',
   widgetShow:on=>ipcRenderer.send('widget-show',!!on),widgetState:()=>ipcRenderer.sendSync('widget-state'),widgetData:d=>ipcRenderer.send('widget-data',d),
   onWidget:cb=>{ipcRenderer.on('widget-closed',()=>cb('closed'));ipcRenderer.on('widget-action',(e,a)=>cb(String(a)))},
   // Archivos abiertos con Temvra (lo compartido desde otro Temvra, un .ics o una bóveda en ZIP)
+  // Bóveda en una carpeta real del equipo
+  dirPick:()=>ipcRenderer.invoke('dir-pick'),dirList:r=>ipcRenderer.invoke('dir-list',r),dirRead:(r,p,bin)=>ipcRenderer.invoke('dir-read',r,p,!!bin),
+  dirWrite:(r,p,d,bin)=>ipcRenderer.invoke('dir-write',r,p,d,!!bin),dirTrash:(r,p)=>ipcRenderer.invoke('dir-trash',r,p),dirMove:(r,a,b)=>ipcRenderer.invoke('dir-move',r,a,b),dirMkdir:(r,p)=>ipcRenderer.invoke('dir-mkdir',r,p),
+  dirWatch:(r,cb)=>{ipcRenderer.removeAllListeners('dir-changed');ipcRenderer.on('dir-changed',(e,x)=>cb(String(x)));ipcRenderer.send('dir-watch',r)},
   onFile:cb=>ipcRenderer.on('vt-file',(e,x)=>cb(x)),onLink:cb=>ipcRenderer.on('vt-link',(e,u)=>cb(String(u)))});

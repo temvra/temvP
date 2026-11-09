@@ -23,6 +23,7 @@
       "main.cjs",
       "preload.cjs",
       "preload-widget.cjs",
+      "vault-dir.cjs",
       {
         "from": "../www",
         "to": "www"

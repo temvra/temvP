@@ -161,6 +161,18 @@ function fileArgs(argv){return argv.slice(1).map(a=>{try{return a.startsWith('fi
   .filter(a=>/\.(json|ics|zip)$/i.test(a)&&!a.startsWith('-')&&fs.existsSync(a)&&fs.statSync(a).isFile()&&fs.statSync(a).size<60e6)}
 function sendFiles(list){if(!list.length)return;if(!win||win.isDestroyed()||win.webContents.isLoading()){pendingFiles=pendingFiles.concat(list);return}
   list.forEach(p=>{try{win.webContents.send('vt-file',{name:path.basename(p),mime:/\.json$/i.test(p)?'application/json':/\.ics$/i.test(p)?'text/calendar':'application/zip',data:fs.readFileSync(p).toString('base64')})}catch(e){}})}
+// Bóveda en una carpeta real del equipo: solo las carpetas que el usuario ha elegido en el diálogo (se recuerdan en carpetas.json)
+const VD=require('./vault-dir.cjs'),{dialog}=require('electron');
+const DIRF=()=>path.join(app.getPath('userData'),'carpetas.json');
+const dirsOk=()=>{try{const a=JSON.parse(fs.readFileSync(DIRF(),'utf8'));return Array.isArray(a)?a:[]}catch(e){return []}};
+const dirOk=r=>typeof r==='string'&&dirsOk().includes(r);
+ipcMain.handle('dir-pick',async e=>{if(!fromApp(e))return null;const r=await dialog.showOpenDialog(win,{title:'Carpeta de la bóveda',properties:['openDirectory','createDirectory']});
+  if(r.canceled||!r.filePaths||!r.filePaths[0])return {cancelled:true};const p=r.filePaths[0],a=dirsOk();if(!a.includes(p)){a.push(p);try{fs.writeFileSync(DIRF(),JSON.stringify(a))}catch(err){}}
+  return {root:p,name:path.basename(p)||p}});
+const dirOp=fn=>async(e,root,...a)=>{if(!fromApp(e)||!dirOk(root))throw new Error('perm: carpeta no permitida');return fn(root,...a)};
+ipcMain.handle('dir-list',dirOp(VD.list));ipcMain.handle('dir-read',dirOp(VD.read));ipcMain.handle('dir-write',dirOp(VD.write));
+ipcMain.handle('dir-trash',dirOp(VD.trash));ipcMain.handle('dir-move',dirOp(VD.move));ipcMain.handle('dir-mkdir',dirOp(VD.mkdir));
+let dirStop=null;ipcMain.on('dir-watch',(e,root)=>{if(dirStop){dirStop();dirStop=null}if(!fromApp(e)||!dirOk(root))return;const s=e.sender;dirStop=VD.watch(root,()=>{if(!s.isDestroyed())s.send('dir-changed',root)})});
 function open(hidden){
   win=new BrowserWindow({show:!hidden,width:1280,height:820,minWidth:360,minHeight:500,backgroundColor:'#000000',icon:ICON,webPreferences:{backgroundThrottling:false,preload:path.join(__dirname,'preload.cjs')}});
   win.on('close',e=>{if(tray&&!quitting){e.preventDefault();win.hide()}});

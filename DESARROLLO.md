@@ -8,8 +8,8 @@ Se prueba en un móvil Android, en un PC con Linux y en tableta.
 - `src/app.html` — **toda la app** en un solo archivo (HTML + CSS + JS). El JS va dentro de una IIFE: sus funciones no son globales.
 - `src/widget.html` — widget «Ahora» del escritorio y de la vista previa de Ajustes (recibe datos por `postMessage` o por `window.VTWidget`).
 - `src/native.js` — puente con el plugin nativo (`window.VTNative`): temporizador en segundo plano, alarmas, widgets.
-- `android/app/src/main/java/com/temvra/app/` — plugin y servicios nativos: `TimerService`, `Alerts`, `Widgets` (todos los widgets), `WidgetTick` (tic de cada minuto).
-- `desktop/` — Electron: `main.cjs`, `preload.cjs`, `preload-widget.cjs`.
+- `android/app/src/main/java/com/temvra/app/` — plugin y servicios nativos: `TimerService`, `Alerts`, `Widgets` (todos los widgets), `WidgetTick` (tic de cada minuto), `VaultDir` (bóveda en una carpeta real con el selector de carpetas del sistema).
+- `desktop/` — Electron: `main.cjs`, `preload.cjs`, `preload-widget.cjs` y `vault-dir.cjs` (carpeta real de la bóveda; no usa Electron, se prueba con Node).
 - `scripts/build-www.mjs` — genera `www/` (añade el `<head>` con el viewport, copia `native.js`, `widget.html` y las fuentes).
 - `www/` y `android/app/src/main/assets/public/` se generan: no se editan a mano.
 
@@ -29,6 +29,7 @@ Se prueba en un móvil Android, en un PC con Linux y en tableta.
 - Animaciones: solo `transform` y `opacity` en lo que se mueve cada fotograma; escribe en el DOM solo si el valor cambia (`setTx`, `put` en las lentes). Nada de bucles `requestAnimationFrame` que sigan corriendo en reposo.
 - El color del rayo de la hora sale de las variables `--lz`, `--lz2`, `--lz3`, `--lzd` (formato `R G B`): no pongas rojos fijos.
 - Sincronización con GitHub: Notas usa `ghSync`; Agenda y Time usan `appSync` y guardan un JSON por elemento en `.temvra/` del repo de la bóveda. Nunca sincronices con un repositorio de código (`GH_CODE_MARK`).
+- Bóveda en una carpeta real: `dirSync` en `src/app.html` (fusión de 3 vías con `v.dir.base`, por bóveda en `v.dir`); en Android `VaultDir.java` y en el PC `vault-dir.cjs`, que solo abre carpetas elegidas en el diálogo (`carpetas.json` del perfil). Nunca se borra en la carpeta: va a su `.trash`. La carpeta y GitHub (`ghSync`) no corren a la vez (`window.__dirBusy`) y lo que llega de la carpeta se sube a GitHub como cualquier cambio.
 - Cambios pequeños y comentados en español, siguiendo el estilo compacto que ya tiene el archivo.
 
 ## Android (Capacitor 8 · targetSdk 36 · JDK 21)
@@ -54,5 +55,6 @@ Se prueba en un móvil Android, en un PC con Linux y en tableta.
 - Navega con clics reales: `.nav-in button[data-view="cal|time|notes"]`, `.nav-set` (Ajustes), `#cal-vseg [data-cv=…]` y `#bk-vseg [data-cv=…]` para las vistas de la agenda.
 - Tamaños: móvil 412×900 (`hasTouch`), tableta 800×1280 y 1280×800 (`isMobile`), escritorio 1440×900. `DESK` = ancho ≥ 900 (o apaisado ≥ 640).
 - Rendimiento: con CDP `Emulation.setCPUThrottlingRate {rate:4}` para parecerse a un móvil, mide fotogramas con `requestAnimationFrame` y `Performance.getMetrics` (`TaskDuration`) en reposo y en las transiciones. En la app hay un medidor de fps (Ajustes › Rendimiento) que copia un informe por vistas.
+- Carpeta real: en el navegador define `window.__dirTestBackend` con `addInitScript` (`kind`, `pick`, `list`, `read`, `write`, `trash`, `move`, `mkdir` sobre un objeto en memoria). En Electron, escribe `carpetas.json` (array con la ruta) en el perfil temporal para permitir una carpeta sin el diálogo. Electron como root necesita `--no-sandbox`.
 - Sincronización con GitHub: no uses la API real; simula `api.github.com` con un servidor git en memoria (refs, commits, trees, blobs) compartido por dos contextos del navegador.
 - Android: con el móvil conectado por USB, `npm run apk` y `adb install -r android/app/build/outputs/apk/debug/app-debug.apk`; logs con `adb logcat | grep -i temvra`.
