@@ -7,7 +7,9 @@ const ok=(c,n,d)=>{console.log((c?'✓ ':'✗ ')+n+(c||d===undefined?'':' → '+
 
 async function abre(puerto,[w,h],movil=false){
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'temvra-prueba-'));temporales.push(dir);
-  const proc=spawn(path.join(app,'node_modules/.bin/electron'),[app,'--ozone-platform=headless','--password-store=basic','--host-rules=MAP * ~NOTFOUND',`--user-data-dir=${dir}`,`--remote-debugging-port=${puerto}`],{stdio:'ignore'});
+  /* La app sigue el idioma del sistema y las pruebas buscan sus textos en español: se fija el español aunque el equipo esté en otro idioma.
+     No basta con --lang: en Linux LANGUAGE y LC_ALL mandan sobre él */
+  const proc=spawn(path.join(app,'node_modules/.bin/electron'),[app,'--ozone-platform=headless','--password-store=basic','--host-rules=MAP * ~NOTFOUND',`--user-data-dir=${dir}`,`--remote-debugging-port=${puerto}`],{stdio:'ignore',env:{...process.env,LANGUAGE:'es_ES',LC_ALL:'es_ES.UTF-8',LANG:'es_ES.UTF-8'}});
   let t=null;for(let i=0;i<80&&!t;i++){await sleep(250);try{const l=await (await fetch(`http://127.0.0.1:${puerto}/json/list`)).json();t=l.find(x=>x.type==='page'&&/index\.html/.test(x.url))}catch(e){}}
   if(!t)throw new Error('la app no ha arrancado');
   const ws=new WebSocket(t.webSocketDebuggerUrl);await new Promise((r,k)=>{ws.onopen=r;ws.onerror=k});
@@ -66,11 +68,14 @@ async function token(a){
   await a.recarga();
   ok(await a.ev(`VTAPI.state().gh.token==='de_prueba'`),'token: sin llavero en el sistema se conserva como antes')}
 
-/* Sin categorías también se puede crear un bloque: se toca la línea de tiempo y se elige Bloque */
-async function bloque(a,x,y){
+/* Sin categorías también se puede crear un bloque: se toca un hueco de la línea de tiempo y se elige Bloque.
+   El hueco se busca en pantalla: la vista Día se coloca en la hora actual y un punto fijo, por la noche, cae en la cabecera del día siguiente */
+async function bloque(a){
   await a.ev(`(async()=>{document.querySelector('.nav [data-view=cal]').getAttribute('aria-current')==='page'||document.querySelector('.nav [data-view=cal]').click();await new Promise(r=>setTimeout(r,900));document.querySelector('#cal-vseg [data-cv=day]').click();await new Promise(r=>setTimeout(r,1300))})()`);
-  await a.raton('mouseMoved',x,y);await a.raton('mousePressed',x,y,1,'left');await sleep(60);await a.raton('mouseReleased',x,y,0,'left');await sleep(900);
-  const r=await a.ev(`(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms)),b=[...document.querySelectorAll('.sheet-back:not([hidden]) button')].find(x=>/Bloque/.test(x.textContent));if(!b)return {menu:false};b.click();await w(700);document.getElementById('bks-save').click();await w(900);const e=VTAPI.state().events.at(-1);return {menu:true,cat:e&&e.cat,enPantalla:document.querySelectorAll('#v-blocks .bk-b').length}})()`);
+  const p=await a.ev(`(()=>{const v=document.getElementById('v-blocks').getBoundingClientRect(),x=v.left+v.width/2,m=v.top+v.height/2;for(let d=0;d<v.height/2;d+=20)for(const y of [m+d,m-d]){const e=document.elementFromPoint(x,y);if(e&&e.closest('.bk-grid')&&!e.closest('[data-bk],[data-ev]'))return [x,y]}return null})()`);
+  if(!p){ok(false,'sin categorías: se puede crear un bloque y se ve',{hueco:null});return}
+  const [x,y]=p;await a.raton('mouseMoved',x,y);await a.raton('mousePressed',x,y,1,'left');await sleep(60);await a.raton('mouseReleased',x,y,0,'left');await sleep(900);
+  const r=await a.ev(`(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms)),bs=[...document.querySelectorAll('.sheet-back:not([hidden]) button')],b=bs.find(x=>/Bloque/.test(x.textContent));if(!b)return {menu:false,botones:bs.map(x=>x.textContent.trim().slice(0,30))};b.click();await w(700);document.getElementById('bks-save').click();await w(900);const e=VTAPI.state().events.at(-1);return {menu:true,cat:e&&e.cat,enPantalla:document.querySelectorAll('#v-blocks .bk-b').length}})()`);
   ok(r.menu&&r.cat&&r.enPantalla>0,'sin categorías: se puede crear un bloque y se ve',r)}
 
 /* Instalación antigua con copias repetidas y objetos de ejemplo sin usar */
@@ -92,7 +97,7 @@ try{
   console.log('— Móvil 412×915');
   const mv=await abre(9702,[412,915],true);
   await vacio(mv,false);ok(!await mv.ev(`document.body.classList.contains('deskcal')`),'móvil: sin panel de días');
-  await sinVisita(mv);await centrar(mv);await aro(mv,false);await bloque(mv,200,520);await migracion(mv);
+  await sinVisita(mv);await centrar(mv);await aro(mv,false);await bloque(mv);await migracion(mv);
   ok(!mv.errores.length,'móvil: sin errores de JavaScript',mv.errores);mv.cierra();
 }catch(e){fallos++;console.error('✗ Prueba interrumpida:',e.message)}
 finally{abiertas.forEach(a=>a.cierra());await sleep(400);if(!yaHabia)try{fs.unlinkSync(enlace)}catch(e){}for(const d of temporales)try{fs.rmSync(d,{recursive:true,force:true})}catch(e){}}

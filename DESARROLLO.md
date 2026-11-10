@@ -47,7 +47,7 @@ Se prueba en un móvil Android, en un PC con Linux y en tableta.
 - Se publica para Windows (.exe) y Linux (AppImage).
 
 ## Cómo probar
-- `npm test`: sintaxis y pruebas en Electron sin ventana (`scripts/pruebas.mjs`), con perfiles temporales y sin internet: perfil vacío, todas las vistas, calendario al centrar el día, aro de la burbuja y guardado cuando no cabe en localStorage. Hazlo antes de publicar.
+- `npm test`: sintaxis y pruebas en Electron sin ventana (`scripts/pruebas.mjs`), con perfiles temporales, en español (sea cual sea el idioma del equipo) y sin internet: perfil vacío, todas las vistas, calendario al centrar el día, aro de la burbuja, crear un bloque sin categorías y guardado cuando no cabe en localStorage. Hazlo antes de publicar.
 - Sintaxis: `node scripts/check-js.mjs` después de cada cambio en `src/`, `desktop/` o `scripts/`.
 - En navegador: Playwright + Chromium sirviendo `src/app.html` envuelto en
   `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>` + archivo + `</body></html>`
