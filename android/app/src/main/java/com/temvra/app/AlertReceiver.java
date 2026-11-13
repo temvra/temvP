@@ -16,6 +16,8 @@ public class AlertReceiver extends BroadcastReceiver {
         String a = intent.getAction();
         if (Alerts.ACTION_FIRE.equals(a)) {
             Alerts.fireDue(c);
+        } else if (Alerts.ACTION_REFRESH.equals(a)) {
+            Alerts.refreshDue(c);
         } else if (ACTION_TIMER.equals(a)) {
             TimerCtl.act(c, intent.getStringExtra("act"));
         } else if (ACTION_LINE.equals(a)) {
@@ -25,11 +27,13 @@ public class AlertReceiver extends BroadcastReceiver {
             if (o == null) return;
             if ("alarms".equals(o.optString("channel"))) AlarmService.stop(c);
             if (Alerts.nm(c) != null) Alerts.nm(c).cancel(Alerts.idOf(o));
+            Alerts.forget(c, o);
             if (Alerts.ACTION_SNOOZE.equals(a)) snooze(c, o);
         } else {
-            // Reinicio, actualización de la app o cambio de hora
+            // Reinicio, actualización de la app o cambio de hora: los textos de los avisos a la vista se rehacen con la hora nueva
             TimerCtl.sync(c);
             Widgets.refreshAll(c);
+            Alerts.refreshShown(c);
         }
     }
 

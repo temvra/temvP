@@ -13,11 +13,16 @@ import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.service.notification.StatusBarNotification;
 
 import androidx.core.app.NotificationCompat;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Avisos programados (alarmas, temporizador, eventos y recordatorios).
@@ -29,6 +34,7 @@ public final class Alerts {
     static final String ACTION_FIRE = "com.temvra.app.ALERT_FIRE";
     static final String ACTION_DISMISS = "com.temvra.app.ALERT_DISMISS";
     static final String ACTION_SNOOZE = "com.temvra.app.ALERT_SNOOZE";
+    static final String ACTION_REFRESH = "com.temvra.app.ALERT_REFRESH";
 
     private Alerts() {}
 
@@ -101,11 +107,23 @@ public final class Alerts {
                 // setAlarmClock no se retrasa nunca, ni con el móvil en reposo profundo
                 am.setAlarmClock(new AlarmManager.AlarmClockInfo(at, openIntent(c, "open", 60, null)), pi);
             } else {
-                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
+                armExact(am, at, pi);
             }
         } catch (SecurityException e) {
             am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
         }
+    }
+
+    /*
+     * El móvil de pruebas (ColorOS 17) trata las alarmas exactas como si no lo fueran: les añade una ventana del 75 % de lo que falta
+     * y las entrega al final (una actualización pedida para las 08:49 llegó a las 08:50:58). Se pide antes, para que esa ventana acabe
+     * justo a la hora buena; si llega antes, quien la recibe ve que aún no toca y la vuelve a pedir con lo que queda.
+     * Con menos de 10 s de margen el sistema ya no añade ventana.
+     */
+    static void armExact(AlarmManager am, long at, PendingIntent pi) {
+        long now = System.currentTimeMillis(), d = at - now, t = d > 10_000 ? now + (long) (d / 1.75) : at;
+        try { am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, t, pi); }
+        catch (SecurityException e) { am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, t, pi); }
     }
 
     /** Lanza lo que ya toque y arma el siguiente. */
@@ -217,7 +235,7 @@ public final class Alerts {
     }
 
     static void notifyReminder(Context c, JSONObject a) {
-        ensureChannels(c);
+        if (a.optLong("start") > 0 && System.currentTimeMillis() >= expiry(a)) return;
         JSONObject cfg = cfg(c);
         if (cfg.optBoolean("vib", true)) {
             Vibrator v = (Vibrator) c.getSystemService(Context.VIBRATOR_SERVICE);
@@ -226,20 +244,150 @@ public final class Alerts {
                 else v.vibrate(new long[]{0, 250, 120, 250}, -1);
             }
         }
+        postReminder(c, a, !cfg.optBoolean("soundOn", true));
+        if (a.optLong("start") > 0) { remember(c, a); armRefresh(c); }
+    }
+
+    /*
+     * El texto dice lo que falta en el momento de mostrarse («En 15 min», «Ahora»). Antes se escribía al programarlo y la notificación
+     * seguía diciendo «En 15 min» cuando ya había empezado. Se rehace cada pocos minutos (ajuste de la app), al empezar, y se quita sola al acabar.
+     */
+    private static void postReminder(Context c, JSONObject a, boolean silent) {
+        ensureChannels(c);
+        long now = System.currentTimeMillis(), start = a.optLong("start");
+        String rel = relText(start, a.optBoolean("allDay"), now), txt = rel.isEmpty() ? a.optString("body") : rel + " · " + a.optString("body");
         NotificationCompat.Builder b = new NotificationCompat.Builder(c, CH_REMINDER)
                 .setSmallIcon(R.drawable.ic_stat_temvra)
                 .setContentTitle(a.optString("title"))
-                .setContentText(a.optString("body"))
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(a.optString("body")))
+                .setContentText(txt)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(txt))
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setAutoCancel(true)
+                .setOnlyAlertOnce(true)
                 .setContentIntent(tapIntent(c, a))
                 .addAction(0, "Posponer", receiverIntent(c, ACTION_SNOOZE, a))
                 .addAction(0, "Ignorar", receiverIntent(c, ACTION_DISMISS, a));
-        if (!cfg.optBoolean("soundOn", true)) b.setSilent(true);
+        if (start > 0) {
+            b.setWhen(start).setShowWhen(true).setTimeoutAfter(Math.max(1000, expiry(a) - now));
+            // Cuenta atrás en la cabecera: siempre exacta, aunque el sistema retrase la siguiente actualización
+            if (!a.optBoolean("allDay") && start > now) b.setUsesChronometer(true).setChronometerCountDown(true);
+        }
+        if (silent) b.setSilent(true);
         post(c, idOf(a), b.build());
+    }
+
+    static String relText(long start, boolean allDay, long now) {
+        if (start <= 0) return "";
+        int days = dayDiff(now, start);
+        if (allDay) return days <= 0 ? "Hoy" : days == 1 ? "Mañana" : "En " + days + " días";
+        long mins = Math.round((start - now) / 60000.0);
+        if (mins <= 0) return "Ahora";
+        if (mins >= 1440) return days == 1 ? "Mañana" : "En " + days + " días";
+        if (mins >= 60) { long h = mins / 60, m = mins % 60; return "En " + h + " h" + (h < 3 && m > 0 ? " " + m + " min" : ""); }
+        return "En " + mins + " min";
+    }
+
+    private static int dayDiff(long a, long b) {
+        Calendar x = Calendar.getInstance(), y = Calendar.getInstance();
+        x.setTimeInMillis(a); y.setTimeInMillis(b);
+        for (Calendar k : new Calendar[]{x, y}) { k.set(Calendar.HOUR_OF_DAY, 12); k.set(Calendar.MINUTE, 0); k.set(Calendar.SECOND, 0); k.set(Calendar.MILLISECOND, 0); }
+        return (int) Math.round((y.getTimeInMillis() - x.getTimeInMillis()) / 86_400_000.0);
+    }
+
+    /** Cuándo deja de tener sentido: al acabar el evento, a la media hora de empezar si no tiene fin, o al terminar el día si es de todo el día. */
+    static long expiry(JSONObject a) {
+        long start = a.optLong("start"), end = a.optLong("end");
+        if (a.optBoolean("allDay")) {
+            Calendar k = Calendar.getInstance();
+            k.setTimeInMillis(start);
+            k.set(Calendar.HOUR_OF_DAY, 23); k.set(Calendar.MINUTE, 59); k.set(Calendar.SECOND, 59);
+            return k.getTimeInMillis();
+        }
+        return end > start ? end : start + 30 * 60_000L;
+    }
+
+    private static JSONArray shown(Context c) {
+        try { return new JSONArray(sp(c).getString("shown", "[]")); } catch (Exception e) { return new JSONArray(); }
+    }
+
+    private static void remember(Context c, JSONObject a) {
+        JSONArray l = shown(c), out = new JSONArray();
+        String k = a.optString("key");
+        for (int i = 0; i < l.length(); i++) { JSONObject o = l.optJSONObject(i); if (o != null && !k.equals(o.optString("key"))) out.put(o); }
+        out.put(a);
+        sp(c).edit().putString("shown", out.toString()).apply();
+    }
+
+    static void forget(Context c, JSONObject a) {
+        JSONArray l = shown(c), out = new JSONArray();
+        int id = idOf(a);
+        for (int i = 0; i < l.length(); i++) { JSONObject o = l.optJSONObject(i); if (o != null && idOf(o) != id) out.put(o); }
+        sp(c).edit().putString("shown", out.toString()).apply();
+        armRefresh(c);
+    }
+
+    /** Rehace las notificaciones de eventos que siguen en la barra y quita las que ya no tienen sentido. */
+    static void refreshShown(Context c) {
+        JSONArray l = shown(c), keep = new JSONArray();
+        Set<Integer> active = activeIds(c);
+        long now = System.currentTimeMillis();
+        NotificationManager nm = nm(c);
+        for (int i = 0; i < l.length(); i++) {
+            JSONObject o = l.optJSONObject(i);
+            if (o == null) continue;
+            int id = idOf(o);
+            // Si ya no está en la barra (la abrió o la quitó) no se vuelve a poner
+            if (active != null && !active.contains(id)) continue;
+            if (now >= expiry(o)) { if (nm != null) nm.cancel(id); continue; }
+            keep.put(o);
+        }
+        sp(c).edit().putString("shown", keep.toString()).apply();
+        for (int i = 0; i < keep.length(); i++) postReminder(c, keep.optJSONObject(i), true);
+        armRefresh(c);
+    }
+
+    private static Set<Integer> activeIds(Context c) {
+        NotificationManager nm = nm(c);
+        if (nm == null || Build.VERSION.SDK_INT < 23) return null;
+        Set<Integer> s = new HashSet<>();
+        try { for (StatusBarNotification n : nm.getActiveNotifications()) s.add(n.getId()); } catch (Exception e) { return null; }
+        return s;
+    }
+
+    private static PendingIntent refreshIntent(Context c) {
+        Intent it = new Intent(c, AlertReceiver.class).setAction(ACTION_REFRESH);
+        return PendingIntent.getBroadcast(c, 51, it, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    /** Próxima actualización: cada N minutos mientras falta tiempo, justo al empezar y al caducar. */
+    static void armRefresh(Context c) {
+        AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
+        if (am == null) return;
+        PendingIntent pi = refreshIntent(c);
+        JSONArray l = shown(c);
+        long now = System.currentTimeMillis(), next = Long.MAX_VALUE;
+        int every = cfg(c).optInt("refresh", 10);
+        for (int i = 0; i < l.length(); i++) {
+            JSONObject o = l.optJSONObject(i);
+            if (o == null) continue;
+            long st = o.optLong("start");
+            if (st > now) { next = Math.min(next, st); if (every > 0) next = Math.min(next, now + every * 60_000L); }
+            next = Math.min(next, expiry(o));
+        }
+        if (next == Long.MAX_VALUE) { am.cancel(pi); sp(c).edit().remove("rfAt").apply(); return; }
+        next = Math.max(next, now + 1000);
+        sp(c).edit().putLong("rfAt", next).apply();
+        armExact(am, next, pi);
+    }
+
+    /** La alarma de actualización puede llegar antes de tiempo a propósito (ver armExact): si aún no toca, solo se vuelve a pedir. */
+    static void refreshDue(Context c) {
+        long at = sp(c).getLong("rfAt", 0);
+        AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
+        if (am != null && at > System.currentTimeMillis() + 1500) { armExact(am, at, refreshIntent(c)); return; }
+        refreshShown(c);
     }
 
     static void notifyTimer(Context c, JSONObject a) {

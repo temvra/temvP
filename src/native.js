@@ -47,7 +47,7 @@
       ready=true}catch(e){console.warn(e);ready=true}}
   async function clearAll(){if(TV)try{await TV.clearAlerts()}catch(e){}}
   async function schedule(){if(!ready||!api()||!TV)return;
-    try{const s=api().state();await TV.scheduleAlerts({list:api().upcoming(7),cfg:{sound:s.sound,soundOn:s.soundOn!==false,vol:s.vol,aviso:s.aviso,vib:s.vib,snooze:s.snooze,tts:s.tts,timer:api().timerSnapshot()}})}catch(e){console.warn('schedule',e)}}
+    try{const s=api().state();await TV.scheduleAlerts({list:api().upcoming(7),cfg:{sound:s.sound,soundOn:s.soundOn!==false,vol:s.vol,aviso:s.aviso,vib:s.vib,snooze:s.snooze,refresh:s.avRefresh==null?10:s.avRefresh,tts:s.tts,timer:api().timerSnapshot()}})}catch(e){console.warn('schedule',e)}}
   /* Lo que se haya tocado desde el bloqueo (pausa, reinicio…) y las vueltas que han pasado */
   async function syncTimer(){if(!TV||!api())return;try{api().timerApply(await TV.timerState())}catch(e){}}
   async function syncFired(){if(!TV||!api())return;try{const r=await TV.consumeFired();if(r.fired&&r.fired.length)api().firedAlarms(r.fired)}catch(e){}}

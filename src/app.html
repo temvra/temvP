@@ -3161,6 +3161,7 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
       <div class="field" style="margin-top:0"><label for="duck-lvl">Bajar música al</label><input type="range" id="duck-lvl" min="0" max="60" step="5"><output id="duck-o"></output></div>
       <div class="field"><label for="duck-dur">Duración</label><input type="range" id="duck-dur" min="1" max="6"><output id="dur-o"></output></div>
       <div class="field"><label for="snooze-sel">Posponer durante</label><select id="snooze-sel"><option value="1">1 min</option><option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option><option value="30">30 min</option></select></div>
+      <div class="field" id="avrf-row" hidden><label for="avrf-sel">Actualizar avisos cada</label><select id="avrf-sel"><option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option><option value="30">30 min</option><option value="0">Solo al empezar</option></select></div>
       <div class="note" id="duck-note">En esta vista previa el navegador no puede controlar Spotify. En la app Android, la música bajará, se pausará o seguirá según lo que elijas aquí.</div>
     </div>
 
@@ -3507,7 +3508,7 @@ body:not(.desk) #v-blocks.bkwk .bk-time,body:not(.desk) #v-blocks.bkwk .bk-em{di
     <div class="t1" style="margin-top:18px">Índice</div>
     <div id="nm-outline" class="stack" style="margin-top:8px"></div>
     <div class="t2" id="nm-info" style="margin-top:14px"></div>
-    <div class="field" style="margin-top:16px"><button class="btn tonal" id="nm-pin">Añadir a marcadores</button><button class="btn tonal" id="nm-date2">Vincular a una fecha</button><button class="btn tonal" id="nm-share">Compartir…</button><button class="btn tonal" id="nm-plan">✨ Convertir en plan</button></div>
+    <div class="field" style="margin-top:16px"><button class="btn tonal" id="nm-pin">Añadir a marcadores</button><button class="btn tonal" id="nm-date2">Vincular a una fecha</button><button class="btn tonal" id="nm-dayh">Encabezado del día</button><button class="btn tonal" id="nm-share">Compartir…</button><button class="btn tonal" id="nm-plan">✨ Convertir en plan</button></div>
     <div class="sheet-actions"><button class="btn tonal" id="nm-del">Eliminar nota</button><span style="flex:1"></span><button class="btn" id="nm-ok">Hecho</button></div>
   </div>
 </div>
@@ -6676,6 +6677,11 @@ $('sr-res').onclick=e=>{const b=e.target.closest('[data-sr]');if(!b)return;const
 
 /* Avisos con antelación */
 let bnEv=null,bnT;
+/* Texto según la hora a la que sale de verdad: si sale tarde (PC dormido, app cerrada) dice cuánto hace, no lo que faltaba */
+function bnRel(at,e){const now=Date.now(),mins=Math.round((at-now)/6e4),dd=Math.round((fromKey(dk(new Date(at)))-fromKey(dk(new Date(now))))/864e5),h=e.start?' · a las '+e.start:' · todo el día';
+  if(dd>=2)return 'El '+new Date(at).toLocaleDateString(LOC,{weekday:'long',day:'numeric'})+h;if(dd===1)return 'Mañana'+h;if(!e.start)return 'Hoy'+h;
+  if(mins<0)return `Hace ${-mins} min${h}`;if(mins===0)return 'Ahora'+h;
+  if(mins>=60){const H=Math.floor(mins/60),M=mins%60;return `En ${H} h${H<3&&M?' '+M+' min':''}${h}`}return `En ${mins} min${h}`}
 function checkReminders(){
   const now=Date.now();
   S.events.forEach(e=>{if(e.snoozeUntil&&now>=e.snoozeUntil){delete e.snoozeUntil;save();showBanner(e.title,'Pospuesto'+(e.start?' · a las '+e.start:''),e);return}});
@@ -6684,8 +6690,7 @@ function checkReminders(){
     ds.forEach(k=>{const done=e.rec?((e.notif||{})[k]||(e.kind==='task'&&(e.doneOn||{})[k])):(e.notified||(e.kind==='task'&&e.done));if(done)return;
       const at=fromKey(k);const [h,m]=(e.start||'09:00').split(':').map(Number);at.setHours(h,m,0,0);const fire=at-e.remind*6e4;
       if(now>=fire&&now<at.getTime()+6e4*30){if(e.rec){e.notif=e.notif||{};e.notif[k]=true}else e.notified=true;save();
-        const mins=Math.round((at-now)/6e4);
-        showBanner(e.title,mins<=0?'Ahora':mins>=2880?'El '+fromKey(k).toLocaleDateString(LOC,{weekday:'long',day:'numeric'})+(e.start?' a las '+e.start:''):mins>=1440?'Mañana a las '+(e.start||'todo el día'):mins>=60?`En ${Math.round(mins/60)} h · a las ${e.start}`:`En ${mins} min · a las ${e.start}`,e)}})});
+        showBanner(e.title,bnRel(+at,e),e)}})});
   /* Cierre del día y recordatorios de hábitos, también con la app abierta (en Android además salen como notificación) */
   const kT=dk(new Date(now)),atT=hm=>{const d=fromKey(kT),[h,m]=hm.split(':').map(Number);d.setHours(h,m,0,0);return +d};
   if(S.dayClose&&S.dayClose.on&&S.dayCloseSeen!==kT){const a=atT(S.dayClose.t||'21:30');if(now>=a&&now<a+3*36e5){S.dayCloseSeen=kT;save();const c=closeItems(kT);showBanner('🌙 '+T('Cierre del día'),c.done.length+' '+T('hechas')+' · '+c.pending.length+' '+T('pendientes'),{id:'_close',date:kT},null,'close')}}
@@ -6744,7 +6749,7 @@ function md(src){
   const listStack=[];const closeLists=(lvl=-1)=>{while(listStack.length&&listStack[listStack.length-1].ind>lvl){h+=`</${listStack.pop().tag}>`}};
   while(i<L.length){
     let l=L[i];
-    if(/^```\s*agenda\s*$/i.test(l)&&PL('calendar')&&S.ob.cal.agenda){closeLists();i++;while(i<L.length&&!/^```/.test(L[i]))i++;i++;h+='<div class="agenda-blk"></div>';continue}
+    {const ma=/^```\s*agenda(?:\s+(\d{4}-\d{2}-\d{2}))?\s*$/i.exec(l);if(ma&&PL('calendar')&&S.ob.cal.agenda){closeLists();i++;while(i<L.length&&!/^```/.test(L[i]))i++;i++;h+='<div class="agenda-blk"'+(ma[1]?' data-k="'+ma[1]+'"':'')+'></div>';continue}}
     if(/^```/.test(l)){closeLists();let c=[];i++;while(i<L.length&&!/^```/.test(L[i]))c.push(L[i++]);i++;h+=`<pre><code>${esc(c.join('\n'))}</code></pre>`;continue}
     if(/^\s*$/.test(l)){closeLists();i++;continue}
     let m;
@@ -7145,7 +7150,7 @@ function noteCtx(n){const bm=isBm(n.id),g=gitTag('n',n.id);
   const A=[
     ['Abrir en pestaña nueva',MI.tab,()=>openNewTab(n.id)],
     ['sep'],['Hacer una copia',MI.copy,()=>dupNote(n)],['Mover archivo a…',MI.move,()=>moveTo('note',n.id)],[bm?'Quitar marcador':'Marcar…',MI.bookmark,()=>{if(bm){S.bookmarks=S.bookmarks.filter(b=>b.ref!==n.id);save();renderNotes()}else openBmForm({type:'note',ref:n.id})}],
-    ['Combinar el archivo entero con…',MI.merge,()=>mergeNote(n)],['Vincular a una fecha',MI.cal,()=>{openNote(n.id,false);openDateSheet()},n.date||''],
+    ['Combinar el archivo entero con…',MI.merge,()=>mergeNote(n)],['Vincular a una fecha',MI.cal,()=>{openNote(n.id,false);openDateSheet()},n.date||''],['Encabezado del día',MI.cal,()=>{openNote(n.id,false);dayHeaderAsk(n)}],
     ...gitCtx('n',n.id,n.title),
     ['sep'],['Copiar ruta',MI.clip,()=>copyPathMenu('note',n.id),'',1],
     ['sep'],['Abrir el historial de versiones',MI.history,()=>showHistory(n)],
@@ -8051,7 +8056,7 @@ function setMode(e){neEdit=e;$('ne-edit').hidden=!e;$('ne-read').hidden=e;$('ne-
   $('ne-mode').innerHTML=e?I_READ:I_EDIT;$('ne-mode').setAttribute('aria-label',e?'Lectura':'Edición');$('ne-mode').title=e?'Lectura':'Edición';
   if(e){$('ne-text').value=curNote.body;autoGrow();edHL();if(neUp())requestAnimationFrame(neToBottom)}else{renderRead();if(neUp())requestAnimationFrame(neToBottom)}setTimeout(renderDeskTabs,0);renderNoteMeta();$('ne-sug').hidden=true;requestAnimationFrame(()=>{if(typeof neDownBtn==='function')neDownBtn()})}
 function propsHTML(p){const ks=Object.keys(p);if(!ks.length)return '';return `<div class="props"><div class="props-h">Propiedades</div>${ks.map(k=>{const v=p[k],t=propType(k,v);const val=Array.isArray(v)?v.map(x=>`<span class="pchip">${esc(x)}</span>`).join(''):(t==='checkbox'?`<input type="checkbox" disabled ${v==='true'?'checked':''}>`:esc(v));return `<div class="prow"><span class="pk">${PTYPE_IC[t]}${esc(k)}</span><span class="pv">${val}</span></div>`}).join('')}</div>`}
-function renderRead(){setTimeout(()=>{hydrateMedia($('ne-read'));if(curNote)$('ne-read').querySelectorAll('.agenda-blk').forEach(b=>b.innerHTML=agendaHTML(curNote.date||dk(new Date())))},0);const fm=fmParse(curNote.body);$('ne-read').innerHTML=propsHTML(fm.props)+(fm.rest.trim()?md(fm.rest.replace(/^#\s+.*\n?/,m=>norm(m.replace(/^#\s+/,'').trim())===norm(curNote.title)?'':m)):(Object.keys(fm.props).length?'':'<p style="color:var(--ob-muted)">—</p>'))}
+function renderRead(){setTimeout(()=>{hydrateMedia($('ne-read'));if(curNote)$('ne-read').querySelectorAll('.agenda-blk').forEach(b=>b.innerHTML=agendaHTML(b.dataset.k||curNote.date||dk(new Date())))},0);const fm=fmParse(curNote.body);$('ne-read').innerHTML=propsHTML(fm.props)+(fm.rest.trim()?md(fm.rest.replace(/^#\s+.*\n?/,m=>norm(m.replace(/^#\s+/,'').trim())===norm(curNote.title)?'':m)):(Object.keys(fm.props).length?'':'<p style="color:var(--ob-muted)">—</p>'))}
 function renderNoteMeta(){
   if(!curNote)return;const words=(curNote.body.match(/[\p{L}\p{N}]+/gu)||[]).length;
   $('ne-meta').innerHTML=(curNote.date?`<button class="ob-datechip" data-godate="${curNote.date}">${OBI('<rect x="3.5" y="4.5" width="17" height="16" rx="3"/><path d="M8 3v3M16 3v3M3.5 10h17"/>',15)}${cap(fromKey(curNote.date).toLocaleDateString(LOC,{weekday:'short',day:'numeric',month:'short',year:'numeric'}))}</button>`:'')+
@@ -8111,6 +8116,7 @@ function openDateSheet(){if(!curNote)return;$('nd-date').value=curNote.date||dk(
 function setNoteDate(k){curNote.date=k||undefined;curNote.updated=Date.now();save();renderNoteMeta();$('nd-cal').hidden=!k}
 $('ne-date').onclick=openDateSheet;$('nm-date2').onclick=()=>{$('nm-sheet').hidden=true;openDateSheet()};
 $('nm-plan').onclick=()=>{$('nm-sheet').hidden=true;noteToPlan(curNote)};
+$('nm-dayh').onclick=()=>{$('nm-sheet').hidden=true;dayHeaderAsk(curNote)};
 /* Sin fecha, hora ni duración la Captura rápida solo propondría añadir la nota a sí misma: mejor explicar qué falta */
 function noteToPlan(n){const b=n.body.replace(/^#.*\n/,'').slice(0,600),t=n.title+'. '+b;if(qcIsNote(qParse(t),b)){toast('Para convertirla en plan, escribe en la nota cuándo o cuánto: «examen el viernes», «estudiar 2 h»…');return}openQC(t,n)}
 $('nm-share').onclick=()=>{$('nm-sheet').hidden=true;shareNote(curNote)};
@@ -8445,6 +8451,19 @@ function toggleTaskId(id){if(id.startsWith('nt|')){const [,nidp,li]=id.split('|'
   const ev=realEv(id);if(!ev)return false;if(String(id).includes('@')){const k=id.split('@')[1];ev.doneOn=ev.doneOn||{};ev.doneOn[k]=!ev.doneOn[k];logDone(ev,ev.doneOn[k]);save();return ev.doneOn[k]}ev.done=!ev.done;logDone(ev,ev.done);save();return ev.done}
 function openNoteTask(id){const [,nidp,li]=id.split('|');const n=nget(nidp);if(!n)return;const line=(n.body.split('\n')[+li]||'').replace(/^[\s\-*+]+\[.\]\s*/,'');$('dayview').hidden=true;show('notes');openNote(n.id,false);flashLine(line.replace(ND_RE,'').trim())}
 
+/* Encabezado del día en una nota ya creada: el de la nota diaria (fecha larga y agenda de ese día). La fecha va en el bloque para que no cambie con los días */
+function dayHeadMd(k){return '# '+cap(fromKey(k).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'\n\n'+(PL('calendar')&&S.ob.cal.agenda?'```agenda '+k+'\n```\n\n':'')}
+function dayHeader(n,k){if(!n)return;const add=dayHeadMd(k),ed=neEdit&&curNote===n,txt=ed?$('ne-text').value:(n.body||''),fm=txt.match(/^---\n[\s\S]*?\n---\s*\n/),at=fm?fm[0].length:0;
+  if(txt.slice(at).startsWith(add.split('\n')[0]+'\n')){toast('La nota ya tiene el encabezado de ese día');return}
+  if(ed){edRange(at,at,add,at+add.length,at+add.length);saveNote()}else{n.body=txt.slice(0,at)+add+txt.slice(at);n.updated=Date.now();save();if(curNote===n)renderRead()}
+  renderNotes();toast('Encabezado del día añadido')}
+function dayHeaderAsk(n){if(!n)return;const hoy=dk(new Date()),ayer=dk(new Date(Date.now()-864e5)),fmt=k=>cap(fromKey(k).toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long'})),op=[{t:'Hoy',s:fmt(hoy),k:hoy}];
+  if(n.date&&n.date!==hoy)op.push({t:'Día de la nota',s:fmt(n.date),k:n.date});
+  op.push({t:'Ayer',s:fmt(ayer),k:ayer},{t:'Otro día…',k:''});
+  obSheet('Encabezado del día',op,i=>{const o=op[i];if(!o)return;if(o.k){dayHeader(n,o.k);return}
+    const inp=document.createElement('input');inp.type='date';inp.value=n.date||hoy;inp.style.cssText='position:fixed;left:50%;top:50%;width:1px;height:1px;opacity:0';document.body.appendChild(inp);
+    inp.onchange=()=>{if(inp.value)dayHeader(n,inp.value);inp.remove()};inp.onblur=()=>setTimeout(()=>inp.remove(),600);try{inp.showPicker()}catch(e){inp.focus()}},'Arriba de la nota, con la agenda de ese día')}
+
 /* Bloque ```agenda``` dentro de una nota */
 function agendaHTML(k){const items=dayItems(k),d=fromKey(k);
   return `<div class="agb"><div class="agb-h"><b>Agenda · ${esc(cap(d.toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long'})))}</b><button data-godate="${k}">Ver en el calendario</button></div>`+
@@ -8465,6 +8484,7 @@ function COMMANDS(){const n=curNote,c=[];const add=(t,run,need,hk)=>c.push({t,ru
   add('Buscar en todas las notas',()=>{if(curNote&&!DESK.matches)closeNote();S.obPanel='search';save();$('ob-list').innerHTML='';show('notes');setTimeout(()=>{const q=$('obs-q');if(q){q.focus();q.select()}},60)},null,'Ctrl+Shift+F');
   add('Abrir vista de grafo',()=>openGraph());
   if(PL('templates'))add('Plantillas: insertar plantilla',insertTemplate,'note');
+  add('Insertar encabezado del día',()=>dayHeaderAsk(n),'note');
   add('Insertar fecha actual',()=>{if(!neEdit)setMode(true);insertAt(fmtDate(new Date(),S.ob.tpl.dateFmt),'')},'note');
   add('Insertar hora actual',()=>{if(!neEdit)setMode(true);insertAt(fmtDate(new Date(),S.ob.tpl.timeFmt),'')},'note');
   if(PL('calendar')){add('Calendario: insertar tarea con fecha',()=>{if(!neEdit)setMode(true);const ta=$('ne-text');const nl=ta.selectionStart&&ta.value[ta.selectionStart-1]!=='\n'?'\n':'';insertAt(nl+'- [ ] ',' 📅 '+dk(new Date()))},'note');
@@ -8776,6 +8796,8 @@ $('hol-we').onclick=()=>{S.hol.we=S.hol.we===false;save();renderHolSet();renderC
 renderHolSet();
 function renderWk(){document.querySelectorAll('#wk-seg button').forEach(b=>b.setAttribute('aria-pressed',String(S.weekStart)===b.dataset.wk))}
 document.querySelectorAll('#wk-seg button').forEach(b=>b.onclick=()=>{S.weekStart=b.dataset.wk==='auto'?'auto':+b.dataset.wk;save();renderWk();renderCal();renderAlarms()});
+/* Cada cuánto se rehace el «En 15 min» de las notificaciones que siguen a la vista; al empezar pasan a «Ahora» y al acabar se quitan solas */
+$('avrf-sel').value=String(S.avRefresh==null?10:S.avRefresh);$('avrf-sel').onchange=e=>{S.avRefresh=+e.target.value;save()};
 $('snooze-sel').value=S.snooze;$('snooze-sel').onchange=e=>{S.snooze=+e.target.value;save();$('ring-snooze').textContent='Posponer '+S.snooze+' min'};
 function renderAll(){renderCal();renderAlarms();renderCities();renderClock();renderLaps();renderPresets();renderSwLaps();renderAviso();renderSounds();if(view==='circ')renderCircuit();if(!$('dayview').hidden)renderDay();if(!$('tasksview').hidden)renderTasks();if(!$('searchview').hidden)runSearch()}
 
@@ -9322,7 +9344,7 @@ $('bks-guide').onclick=()=>{const cat=typeof bkSel!=='undefined'?bkSel:'',m={gym
 
 /* Permisos que necesitan los avisos con el móvil bloqueado */
 const PERMS=[['notifications','Notificaciones','Para ver los avisos en la pantalla de bloqueo'],['fullScreen','Alarma a pantalla completa','La alarma se abre encima del bloqueo'],['battery','Sin restricciones de batería','Evita que el sistema retrase avisos y widgets']];
-async function renderPerms(){if(!natSound())return;$('duck-note').hidden=true;let st=null;try{st=await VTNative.permStatus()}catch(e){}if(!st)return;
+async function renderPerms(){if(!natSound())return;$('avrf-row').hidden=false;$('duck-note').hidden=true;let st=null;try{st=await VTNative.permStatus()}catch(e){}if(!st)return;
   $('perm-label').hidden=false;$('perm-list').hidden=false;
   $('perm-list').innerHTML=PERMS.map(([k,t,d],i)=>`<button class="row${i===0?' first':''}${i===PERMS.length-1?' last':''}" data-perm="${k}"><span class="txt"><span class="t1" style="display:block">${t}</span><span class="t2" style="display:block">${d}</span></span><span class="perm-st${st[k]?' ok':''}">${st[k]?'Activo':'Activar'}</span></button>`).join('')}
 $('perm-list').onclick=e=>{const b=e.target.closest('[data-perm]');if(b)VTNative.openPerm(b.dataset.perm)};
@@ -9460,7 +9482,11 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
     let bad=0,chk=0;addEventListener('scroll',()=>{const n=Date.now();if(n<chk||document.documentElement.classList.contains('lg-lite'))return;chk=n+8000;let f=0,t0=performance.now();requestAnimationFrame(function fr(t){f++;if(t-t0<900){requestAnimationFrame(fr);return}if(f<22){if(++bad>=2){document.documentElement.classList.add('lg-lite');S.lgLite=true;save()}}else bad=0})},{passive:true,capture:true})}
   /* Gel: al pulsar, el control crece, sigue al dedo con resistencia y se ilumina desde el punto de contacto; la energía llega a los vecinos */
   const LG_PRESS='.row,.tm-row,.reg-card,.rcard,.vl-row,.nd-row,.mcell,.btn,.icon-btn,.fab,.fab-s,.ob-pillbar button,.bk-zoom button,.pg-edge,.avatar,.cv-dock button,.seg button,.bks-quick button,.bk-filter button,.ob-round,.vl-new,.cp-b,.ob-tools button,.ne-tools button,.dt-new,.switch';
-  const GEL=new WeakMap(),gelOf=el=>{let g=GEL.get(el);if(!g){g={x:0,y:0,s:1,l:0,vx:0,vy:0,vs:0,vl:0,tx:0,ty:0,ts:1,tl:0,raf:0,t:0,resp:.3,damp:.6};GEL.set(el,g)}return g};
+  /* Con ratón, sobre texto que se puede seleccionar no hay gel ni burbuja: deformaban lo que se está leyendo o seleccionando. Los rótulos de los botones no cuentan (no se seleccionan) */
+const sobreTexto=(x,y)=>{const el=document.elementFromPoint(x,y);if(!el||el.closest('button,[role=button],a,label,.chip,.mchip')||getComputedStyle(el).userSelect==='none')return false;
+  const p=document.caretPositionFromPoint?document.caretPositionFromPoint(x,y):null,r=!p&&document.caretRangeFromPoint?document.caretRangeFromPoint(x,y):null,n=p?p.offsetNode:r&&r.startContainer;
+  if(!n||n.nodeType!==3||!n.textContent.trim())return false;const g=document.createRange();g.selectNodeContents(n);return [...g.getClientRects()].some(b=>x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom)};
+const GEL=new WeakMap(),gelOf=el=>{let g=GEL.get(el);if(!g){g={x:0,y:0,s:1,l:0,vx:0,vy:0,vs:0,vl:0,tx:0,ty:0,ts:1,tl:0,raf:0,t:0,resp:.3,damp:.6};GEL.set(el,g)}return g};
   function gelRun(el,g){if(g.raf)return;g.t=performance.now();el.classList.add('lg-gel');g.raf=requestAnimationFrame(function st(now){const dt=Math.min(.05,Math.max(.001,(now-g.t)/1000));g.t=now;
       spStep(g,'x',g.tx,g.resp,g.damp,dt);spStep(g,'y',g.ty,g.resp,g.damp,dt);spStep(g,'s',g.ts,g.resp,g.damp,dt);spStep(g,'l',g.tl,.34,1,dt);if(g.l<0){g.l=0;g.vl=0}
       const sp=Math.hypot(g.vx,g.vy)||1e-6,k=Math.min(.09,sp/7000),ax=Math.abs(g.vx)/sp,ay=Math.abs(g.vy)/sp;el.style.translate=`${g.x.toFixed(2)}px ${g.y.toFixed(2)}px`;el.style.scale=`${(g.s*(1+k*(ax-ay*.55))).toFixed(4)} ${(g.s*(1+k*(ay-ax*.55))).toFixed(4)}`;el.style.setProperty('--lg-g',g.l.toFixed(3));
@@ -9468,7 +9494,7 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
       g.raf=0;g.x=g.tx;g.y=g.ty;g.s=g.ts;if(g.ts===1&&!g.tx&&!g.ty&&!g.tl){el.style.translate='';el.style.scale='';el.classList.remove('lg-gel');el.style.removeProperty('--lg-g');const d=g.done;g.done=null;g.resp=.3;g.damp=.6;if(d)d()}})}
   window.lgGel=(el,o)=>{if(RM.matches)return;const g=gelOf(el);if(o.x!=null){g.x=o.x;g.y=o.y;g.vx=o.vx||0;g.vy=o.vy||0;g.resp=.4;g.damp=.7}else{g.resp=.44;g.damp=.5}if(o.s)g.s=o.s;if(o.l)g.l=o.l;g.tx=g.ty=0;g.ts=1;g.tl=0;g.done=o.done||null;gelRun(el,g)};
   let gp=null;
-  document.addEventListener('pointerdown',e=>{if(RM.matches||e.button>0)return;const el=e.target.closest&&e.target.closest(LG_PRESS);if(!el||el.disabled)return;const r=el.getBoundingClientRect(),g=gelOf(el);
+  document.addEventListener('pointerdown',e=>{if(RM.matches||e.button>0)return;const el=e.target.closest&&e.target.closest(LG_PRESS);if(!el||el.disabled||e.pointerType==='mouse'&&sobreTexto(e.clientX,e.clientY))return;const r=el.getBoundingClientRect(),g=gelOf(el);
     el.style.setProperty('--px',(e.clientX-r.left)+'px');el.style.setProperty('--py',(e.clientY-r.top)+'px');const big=Math.max(r.width,r.height);g.resp=.2;g.damp=.62;g.ts=1+Math.max(.03,Math.min(.13,6.5/big));g.tl=1;gelRun(el,g);gp={el,id:e.pointerId,x:e.clientX,y:e.clientY,w:r.width,h:r.height};
     /* Los vecinos notan el empujón */
     const P=el.parentElement;if(P)[...P.children].forEach(n=>{if(n===el||!n.matches||!n.matches(LG_PRESS)||!n.offsetWidth)return;const b=n.getBoundingClientRect(),dx=(b.left+b.width/2)-e.clientX,dy=(b.top+b.height/2)-e.clientY,d=Math.hypot(dx,dy);if(d>170)return;const q=gelOf(n),f=(170-d)*1.1/(d||1);q.vx+=dx*f;q.vy+=dy*f;q.vl+=(170-d)/90;q.resp=.34;q.damp=.58;n.style.setProperty('--px','50%');n.style.setProperty('--py','50%');gelRun(n,q)})},true);
@@ -9619,7 +9645,7 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
     /* En cada pulsación: los controles pequeños curvan la luz con su propia forma; en el resto, un agujero pequeño donde está el dedo */
     const HOLE_SKIP='input,textarea,select,[contenteditable="true"],canvas,.lg-host,body:not(.desk) .nav-set,.tp-dial,.ne-text,#ne-text,.cm-editor';
     let hp=null;const hpEnd=()=>{if(!hp)return;clearTimeout(hp.tm);if(hp.H)hp.H.str(0);hp=null};
-    document.addEventListener('pointerdown',e=>{hpEnd();if(RM.matches||(e.pointerType==='mouse'&&e.button>2)||!e.target.closest)return;if(e.target.closest(HOLE_SKIP))return;
+    document.addEventListener('pointerdown',e=>{hpEnd();if(RM.matches||(e.pointerType==='mouse'&&e.button>2)||!e.target.closest)return;if(e.target.closest(HOLE_SKIP)||e.pointerType==='mouse'&&sobreTexto(e.clientX,e.clientY))return;
       const el=e.target.closest(LG_PRESS+',button,[role=button],a,.chip,.mchip,.bk-b,.wk-ev'),r=el&&el.getBoundingClientRect();
       /* Los controles, también los anchos (filas, botones de toda la anchura), curvan la luz con su forma y centrados en ellos */
       if(el&&r.width&&r.width<=720&&r.height<=130){const mk=()=>{const q=el.getBoundingClientRect();if(!q.width)return null;const rad=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0,R=Math.max(16,Math.min(40,Math.min(q.width,q.height)*.3+10)),H=window.lgHole(q.width,q.height,rad,R);return H&&H.at(q.left+q.width/2,q.top+q.height/2).track(el).str(1)};
@@ -9630,6 +9656,9 @@ function lens(box,itemSel,cur,tgt,drag,root,op){if(!box)return;root=root||box;co
       const x=e.clientX,y=e.clientY;hp={x,y,id:e.pointerId,tm:setTimeout(()=>{if(!hp||hp.H)return;hp.H=window.lgHole(30,30,15,44);if(hp.H)hp.H.at(hp.x,hp.y).str(1)},70)}},true);
     /* Si el dedo arrastra lo pulsado (una tarjeta, un bloque, una fila), la burbuja deja el sitio donde se pulsó y va con el dedo */
     addEventListener('pointermove',e=>{if(!hp||hp.id!==e.pointerId)return;const d=Math.hypot(e.clientX-hp.x,e.clientY-hp.y);
+      /* Con ratón, al pasar por texto o mientras se selecciona la burbuja se aparta, y vuelve al salir del texto */
+      if(e.pointerType==='mouse'&&(hp.H||hp.oc)){if(!getSelection().isCollapsed||sobreTexto(e.clientX,e.clientY)){if(hp.H){hp.H.str(0);hp.H=null}hp.oc=true;return}
+        if(hp.oc){hp.oc=false;hp.fl=true;hp.H=window.lgHole(30,30,15,44);if(!hp.H){hp=null;return}hp.H.str(1)}}
       if(!hp.H){if(d>8){clearTimeout(hp.tm);hp=null}return}
       if(!hp.fl){if(d<14)return;hp.fl=true;if(hp.el){hp.H.str(0);hp.H=window.lgHole(30,30,15,44);if(!hp.H){hp=null;return}hp.H.str(1)}}
       hp.H.at(e.clientX,e.clientY)},{capture:true,passive:true});
@@ -9852,7 +9881,9 @@ window.VTAPI={
       out.push({key:'al|'+a.id+'|'+dk(d),at:+d,title:'⏰ '+(a.label||'Alarma'),body:a.t+(a.days.length?' · '+daysTxt(a.days):''),channel:'alarms',extra:{type:'alarm',id:a.id}});if(!a.days.length)break}});
     S.events.forEach(e=>{if(!e.date||e.remind==null||e.remind<0)return;const ds=e.rec?occDates(e,t0,t1):[e.date];
       ds.forEach(k=>{if(e.kind==='task'&&(e.rec?(e.doneOn||{})[k]:e.done))return;const at=fromKey(k);const [h,m]=(e.start||'09:00').split(':').map(Number);at.setHours(h,m,0,0);const fire=+at-e.remind*6e4;if(fire<=now||fire>lim)return;
-        const c=e.cat?bkCat(e.cat):null;out.push({key:'ev|'+e.id+'|'+k,at:fire,title:(c?c.emoji+' ':e.kind==='task'?'☑️ ':'📅 ')+e.title,body:(e.remind?(e.remind>=1440?'Mañana':'En '+(e.remind>=60?Math.round(e.remind/60)+' h':e.remind+' min'))+' · ':'Ahora · ')+(e.start||'todo el día')+(e.loc?' · '+e.loc:''),channel:'reminders',extra:{type:'event',id:e.rec?e.id+'@'+k:e.id,date:k}})})});
+        const c=e.cat?bkCat(e.cat):null,fin=e.start&&e.end?(()=>{const x=fromKey(k),[eh,em]=e.end.split(':').map(Number);x.setHours(eh,em,0,0);return +x>+at?+x:0})():0;
+        /* Lo que falta («En 15 min», «Ahora») lo escribe la notificación cada vez que se muestra o se actualiza: aquí solo va lo que no cambia */
+        out.push({key:'ev|'+e.id+'|'+k,at:fire,start:+at,end:fin,allDay:!e.start,title:(c?c.emoji+' ':e.kind==='task'?'☑️ ':'📅 ')+e.title,body:(e.start?'a las '+e.start:'todo el día')+(e.loc?' · '+e.loc:''),channel:'reminders',extra:{type:'event',id:e.rec?e.id+'@'+k:e.id,date:k}})})});
     /* Cierre del día y recordatorios de hábitos */
     const at2=(k,hm)=>{const d=new Date();d.setDate(d.getDate()+k);const [h,m]=hm.split(':').map(Number);d.setHours(h,m,0,0);return d};
     if(S.dayClose&&S.dayClose.on)for(let k=0;k<=(days||3);k++){const d=at2(k,S.dayClose.t||'21:30');if(+d<=now||+d>lim)continue;out.push({key:'close|'+dk(d),at:+d,title:'🌙 '+T('Cierre del día'),body:T('Repasa lo que has hecho y pasa lo pendiente a mañana'),channel:'reminders',extra:{type:'close',date:dk(d)}})}
